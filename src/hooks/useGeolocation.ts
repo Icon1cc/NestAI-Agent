@@ -44,23 +44,25 @@ export function useGeolocation() {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
-            
-            // Reverse geocode to get label
+
+            // Reverse geocode to get a friendly label, but never block the UX on it.
+            // If reverse-geocoding is slow/fails, fall back to coordinates.
             try {
-              const location = await reverseGeocode(latitude, longitude);
-              
-              if (location) {
-                setIsLoading(false);
-                resolve(location);
-              } else {
-                // Fallback: return coordinates without label
-                setIsLoading(false);
-                resolve({
+              const reverseWithTimeout = Promise.race([
+                reverseGeocode(latitude, longitude),
+                new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
+              ]);
+
+              const location = await reverseWithTimeout;
+
+              setIsLoading(false);
+              resolve(
+                location || {
                   label: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
                   lat: latitude,
                   lng: longitude,
-                });
-              }
+                }
+              );
             } catch (geoError) {
               console.error('Reverse geocode error:', geoError);
               setIsLoading(false);

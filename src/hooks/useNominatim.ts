@@ -52,9 +52,6 @@ export function useNominatimSearch() {
           `${NOMINATIM_BASE}/search?${params.toString()}`,
           { 
             signal: abortControllerRef.current.signal,
-            headers: {
-              'User-Agent': 'NestAI/1.0'
-            }
           }
         );
 
@@ -143,9 +140,6 @@ export function useReverseGeocode() {
         `${NOMINATIM_BASE}/reverse?${params.toString()}`,
         { 
           signal: abortControllerRef.current.signal,
-          headers: {
-            'User-Agent': 'NestAI/1.0'
-          }
         }
       );
 
