@@ -12,12 +12,12 @@ import { useListings } from '@/hooks/useListings';
 import { useAmenities } from '@/hooks/useAmenities';
 
 const DEMO_LOCATION = {
-  label: 'Prenzlauer Berg, Berlin, Germany',
-  lat: 52.5388,
-  lng: 13.4244,
-  countryCode: 'DE',
-  city: 'Berlin',
-  country: 'Germany',
+  label: 'Le Marais, Paris, France',
+  lat: 48.8566,
+  lng: 2.3522,
+  countryCode: 'FR',
+  city: 'Paris',
+  country: 'France',
 };
 
 export default function Index() {
