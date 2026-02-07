@@ -11,13 +11,14 @@ import { useAppStore } from '@/store/appStore';
 import { useListings } from '@/hooks/useListings';
 import { useAmenities } from '@/hooks/useAmenities';
 
-const PARIS_LOCATION = {
-  label: 'Paris, France',
-  lat: 48.8566,
-  lng: 2.3522,
-  countryCode: 'FR',
-  city: 'Paris',
-  country: 'France',
+// Berlin demo location as per spec
+const BERLIN_DEMO_LOCATION = {
+  label: 'Berlin, Germany',
+  lat: 52.52,
+  lng: 13.405,
+  countryCode: 'DE',
+  city: 'Berlin',
+  country: 'Germany',
 };
 
 export default function Index() {
@@ -36,8 +37,11 @@ export default function Index() {
     setDemoMode,
     resetLocation,
     radiusKm,
+    setRadiusKm,
     listingType,
     setActiveTab,
+    setPriceRange,
+    addMessage,
   } = useAppStore();
 
   const { listings, fetchListings } = useListings();
@@ -55,14 +59,30 @@ export default function Index() {
   }, [setMapPickerOpen]);
 
   const handleDemoMode = useCallback(async () => {
+    // Set demo mode with Berlin location
     setDemoMode(true);
-    setLocation(PARIS_LOCATION);
+    setLocation(BERLIN_DEMO_LOCATION);
+    setRadiusKm(3);
+    setPriceRange(0, 1200);
+    
+    // Add demo user prompt
+    addMessage({
+      role: 'user',
+      content: 'quiet area, parks nearby, good transit, budget under 1200',
+    });
     
     // Fetch demo data
-    await fetchAmenities(PARIS_LOCATION, 3);
-    await fetchListings(PARIS_LOCATION, 3, 'rent', { budgetMax: 1200 }, true);
+    await fetchAmenities(BERLIN_DEMO_LOCATION, 3);
+    await fetchListings(BERLIN_DEMO_LOCATION, 3, 'rent', { budgetMax: 1200 }, true);
+    
+    // Add demo assistant response
+    addMessage({
+      role: 'assistant',
+      content: `I found some great options in Berlin within your €1,200 budget! These listings are in quiet areas with good park access and transit connections. I've ranked them based on your preferences.`,
+    });
+    
     setActiveTab('listings');
-  }, [setDemoMode, setLocation, fetchAmenities, fetchListings, setActiveTab]);
+  }, [setDemoMode, setLocation, setRadiusKm, setPriceRange, addMessage, fetchAmenities, fetchListings, setActiveTab]);
 
   const handleChangeLocation = useCallback(() => {
     resetLocation();

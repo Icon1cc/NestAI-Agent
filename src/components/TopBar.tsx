@@ -12,35 +12,16 @@ import {
 import { cn } from '@/lib/utils';
 import type { RadiusKm, ListingType } from '@/types';
 
+// Only radius options: 1, 3, 7, 10 km
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
-
-// Major French cities ordered alphabetically
-const FRENCH_CITIES = [
-  { code: 'bordeaux', name: 'Bordeaux', lat: 44.8378, lng: -0.5792 },
-  { code: 'lille', name: 'Lille', lat: 50.6292, lng: 3.0573 },
-  { code: 'lyon', name: 'Lyon', lat: 45.7640, lng: 4.8357 },
-  { code: 'marseille', name: 'Marseille', lat: 43.2965, lng: 5.3698 },
-  { code: 'montpellier', name: 'Montpellier', lat: 43.6108, lng: 3.8767 },
-  { code: 'nantes', name: 'Nantes', lat: 47.2184, lng: -1.5536 },
-  { code: 'nice', name: 'Nice', lat: 43.7102, lng: 7.2620 },
-  { code: 'paris', name: 'Paris', lat: 48.8566, lng: 2.3522 },
-  { code: 'strasbourg', name: 'Strasbourg', lat: 48.5734, lng: 7.7521 },
-  { code: 'toulouse', name: 'Toulouse', lat: 43.6047, lng: 1.4442 },
-];
-
-// France center for "All Cities" view
-const FRANCE_CENTER = { lat: 46.6034, lng: 2.3488 };
 
 export function TopBar() {
   const {
     location,
-    setLocation,
     radiusKm,
     setRadiusKm,
     listingType,
     setListingType,
-    countryCode,
-    setCountryCode,
     isDarkMode,
     toggleDarkMode,
     selectedOfferIds,
@@ -48,34 +29,6 @@ export function TopBar() {
     setCompareModalOpen,
     setSettingsOpen,
   } = useAppStore();
-
-  const handleCityChange = (code: string) => {
-    if (code === 'all') {
-      setCountryCode(null);
-      // Focus on entire France
-      setLocation({
-        label: 'France',
-        lat: FRANCE_CENTER.lat,
-        lng: FRANCE_CENTER.lng,
-        countryCode: 'FR',
-        country: 'France',
-      });
-    } else {
-      setCountryCode(code);
-      // Focus on selected city
-      const city = FRENCH_CITIES.find(c => c.code === code);
-      if (city) {
-        setLocation({
-          label: `${city.name}, France`,
-          lat: city.lat,
-          lng: city.lng,
-          countryCode: 'FR',
-          city: city.name,
-          country: 'France',
-        });
-      }
-    }
-  };
 
   const hasLocation = !!location;
   const canCompare = selectedOfferIds.length === 2;
@@ -115,24 +68,6 @@ export function TopBar() {
 
         {/* Right: Controls */}
         <div className="flex items-center gap-2">
-          {/* City selector */}
-          <div className="hidden sm:block">
-            <Select
-              value={countryCode || 'all'}
-              onValueChange={handleCityChange}
-            >
-              <SelectTrigger className="h-9 w-[140px] bg-muted/50 border-border/50 text-sm">
-                <SelectValue placeholder="City" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cities</SelectItem>
-                {FRENCH_CITIES.map(c => (
-                  <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Radius selector */}
           <Select
             value={radiusKm.toString()}
@@ -156,7 +91,7 @@ export function TopBar() {
             </SelectContent>
           </Select>
 
-          {/* Listing type toggle */}
+          {/* Listing type toggle (Rent/Buy) */}
           <div className={cn(
             "flex items-center h-9 rounded-lg p-0.5 bg-muted/50 border border-border/50",
             !hasLocation && "opacity-50 pointer-events-none"

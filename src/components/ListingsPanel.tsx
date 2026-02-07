@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Bed, Maximize2, MapPin, ExternalLink, Check, Loader2, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import type { Listing } from '@/types';
@@ -11,9 +11,11 @@ interface ListingCardProps {
 }
 
 function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
-  const scoreColor = listing.score >= 8 
+  // Convert score to 0-100 for display
+  const displayScore = Math.round(listing.score * 10);
+  const scoreColor = displayScore >= 80 
     ? 'nest-score-high' 
-    : listing.score >= 6 
+    : displayScore >= 60 
       ? 'nest-score-medium' 
       : 'nest-score-low';
 
@@ -41,9 +43,9 @@ function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
           </div>
         )}
         
-        {/* Score badge */}
-        <div className={cn("absolute top-3 left-3", scoreColor)}>
-          {listing.score.toFixed(1)}
+        {/* Score badge - shows as X/100 */}
+        <div className={cn("absolute top-3 left-3 px-2 py-1 rounded-lg text-xs font-bold", scoreColor)}>
+          {displayScore}/100
         </div>
 
         {/* Badges */}
@@ -88,14 +90,18 @@ function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
         </p>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-          <span className="flex items-center gap-1">
-            <Bed className="w-4 h-4" />
-            {listing.rooms}
-          </span>
-          <span className="flex items-center gap-1">
-            <Maximize2 className="w-4 h-4" />
-            {listing.areaM2} m²
-          </span>
+          {listing.rooms > 0 && (
+            <span className="flex items-center gap-1">
+              <Bed className="w-4 h-4" />
+              {listing.rooms}
+            </span>
+          )}
+          {listing.areaM2 > 0 && (
+            <span className="flex items-center gap-1">
+              <Maximize2 className="w-4 h-4" />
+              {listing.areaM2} m²
+            </span>
+          )}
           {listing.distance && (
             <span className="flex items-center gap-1">
               <MapPin className="w-4 h-4" />
@@ -112,16 +118,29 @@ function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
             ))}
           </div>
         )}
+        {listing.cons && listing.cons.length > 0 && (
+          <div className="mb-3 space-y-1">
+            {listing.cons.slice(0, 1).map((con, i) => (
+              <p key={i} className="text-xs text-destructive/80">✗ {con}</p>
+            ))}
+          </div>
+        )}
 
-        <a
-          href={listing.source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="nest-btn-primary w-full flex items-center justify-center gap-2 text-sm"
-        >
-          <span>View on {listing.provider}</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
+        {listing.source_url && listing.source_url !== '#' ? (
+          <a
+            href={listing.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="nest-btn-primary w-full flex items-center justify-center gap-2 text-sm"
+          >
+            <span>View on {listing.provider}</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        ) : (
+          <div className="text-center text-sm text-muted-foreground py-2">
+            Contact NestAI for details
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -133,9 +152,10 @@ interface ListingsPanelProps {
   error: string | null;
   onSearch: () => void;
   isDemoMode: boolean;
+  assistantMessage?: string;
 }
 
-export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode }: ListingsPanelProps) {
+export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode, assistantMessage }: ListingsPanelProps) {
   const { selectedOfferIds, toggleOfferSelection, listingType } = useAppStore();
 
   if (isLoading) {
@@ -155,16 +175,28 @@ export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode
     );
   }
 
+  // Show assistant message even if no listings
   if (listings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-        <Home className="w-12 h-12 text-muted-foreground/50 mb-4" />
-        <p className="text-muted-foreground mb-4">
-          No listings found yet. Click "Search Listings" to find {listingType === 'rent' ? 'rentals' : 'properties'}.
-        </p>
+        {assistantMessage ? (
+          <div className="mb-6 p-4 rounded-xl bg-muted/50 border border-border/50 max-w-md">
+            <p className="text-foreground">{assistantMessage}</p>
+          </div>
+        ) : (
+          <>
+            <Home className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground mb-2">
+              No offers yet
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ask NestAI to search for {listingType === 'rent' ? 'rentals' : 'properties'}
+            </p>
+          </>
+        )}
         <button onClick={onSearch} className="nest-btn-hero flex items-center gap-2">
           <Sparkles className="w-4 h-4" />
-          Search Listings
+          Search with NestAI
         </button>
       </div>
     );
@@ -172,10 +204,21 @@ export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode
 
   return (
     <div className="p-4 space-y-4">
+      {/* Assistant message */}
+      {assistantMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-primary/5 border border-primary/20"
+        >
+          <p className="text-foreground text-sm">{assistantMessage}</p>
+        </motion.div>
+      )}
+
       <div className="flex items-center justify-between px-1">
         <h2 className="nest-section-title">
           {listings.length} {listingType === 'rent' ? 'Rentals' : 'Properties'}
-          {isDemoMode && <span className="ml-2 text-accent">(Demo Data)</span>}
+          {isDemoMode && <span className="ml-2 text-accent">(Demo)</span>}
         </h2>
         {selectedOfferIds.length > 0 && (
           <p className="text-sm text-muted-foreground">

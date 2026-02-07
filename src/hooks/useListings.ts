@@ -12,8 +12,8 @@ interface CacheEntry {
   timestamp: number;
 }
 
-// Mock listings for demo mode
-const MOCK_LISTINGS: Listing[] = [
+// Demo listings for Berlin (as per spec)
+const DEMO_LISTINGS: Listing[] = [
   {
     id: 'demo-1',
     title: 'Modern 2-Room Apartment in Prenzlauer Berg',
@@ -193,8 +193,8 @@ export function useListings() {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Filter and add distance to mock listings
-      const filtered = MOCK_LISTINGS.map(listing => ({
+      // Filter and add distance to demo listings
+      const filtered = DEMO_LISTINGS.map(listing => ({
         ...listing,
         distance: calculateDistance(location.lat, location.lng, listing.lat, listing.lng),
       })).filter(listing => {
@@ -213,13 +213,13 @@ export function useListings() {
       return filtered;
     }
 
-    // TODO: Call actual backend API
-    // For now, return mock data
+    // TODO: Call actual backend API (/api/dify/run)
+    // For now, return demo data as fallback
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      const filtered = MOCK_LISTINGS.map(listing => ({
+      const filtered = DEMO_LISTINGS.map(listing => ({
         ...listing,
         distance: calculateDistance(location.lat, location.lng, listing.lat, listing.lng),
       })).filter(listing => listing.distance && listing.distance <= radiusKm);

@@ -31,7 +31,7 @@ export interface NominatimResult {
   };
 }
 
-// Radius options
+// Radius options - only 1, 3, 7, 10
 export type RadiusKm = 1 | 3 | 7 | 10;
 
 // Listing types
@@ -62,6 +62,23 @@ export interface Listing {
   cons?: string[];
 }
 
+// Dify offer schema (normalized from API)
+export interface DifyOffer {
+  property_id: number;
+  lat: number;
+  lng: number; // normalized from long/lng
+  rank: number;
+  photos: string[];
+  price: number;
+  rent_or_buy: boolean; // true = rent, false = buy
+  adress: string;
+  analysis: {
+    pros: string[];
+    cons: string[];
+  };
+  closest_amenity_ids: number[];
+}
+
 export interface ListingsResponse {
   listings: Listing[];
   meta: {
@@ -71,8 +88,8 @@ export interface ListingsResponse {
   errors: string[];
 }
 
-// Amenity types
-export type AmenityCategory = 'groceries' | 'gyms' | 'parks' | 'transit';
+// Amenity types - exactly these categories
+export type AmenityCategory = 'groceries' | 'parks' | 'schools' | 'transit' | 'healthcare' | 'fitness';
 
 export interface Amenity {
   id: string;
@@ -82,13 +99,26 @@ export interface Amenity {
   lng: number;
   distance?: number;
   tags?: Record<string, string>;
+  amenity_id?: number;
+  description?: string;
+}
+
+// Normalized internal amenity from Dify
+export interface DifyAmenity {
+  amenity_id: number;
+  lat: number;
+  lng: number; // normalized from long
+  category: AmenityCategory;
+  description: string;
 }
 
 export interface AmenitiesData {
   groceries: Amenity[];
-  gyms: Amenity[];
   parks: Amenity[];
+  schools: Amenity[];
   transit: Amenity[];
+  healthcare: Amenity[];
+  fitness: Amenity[];
 }
 
 // Search filters
@@ -102,18 +132,16 @@ export interface SearchFilters {
   moveInDate?: string;
 }
 
-// Property search request
-export interface PropertySearchRequest {
-  countryCode?: string;
-  listingType: ListingType;
-  radiusKm: RadiusKm;
-  location: Location;
-  filters: SearchFilters;
-  sort: 'best' | 'price_asc' | 'price_desc' | 'distance';
-}
+// Budget quick chips
+export const BUDGET_CHIPS = [
+  { label: 'Under €800', min: 0, max: 800 },
+  { label: '€800-1200', min: 800, max: 1200 },
+  { label: '€1200-1600', min: 1200, max: 1600 },
+  { label: '€1600+', min: 1600, max: 999999 },
+] as const;
 
 // Dify integration
-export type DifyMode = 'search' | 'compare' | 'chat';
+export type DifyMode = 'chat' | 'compare';
 
 export interface DifyMessage {
   role: 'user' | 'assistant';
@@ -123,31 +151,39 @@ export interface DifyMessage {
 export interface DifyRequest {
   mode: DifyMode;
   user_prompt: string;
-  countryCode?: string;
+  session_id: string;
+  user_id: number;
+  locale: string;
+  countryCode: string;
+  price_min: number;
+  price_max: number;
   radiusKm: RadiusKm;
-  listingType: ListingType;
-  location: Location;
-  filters: SearchFilters;
-  memory_summary: string;
-  recent_messages: DifyMessage[];
-  amenities: AmenitiesData;
-  listings: Listing[];
-  selected_offer_ids: string[];
+  location: { lat: number; lng: number };
+}
+
+export interface DifyCompareRequest {
+  mode: 'compare';
+  session_id: string;
+  user_id: number;
+  offer_id1: number;
+  offer_id2: number;
 }
 
 export interface DifyResponse {
   assistant_text: string;
-  offers: Listing[];
-  comparison?: {
-    offer1: Listing;
-    offer2: Listing;
-    summary: string;
-    winner?: string;
-  };
-  errors: string[];
+  session_id: string;
+  user_id: number;
+  offers: DifyOffer[];
+  amenities: DifyAmenity[];
 }
 
-// Session/History
+export interface DifyCompareResponse {
+  action: 'compare';
+  assistant_text_property1: string;
+  assistant_text_property2: string;
+}
+
+// Session/History stored in IndexedDB
 export interface Session {
   id: string;
   createdAt: string;
@@ -156,6 +192,12 @@ export interface Session {
   memorySummary: string;
   listings: Listing[];
   selectedOfferIds: string[];
+  countryCode?: string;
+  priceMin?: number;
+  priceMax?: number;
+  radiusKm?: RadiusKm;
+  amenitiesSnapshot?: AmenitiesData;
+  offersSnapshot?: Listing[];
 }
 
 // App state
@@ -170,6 +212,10 @@ export interface AppState {
   listingType: ListingType;
   countryCode: string | null;
   isDarkMode: boolean;
+  
+  // Price filters
+  priceMin: number;
+  priceMax: number;
   
   // UI state
   isMapPickerOpen: boolean;
@@ -195,6 +241,26 @@ export interface AppState {
   memorySummary: string;
   isChatLoading: boolean;
   
+  // Session
+  sessionId: string;
+  userId: number;
+  
   // Demo mode
   isDemoMode: boolean;
+}
+
+// Helper to normalize category from Dify (handles typos like "healtcare")
+export function normalizeCategory(cat: string): AmenityCategory {
+  const normalized = cat.toLowerCase().trim();
+  if (normalized === 'healtcare' || normalized === 'healthcare') return 'healthcare';
+  if (normalized === 'gyms' || normalized === 'fitness') return 'fitness';
+  if (['groceries', 'parks', 'schools', 'transit'].includes(normalized)) {
+    return normalized as AmenityCategory;
+  }
+  return 'transit'; // fallback
+}
+
+// Helper to normalize offer lng from long/lng
+export function normalizeOfferLng(offer: any): number {
+  return offer.lng ?? offer.long ?? 0;
 }
