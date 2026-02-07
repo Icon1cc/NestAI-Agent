@@ -1,4 +1,3 @@
-import { forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Moon, Sun, Globe, Ruler } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
@@ -35,42 +34,41 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-const MotionBackdrop = motion.div;
-const MotionPanel = motion.div;
+export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  const {
+    isDarkMode,
+    toggleDarkMode,
+    radiusKm,
+    setRadiusKm,
+    countryCode,
+    setCountryCode,
+    listingType,
+    setListingType,
+  } = useAppStore();
 
-export const SettingsModal = forwardRef<HTMLDivElement, SettingsModalProps>(
-  function SettingsModal({ isOpen, onClose }, ref) {
-    const {
-      isDarkMode,
-      toggleDarkMode,
-      radiusKm,
-      setRadiusKm,
-      countryCode,
-      setCountryCode,
-      listingType,
-      setListingType,
-    } = useAppStore();
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="settings-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[100] bg-foreground/20 backdrop-blur-sm"
+          />
 
-    return (
-      <AnimatePresence>
-        {isOpen && (
-          <div ref={ref} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <MotionBackdrop
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onClose}
-              className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
-            />
-
-            {/* Modal */}
-            <MotionPanel
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-md nest-card-elevated"
-            >
+          {/* Modal */}
+          <motion.div
+            key="settings-modal"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+          >
+            <div className="w-full max-w-md nest-card-elevated pointer-events-auto">
               {/* Header */}
               <div className="p-6 border-b border-border/50 flex items-center justify-between">
                 <h2 className="text-xl font-bold">Settings</h2>
@@ -173,10 +171,10 @@ export const SettingsModal = forwardRef<HTMLDivElement, SettingsModalProps>(
                   Done
                 </button>
               </div>
-            </MotionPanel>
-          </div>
-        )}
-      </AnimatePresence>
-    );
-  }
-);
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
