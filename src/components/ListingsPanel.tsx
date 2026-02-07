@@ -7,25 +7,42 @@ import { cn } from '@/lib/utils';
 interface ListingCardProps {
   listing: Listing;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (ctrlKey: boolean) => void;
+  onViewDetails: () => void;
 }
 
-function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
-  // Convert score to 0-100 for display
-  const displayScore = Math.round(listing.score * 10);
+function ListingCard({ listing, isSelected, onSelect, onViewDetails }: ListingCardProps) {
+  // Use rank (0-1) to calculate display score (0-100)
+  const displayScore = Math.round(listing.rank * 100);
   const scoreColor = displayScore >= 80 
     ? 'nest-score-high' 
     : displayScore >= 60 
       ? 'nest-score-medium' 
       : 'nest-score-low';
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // If ctrl/cmd key is held, toggle selection instead
+    if (e.ctrlKey || e.metaKey) {
+      e.stopPropagation();
+      onSelect(true);
+    } else {
+      onViewDetails();
+    }
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(e.ctrlKey || e.metaKey);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01 }}
+      onClick={handleCardClick}
       className={cn(
-        "nest-card overflow-hidden transition-all",
+        "nest-card overflow-hidden transition-all cursor-pointer",
         isSelected && "ring-2 ring-accent ring-offset-2 ring-offset-background"
       )}
     >
@@ -61,10 +78,7 @@ function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
 
         {/* Select checkbox */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect();
-          }}
+          onClick={handleCheckboxClick}
           className={cn(
             "absolute top-3 right-3 w-7 h-7 rounded-lg flex items-center justify-center transition-all",
             isSelected 
@@ -110,7 +124,14 @@ function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
           )}
         </div>
 
-        {/* Pros/Cons */}
+        {/* Summary (truncated) */}
+        {listing.summary && (
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+            {listing.summary}
+          </p>
+        )}
+
+        {/* Pros/Cons preview */}
         {listing.pros && listing.pros.length > 0 && (
           <div className="mb-3 space-y-1">
             {listing.pros.slice(0, 2).map((pro, i) => (
@@ -126,21 +147,29 @@ function ListingCard({ listing, isSelected, onSelect }: ListingCardProps) {
           </div>
         )}
 
-        {listing.source_url && listing.source_url !== '#' ? (
-          <a
-            href={listing.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nest-btn-primary w-full flex items-center justify-center gap-2 text-sm"
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails();
+            }}
+            className="flex-1 nest-btn-secondary text-sm"
           >
-            <span>View on {listing.provider}</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        ) : (
-          <div className="text-center text-sm text-muted-foreground py-2">
-            Contact NestAI for details
-          </div>
-        )}
+            Details
+          </button>
+          {listing.redirect_url && listing.redirect_url !== '#' ? (
+            <a
+              href={listing.redirect_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 nest-btn-primary flex items-center justify-center gap-1.5 text-sm"
+            >
+              <span>Open</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          ) : null}
+        </div>
       </div>
     </motion.div>
   );
@@ -153,9 +182,18 @@ interface ListingsPanelProps {
   onSearch: () => void;
   isDemoMode: boolean;
   assistantMessage?: string;
+  onViewDetails: (listingId: string) => void;
 }
 
-export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode, assistantMessage }: ListingsPanelProps) {
+export function ListingsPanel({ 
+  listings, 
+  isLoading, 
+  error, 
+  onSearch, 
+  isDemoMode, 
+  assistantMessage,
+  onViewDetails,
+}: ListingsPanelProps) {
   const { selectedOfferIds, toggleOfferSelection, listingType } = useAppStore();
 
   if (isLoading) {
@@ -202,6 +240,9 @@ export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode
     );
   }
 
+  // Sort listings by rank descending
+  const sortedListings = [...listings].sort((a, b) => b.rank - a.rank);
+
   return (
     <div className="p-4 space-y-4">
       {/* Assistant message */}
@@ -223,17 +264,19 @@ export function ListingsPanel({ listings, isLoading, error, onSearch, isDemoMode
         {selectedOfferIds.length > 0 && (
           <p className="text-sm text-muted-foreground">
             {selectedOfferIds.length}/2 selected
+            <span className="ml-2 text-xs">(Ctrl+click to multi-select)</span>
           </p>
         )}
       </div>
 
       <div className="grid gap-4">
-        {listings.map((listing) => (
+        {sortedListings.map((listing) => (
           <ListingCard
             key={listing.id}
             listing={listing}
             isSelected={selectedOfferIds.includes(listing.id)}
-            onSelect={() => toggleOfferSelection(listing.id)}
+            onSelect={(ctrlKey) => toggleOfferSelection(listing.id, ctrlKey)}
+            onViewDetails={() => onViewDetails(listing.id)}
           />
         ))}
       </div>

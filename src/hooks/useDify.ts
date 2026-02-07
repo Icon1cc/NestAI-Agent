@@ -8,9 +8,10 @@ import type {
   Listing, 
   DifyOffer,
   DifyAmenity,
+  OfferAnalysis,
 } from '@/types';
 
-// Mock offer data for demo mode - follows exact Dify contract
+// Mock offer data for demo mode - follows exact Dify contract with new fields
 const MOCK_OFFERS: DifyOffer[] = [
   {
     property_id: 1,
@@ -21,7 +22,17 @@ const MOCK_OFFERS: DifyOffer[] = [
     price: 950,
     rent_or_buy: true,
     adress: 'Prenzlauer Allee 45, 10405 Berlin',
+    redirect_url: 'https://www.immobilienscout24.de/expose/123456',
+    nice_to_have: {
+      posted_date: '2024-01-15',
+      area_m2: 65,
+      rooms: 2,
+      deposit: 1900,
+      furnished: false,
+      requirements: ['Proof of income', 'SCHUFA report'],
+    },
     analysis: {
+      summary: 'A well-located apartment perfect for those seeking tranquility near green spaces with excellent transit access.',
       pros: ['Near Volkspark', 'Excellent transit (U2)', 'Quiet residential area'],
       cons: ['Limited parking', 'No balcony'],
     },
@@ -36,7 +47,17 @@ const MOCK_OFFERS: DifyOffer[] = [
     price: 1100,
     rent_or_buy: true,
     adress: 'Invalidenstraße 112, 10115 Berlin',
+    redirect_url: 'https://www.immobilienscout24.de/expose/234567',
+    nice_to_have: {
+      posted_date: '2024-01-10',
+      area_m2: 75,
+      rooms: 3,
+      deposit: 2200,
+      furnished: true,
+      requirements: ['Employment contract'],
+    },
     analysis: {
+      summary: 'Modern apartment in the heart of Berlin with easy access to the main train station and all amenities.',
       pros: ['Central location', 'Modern kitchen', 'Close to Hauptbahnhof'],
       cons: ['Busy street', 'Higher price point'],
     },
@@ -51,7 +72,16 @@ const MOCK_OFFERS: DifyOffer[] = [
     price: 890,
     rent_or_buy: true,
     adress: 'Boxhagener Str. 78, 10245 Berlin',
+    redirect_url: 'https://www.immobilienscout24.de/expose/345678',
+    nice_to_have: {
+      posted_date: '2024-01-18',
+      area_m2: 55,
+      rooms: 2,
+      deposit: 1780,
+      furnished: false,
+    },
     analysis: {
+      summary: 'Charming apartment in vibrant Friedrichshain, surrounded by cafes and nightlife options.',
       pros: ['Vibrant neighborhood', 'Many cafes nearby', 'Good value'],
       cons: ['Nightlife noise on weekends', 'Older building'],
     },
@@ -66,8 +96,18 @@ const MOCK_OFFERS: DifyOffer[] = [
     price: 1180,
     rent_or_buy: true,
     adress: 'Schönhauser Allee 167, 10435 Berlin',
+    redirect_url: 'https://www.immobilienscout24.de/expose/456789',
+    nice_to_have: {
+      posted_date: '2024-01-12',
+      area_m2: 80,
+      rooms: 3,
+      deposit: 2360,
+      furnished: false,
+      requirements: ['Proof of income', 'References'],
+    },
     analysis: {
-      pros: ['Spacious 2-room', 'Park views', 'Great schools nearby'],
+      summary: 'Spacious family-friendly apartment with park views and excellent schools in the area.',
+      pros: ['Spacious 3-room', 'Park views', 'Great schools nearby'],
       cons: ['Street-facing noise', 'No elevator'],
     },
     closest_amenity_ids: [4, 9, 14],
@@ -81,7 +121,16 @@ const MOCK_OFFERS: DifyOffer[] = [
     price: 780,
     rent_or_buy: true,
     adress: 'Karl-Marx-Str. 203, 12055 Berlin',
+    redirect_url: 'https://www.immobilienscout24.de/expose/567890',
+    nice_to_have: {
+      posted_date: '2024-01-20',
+      area_m2: 45,
+      rooms: 1,
+      deposit: 1560,
+      furnished: true,
+    },
     analysis: {
+      summary: 'Budget-friendly option in a diverse neighborhood with good transit connections.',
       pros: ['Best value in area', 'U-Bahn connection', 'Diverse neighborhood'],
       cons: ['Smaller space', 'Gentrifying area'],
     },
@@ -112,7 +161,8 @@ const MOCK_AMENITIES: DifyAmenity[] = [
 function difyOfferToListing(offer: DifyOffer, index: number): Listing {
   // Normalize lng from long/lng (Dify uses "long")
   const lng = offer.lng ?? offer.long ?? 0;
-  const score = Math.round(offer.rank * 100);
+  const rank = offer.rank ?? 0;
+  const score = Math.round(rank * 10); // 0-10 scale
   
   return {
     id: `dify-${offer.property_id || index}`,
@@ -126,14 +176,19 @@ function difyOfferToListing(offer: DifyOffer, index: number): Listing {
     lat: offer.lat || 0,
     lng,
     photos: offer.photos || [],
-    rooms: 2, // Default if not provided
-    areaM2: 65, // Default if not provided
+    rooms: offer.nice_to_have?.rooms || 0,
+    areaM2: offer.nice_to_have?.area_m2 || 0,
     provider: 'NestAI',
-    source_url: '#',
-    badges: score >= 85 ? ['Top Match'] : [],
-    score: score / 10, // Convert to 0-10 scale
+    source_url: offer.redirect_url || '#',
+    redirect_url: offer.redirect_url,
+    badges: rank >= 0.85 ? ['Top Match'] : [],
+    score,
+    rank,
+    summary: offer.analysis?.summary,
     pros: offer.analysis?.pros || [],
     cons: offer.analysis?.cons || [],
+    nice_to_have: offer.nice_to_have,
+    closest_amenity_ids: offer.closest_amenity_ids || [],
   };
 }
 
@@ -154,7 +209,10 @@ export function useDify() {
     countryCode,
     addMessage,
     setListings,
+    setDifyAmenities,
     isDemoMode,
+    listings,
+    difyAmenities,
   } = useAppStore();
 
   // Generate mock response for demo mode
@@ -212,10 +270,15 @@ export function useDify() {
         addMessage({ role: 'assistant', content: mockResponse.assistant_text });
       }
       
+      // Store Dify amenities
+      if (mockResponse.amenities && mockResponse.amenities.length > 0) {
+        setDifyAmenities(mockResponse.amenities);
+      }
+      
       // Convert offers to listings
       if (mockResponse.offers && mockResponse.offers.length > 0) {
-        const listings = mockResponse.offers.map((offer, i) => difyOfferToListing(offer, i));
-        setListings(listings);
+        const listingsData = mockResponse.offers.map((offer, i) => difyOfferToListing(offer, i));
+        setListings(listingsData);
       }
 
       setIsLoading(false);
@@ -256,10 +319,15 @@ export function useDify() {
         addMessage({ role: 'assistant', content: data.assistant_text });
       }
       
+      // Store Dify amenities
+      if (data.amenities && data.amenities.length > 0) {
+        setDifyAmenities(data.amenities);
+      }
+      
       // Convert offers to listings
       if (data.offers && data.offers.length > 0) {
-        const listings = data.offers.map((offer, i) => difyOfferToListing(offer, i));
-        setListings(listings);
+        const listingsData = data.offers.map((offer, i) => difyOfferToListing(offer, i));
+        setListings(listingsData);
       }
 
       setIsLoading(false);
@@ -274,16 +342,28 @@ export function useDify() {
         content: `(Demo mode - backend not connected) ${mockResponse.assistant_text}` 
       });
       
+      if (mockResponse.amenities.length > 0) {
+        setDifyAmenities(mockResponse.amenities);
+      }
+      
       if (mockResponse.offers.length > 0) {
-        const listings = mockResponse.offers.map((offer, i) => difyOfferToListing(offer, i));
-        setListings(listings);
+        const listingsData = mockResponse.offers.map((offer, i) => difyOfferToListing(offer, i));
+        setListings(listingsData);
       }
       
       setError(null); // Don't show error since we have fallback
       setIsLoading(false);
       return mockResponse;
     }
-  }, [location, sessionId, userId, radiusKm, priceMin, priceMax, countryCode, addMessage, setListings, isDemoMode, getMockResponse]);
+  }, [location, sessionId, userId, radiusKm, priceMin, priceMax, countryCode, addMessage, setListings, setDifyAmenities, isDemoMode, getMockResponse]);
+
+  // Resolve amenities for an offer
+  const resolveOfferAmenities = useCallback((listing: Listing): DifyAmenity[] => {
+    if (!listing.closest_amenity_ids || listing.closest_amenity_ids.length === 0) {
+      return [];
+    }
+    return difyAmenities.filter(a => listing.closest_amenity_ids?.includes(a.amenity_id));
+  }, [difyAmenities]);
 
   const compareOffers = useCallback(async (
     offerId1: number,
@@ -291,6 +371,14 @@ export function useDify() {
   ): Promise<DifyCompareResponse | null> => {
     setIsLoading(true);
     setError(null);
+
+    // Find listings
+    const listing1 = listings.find(l => l.id === `dify-${offerId1}`);
+    const listing2 = listings.find(l => l.id === `dify-${offerId2}`);
+
+    // Resolve amenities for each offer
+    const amenities1 = listing1 ? resolveOfferAmenities(listing1) : [];
+    const amenities2 = listing2 ? resolveOfferAmenities(listing2) : [];
 
     // Mock compare response for demo mode
     if (isDemoMode) {
@@ -313,13 +401,31 @@ export function useDify() {
       return mockResponse;
     }
 
-    // Real API call
+    // Build the full compare request with offer data
     const request: DifyCompareRequest = {
       mode: 'compare',
       session_id: sessionId,
       user_id: userId,
       offer_id1: offerId1,
       offer_id2: offerId2,
+      offer1: {
+        property_id: offerId1,
+        analysis: {
+          summary: listing1?.summary,
+          pros: listing1?.pros || [],
+          cons: listing1?.cons || [],
+        },
+        amenities: amenities1,
+      },
+      offer2: {
+        property_id: offerId2,
+        analysis: {
+          summary: listing2?.summary,
+          pros: listing2?.pros || [],
+          cons: listing2?.cons || [],
+        },
+        amenities: amenities2,
+      },
     };
 
     try {
@@ -344,12 +450,14 @@ export function useDify() {
       setIsLoading(false);
       return null;
     }
-  }, [sessionId, userId, isDemoMode]);
+  }, [sessionId, userId, isDemoMode, listings, resolveOfferAmenities]);
 
   return {
     isLoading,
     error,
     callDify,
     compareOffers,
+    resolveOfferAmenities,
+    difyAmenities,
   };
 }

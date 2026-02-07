@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 import { Crosshair, MapPin } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { useReverseGeocode } from '@/hooks/useNominatim';
-import type { Listing } from '@/types';
+import { normalizeCategory } from '@/types';
+import type { Listing, DifyAmenity } from '@/types';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet marker icon issue
@@ -16,10 +17,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-function createListingIcon(score: number, isSelected: boolean) {
-  const hue = score >= 8 ? 160 : score >= 6 ? 45 : 0;
-  const color = `hsl(${hue}, 60%, 45%)`;
-  const size = isSelected ? 44 : 36;
+// Create listing icon with rank-based color (red to green gradient)
+function createListingIcon(rank: number, isSelected: boolean, isViewing: boolean) {
+  // Map rank (0-1) to hue (0=red, 60=yellow, 120=green)
+  const hue = Math.round(rank * 120);
+  const saturation = 70;
+  const lightness = isViewing ? 35 : 45;
+  const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  const size = isSelected || isViewing ? 44 : 36;
+  const displayScore = Math.round(rank * 100);
   
   return new L.DivIcon({
     className: 'custom-listing-marker',
@@ -29,19 +35,58 @@ function createListingIcon(score: number, isSelected: boolean) {
           width: 100%;
           height: 100%;
           background: ${color};
-          border: 3px solid white;
+          border: ${isViewing ? '4px' : '3px'} solid white;
           border-radius: 50%;
-          box-shadow: 0 4px 12px -2px rgba(0,0,0,0.25);
+          box-shadow: 0 4px 12px -2px rgba(0,0,0,0.25)${isViewing ? ', 0 0 0 3px ' + color : ''};
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          font-size: ${isSelected ? '14px' : '12px'};
+          font-size: ${isSelected || isViewing ? '13px' : '11px'};
           color: white;
-          ${isSelected ? 'transform: scale(1.1); box-shadow: 0 6px 20px -4px rgba(0,0,0,0.35);' : ''}
+          transition: all 0.2s ease;
         ">
-          ${score.toFixed(0)}
+          ${displayScore}
         </div>
+      </div>
+    `,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+// Create amenity marker icon
+function createAmenityIcon(category: string, isHighlighted: boolean) {
+  const emojis: Record<string, string> = {
+    groceries: '🛒',
+    parks: '🌳',
+    schools: '🏫',
+    transit: '🚇',
+    healthcare: '🏥',
+    healtcare: '🏥',
+    fitness: '💪',
+  };
+  const normalizedCat = normalizeCategory(category);
+  const emoji = emojis[normalizedCat] || '📍';
+  const size = isHighlighted ? 32 : 24;
+  
+  return new L.DivIcon({
+    className: 'custom-amenity-marker',
+    html: `
+      <div style="
+        width: ${size}px;
+        height: ${size}px;
+        background: ${isHighlighted ? 'white' : 'rgba(255,255,255,0.9)'};
+        border: 2px solid ${isHighlighted ? 'hsl(160, 35%, 35%)' : 'rgba(0,0,0,0.1)'};
+        border-radius: 50%;
+        box-shadow: ${isHighlighted ? '0 4px 12px rgba(0,0,0,0.2), 0 0 0 3px hsl(160, 35%, 35%, 0.3)' : '0 2px 6px rgba(0,0,0,0.15)'};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${isHighlighted ? '16px' : '12px'};
+        transition: all 0.2s ease;
+      ">
+        ${emoji}
       </div>
     `,
     iconSize: [size, size],
@@ -94,9 +139,12 @@ function MapClickHandler({ onLocationSelect }: MapClickHandlerProps) {
 
 interface ListingPopupProps {
   listing: Listing;
+  onViewDetails: () => void;
 }
 
-function ListingPopupContent({ listing }: ListingPopupProps) {
+function ListingPopupContent({ listing, onViewDetails }: ListingPopupProps) {
+  const displayScore = Math.round(listing.rank * 100);
+  
   return (
     <div className="w-64 p-3">
       {listing.photos[0] && (
@@ -112,23 +160,19 @@ function ListingPopupContent({ listing }: ListingPopupProps) {
         {listing.price.period === 'month' && <span className="text-sm font-normal text-muted-foreground">/mo</span>}
       </p>
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-        <span>{listing.rooms} rooms</span>
-        <span>{listing.areaM2} m²</span>
-        {listing.distance && <span>{listing.distance.toFixed(1)} km</span>}
+        <span className="font-medium">{displayScore}/100</span>
+        {listing.rooms > 0 && <span>{listing.rooms} rooms</span>}
+        {listing.areaM2 > 0 && <span>{listing.areaM2} m²</span>}
       </div>
-      {listing.pros && listing.pros.length > 0 && (
-        <div className="mb-2">
-          <p className="text-xs font-medium text-nest-success">✓ {listing.pros[0]}</p>
-        </div>
+      {listing.summary && (
+        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{listing.summary}</p>
       )}
-      <a
-        href={listing.source_url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={onViewDetails}
         className="block w-full py-2 text-center text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
-        View on {listing.provider}
-      </a>
+        View Details
+      </button>
     </div>
   );
 }
@@ -137,14 +181,34 @@ interface MainMapProps {
   listings: Listing[];
   onRecenter: () => void;
   onChangeLocation: () => void;
+  highlightedAmenityIds?: number[];
 }
 
-export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps) {
-  const { location, radiusKm, selectedOfferIds, setLocation } = useAppStore();
+export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAmenityIds = [] }: MainMapProps) {
+  const { 
+    location, 
+    radiusKm, 
+    selectedOfferIds, 
+    selectedOfferId,
+    setLocation,
+    setSelectedOfferId,
+    difyAmenities,
+  } = useAppStore();
   const { reverseGeocode } = useReverseGeocode();
   const mapRef = useRef<L.Map | null>(null);
 
   const centerIcon = useMemo(() => createCenterIcon(), []);
+
+  // Get highlighted amenity IDs based on selected offer
+  const activeHighlightIds = useMemo(() => {
+    if (selectedOfferId) {
+      const listing = listings.find(l => l.id === selectedOfferId);
+      if (listing?.closest_amenity_ids) {
+        return listing.closest_amenity_ids;
+      }
+    }
+    return highlightedAmenityIds;
+  }, [selectedOfferId, listings, highlightedAmenityIds]);
 
   const handleMapClick = useCallback(async (lat: number, lng: number) => {
     // Update location when map is clicked
@@ -167,6 +231,10 @@ export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps
     }
     onRecenter();
   };
+
+  const handleViewDetails = useCallback((listingId: string) => {
+    setSelectedOfferId(listingId);
+  }, [setSelectedOfferId]);
 
   if (!location) return null;
 
@@ -208,17 +276,44 @@ export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps
           }}
         />
 
+        {/* Amenity markers - show when an offer is selected */}
+        {activeHighlightIds.length > 0 && difyAmenities.map((amenity) => {
+          const isHighlighted = activeHighlightIds.includes(amenity.amenity_id);
+          const lng = amenity.lng ?? amenity.long ?? 0;
+          
+          return (
+            <Marker
+              key={`amenity-${amenity.amenity_id}`}
+              position={[amenity.lat, lng]}
+              icon={createAmenityIcon(amenity.category, isHighlighted)}
+              zIndexOffset={isHighlighted ? 500 : 0}
+            >
+              <Popup closeButton={false}>
+                <div className="p-2 text-center">
+                  <p className="font-medium text-sm">{amenity.description}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{normalizeCategory(amenity.category)}</p>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
         {/* Listing markers */}
         {listings.map((listing) => {
           const isSelected = selectedOfferIds.includes(listing.id);
+          const isViewing = selectedOfferId === listing.id;
           return (
             <Marker
               key={listing.id}
               position={[listing.lat, listing.lng]}
-              icon={createListingIcon(listing.score, isSelected)}
+              icon={createListingIcon(listing.rank, isSelected, isViewing)}
+              zIndexOffset={isViewing ? 1000 : isSelected ? 500 : 0}
             >
               <Popup closeButton={false} className="nest-popup">
-                <ListingPopupContent listing={listing} />
+                <ListingPopupContent 
+                  listing={listing} 
+                  onViewDetails={() => handleViewDetails(listing.id)}
+                />
               </Popup>
             </Marker>
           );

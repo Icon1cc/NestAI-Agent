@@ -6,7 +6,8 @@ import type {
   ListingType, 
   AmenitiesData, 
   Listing, 
-  DifyMessage 
+  DifyMessage,
+  DifyAmenity,
 } from '@/types';
 
 // Generate a simple session ID
@@ -56,11 +57,15 @@ interface AppStore {
   setAmenities: (data: AmenitiesData | null) => void;
   listings: Listing[];
   setListings: (listings: Listing[]) => void;
+  difyAmenities: DifyAmenity[];
+  setDifyAmenities: (amenities: DifyAmenity[]) => void;
   
   // Selection
   selectedOfferIds: string[];
-  toggleOfferSelection: (id: string) => void;
+  toggleOfferSelection: (id: string, ctrlKey?: boolean) => void;
   clearSelection: () => void;
+  selectedOfferId: string | null;
+  setSelectedOfferId: (id: string | null) => void;
   
   // Chat
   messages: DifyMessage[];
@@ -133,7 +138,7 @@ export const useAppStore = create<AppStore>()(
       }),
       isSettingsOpen: false,
       setSettingsOpen: (open) => set({ isSettingsOpen: open }),
-      activeTab: 'amenities',
+      activeTab: 'listings',
       setActiveTab: (activeTab) => set({ activeTab }),
       
       // Data
@@ -141,18 +146,32 @@ export const useAppStore = create<AppStore>()(
       setAmenities: (amenities) => set({ amenities }),
       listings: [],
       setListings: (listings) => set({ listings }),
+      difyAmenities: [],
+      setDifyAmenities: (difyAmenities) => set({ difyAmenities }),
       
-      // Selection
+      // Selection - supports ctrl/cmd click for multi-select
       selectedOfferIds: [],
-      toggleOfferSelection: (id) => {
+      toggleOfferSelection: (id, ctrlKey = false) => {
         const current = get().selectedOfferIds;
-        if (current.includes(id)) {
-          set({ selectedOfferIds: current.filter(i => i !== id) });
-        } else if (current.length < 2) {
-          set({ selectedOfferIds: [...current, id] });
+        if (ctrlKey) {
+          // Multi-select mode with ctrl/cmd
+          if (current.includes(id)) {
+            set({ selectedOfferIds: current.filter(i => i !== id) });
+          } else if (current.length < 2) {
+            set({ selectedOfferIds: [...current, id] });
+          }
+        } else {
+          // Single select mode - toggle
+          if (current.includes(id)) {
+            set({ selectedOfferIds: current.filter(i => i !== id) });
+          } else if (current.length < 2) {
+            set({ selectedOfferIds: [...current, id] });
+          }
         }
       },
-      clearSelection: () => set({ selectedOfferIds: [] }),
+      clearSelection: () => set({ selectedOfferIds: [], selectedOfferId: null }),
+      selectedOfferId: null,
+      setSelectedOfferId: (selectedOfferId) => set({ selectedOfferId }),
       
       // Chat
       messages: [],
@@ -180,10 +199,12 @@ export const useAppStore = create<AppStore>()(
         amenities: null, 
         listings: [], 
         selectedOfferIds: [],
+        selectedOfferId: null,
         isDemoMode: false,
         messages: [],
         priceMin: 0,
         priceMax: 0,
+        difyAmenities: [],
       }),
     }),
     {
