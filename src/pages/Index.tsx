@@ -8,7 +8,6 @@ import { HistoryDrawer } from '@/components/HistoryDrawer';
 import { CompareModal } from '@/components/CompareModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { useAppStore } from '@/store/appStore';
-import { useListings } from '@/hooks/useListings';
 import { useAmenities } from '@/hooks/useAmenities';
 
 // Berlin demo location as per spec
@@ -38,13 +37,12 @@ export default function Index() {
     resetLocation,
     radiusKm,
     setRadiusKm,
-    listingType,
     setActiveTab,
     setPriceRange,
     addMessage,
+    listings,
   } = useAppStore();
 
-  const { listings, fetchListings } = useListings();
   const { fetchAmenities } = useAmenities();
 
   // Apply dark mode on mount
@@ -71,18 +69,11 @@ export default function Index() {
       content: 'quiet area, parks nearby, good transit, budget under 1200',
     });
     
-    // Fetch demo data
+    // Fetch amenities - listings will be fetched by MainLayout's useEffect when demo mode triggers
     await fetchAmenities(BERLIN_DEMO_LOCATION, 3);
-    await fetchListings(BERLIN_DEMO_LOCATION, 3, 'rent', { budgetMax: 1200 }, true);
-    
-    // Add demo assistant response
-    addMessage({
-      role: 'assistant',
-      content: `I found some great options in Berlin within your €1,200 budget! These listings are in quiet areas with good park access and transit connections. I've ranked them based on your preferences.`,
-    });
     
     setActiveTab('listings');
-  }, [setDemoMode, setLocation, setRadiusKm, setPriceRange, addMessage, fetchAmenities, fetchListings, setActiveTab]);
+  }, [setDemoMode, setLocation, setRadiusKm, setPriceRange, addMessage, fetchAmenities, setActiveTab]);
 
   const handleChangeLocation = useCallback(() => {
     resetLocation();
