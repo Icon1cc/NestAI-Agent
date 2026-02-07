@@ -11,8 +11,8 @@ import { useAppStore } from '@/store/appStore';
 import { useListings } from '@/hooks/useListings';
 import { useAmenities } from '@/hooks/useAmenities';
 
-const DEMO_LOCATION = {
-  label: 'Le Marais, Paris, France',
+const PARIS_LOCATION = {
+  label: 'Paris, France',
   lat: 48.8566,
   lng: 2.3522,
   countryCode: 'FR',
@@ -56,11 +56,11 @@ export default function Index() {
 
   const handleDemoMode = useCallback(async () => {
     setDemoMode(true);
-    setLocation(DEMO_LOCATION);
+    setLocation(PARIS_LOCATION);
     
     // Fetch demo data
-    await fetchAmenities(DEMO_LOCATION, 3);
-    await fetchListings(DEMO_LOCATION, 3, 'rent', { budgetMax: 1200 }, true);
+    await fetchAmenities(PARIS_LOCATION, 3);
+    await fetchListings(PARIS_LOCATION, 3, 'rent', { budgetMax: 1200 }, true);
     setActiveTab('listings');
   }, [setDemoMode, setLocation, fetchAmenities, fetchListings, setActiveTab]);
 

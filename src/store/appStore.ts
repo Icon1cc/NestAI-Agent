@@ -74,7 +74,7 @@ export const useAppStore = create<AppStore>()(
       setRadiusKm: (radiusKm) => set({ radiusKm }),
       listingType: 'rent',
       setListingType: (listingType) => set({ listingType }),
-      countryCode: 'FR',
+      countryCode: 'paris',
       setCountryCode: (countryCode) => set({ countryCode }),
       isDarkMode: false,
       toggleDarkMode: () => {

@@ -40,12 +40,13 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
 
   const [isChatLoading, setIsChatLoading] = useState(false);
 
-  // Fetch amenities when location or radius changes
+  // Fetch amenities and listings when location or radius changes
   useEffect(() => {
     if (location) {
       fetchAmenities(location, radiusKm);
+      fetchListings(location, radiusKm, listingType, {}, isDemoMode);
     }
-  }, [location, radiusKm, fetchAmenities]);
+  }, [location, radiusKm, listingType, isDemoMode, fetchAmenities, fetchListings]);
 
   const handleSearch = useCallback(async () => {
     if (!location) return;
