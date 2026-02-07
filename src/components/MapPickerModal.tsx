@@ -145,8 +145,8 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-40 bg-background pt-16"
         >
-          {/* Map fills the space below TopBar */}
-          <div className="w-full h-full relative">
+          {/* Map area - leaves space for footer */}
+          <div className="absolute inset-0 pt-16 pb-20">
             <MapContainer
               center={mapCenter}
               zoom={14}
@@ -210,12 +210,14 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
                 </div>
               </div>
             )}
+          </div>
 
-            {/* Selection info and confirm button */}
-            {selectedPosition && (
-              <div className="absolute bottom-4 left-4 right-4 z-10">
-                <div className="bg-card/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-nest-lg flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
+          {/* Footer */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 h-20 nest-glass flex items-center px-4">
+            <div className="w-full max-w-lg mx-auto flex items-center justify-between gap-4">
+              {selectedPosition ? (
+                <>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
                     <div className="min-w-0">
                       {isLoading ? (
@@ -228,17 +230,26 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={handleConfirm}
-                    disabled={!pendingLocation || isLoading}
-                    className="nest-btn-hero px-4 py-2 flex items-center gap-2 disabled:opacity-50"
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>Confirm</span>
-                  </button>
-                </div>
-              </div>
-            )}
+                  <div className="flex gap-2">
+                    <button onClick={handleClose} className="nest-btn-secondary px-4 py-2">
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirm}
+                      disabled={!pendingLocation || isLoading}
+                      className="nest-btn-hero px-4 py-2 flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>Confirm</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-muted-foreground text-sm w-full text-center">
+                  Select a point on the map to set your search center
+                </p>
+              )}
+            </div>
           </div>
         </motion.div>
       )}
