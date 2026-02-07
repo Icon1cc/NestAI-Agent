@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useAppStore } from '@/store/appStore';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -6,6 +7,8 @@ interface LogoProps {
 }
 
 export function Logo({ size = 'md', showText = true }: LogoProps) {
+  const { resetLocation } = useAppStore();
+  
   const sizes = {
     sm: { icon: 24, text: 'text-lg' },
     md: { icon: 32, text: 'text-xl' },
@@ -14,8 +17,16 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
 
   const { icon, text } = sizes[size];
 
+  const handleClick = () => {
+    resetLocation();
+  };
+
   return (
-    <div className="flex items-center gap-2">
+    <button 
+      onClick={handleClick}
+      className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+      aria-label="Go to home"
+    >
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -101,6 +112,6 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
           <span className="text-gradient-hero">AI</span>
         </motion.span>
       )}
-    </div>
+    </button>
   );
 }
