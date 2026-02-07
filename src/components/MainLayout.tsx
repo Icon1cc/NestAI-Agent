@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MainMap } from './MainMap';
 import { AmenitiesPanel } from './AmenitiesPanel';
 import { ListingsPanel } from './ListingsPanel';
+import { OfferDetailsPanel } from './OfferDetailsPanel';
 import { ChatBar } from './ChatBar';
 import { useAppStore } from '@/store/appStore';
 import { useAmenities } from '@/hooks/useAmenities';
@@ -34,6 +35,8 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     messages,
     priceMax,
     listings,
+    selectedOfferId,
+    setSelectedOfferId,
   } = useAppStore();
 
   const { 
@@ -49,6 +52,11 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
   } = useDify();
 
   const [isChatLoading, setIsChatLoading] = useState(false);
+
+  // Get the selected listing for details view
+  const selectedListing = selectedOfferId 
+    ? listings.find(l => l.id === selectedOfferId) 
+    : null;
 
   // Fetch amenities when location or radius changes
   useEffect(() => {
@@ -77,7 +85,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     
     setIsChatLoading(true);
     
-    // Add user message to store is handled inside useDify, but we need to add it first
+    // Add user message to store
     useAppStore.getState().addMessage({ role: 'user', content: message });
     
     // Call Dify with the message
@@ -99,6 +107,14 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
   const handleRecenter = useCallback(() => {
     // Map will recenter automatically via the MapRecenter component
   }, []);
+
+  const handleViewDetails = useCallback((listingId: string) => {
+    setSelectedOfferId(listingId);
+  }, [setSelectedOfferId]);
+
+  const handleBackFromDetails = useCallback(() => {
+    setSelectedOfferId(null);
+  }, [setSelectedOfferId]);
 
   if (!location) return null;
 
@@ -128,86 +144,106 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
         animate={{ opacity: 1, x: 0 }}
         className="flex-1 flex flex-col min-h-0 lg:h-full"
       >
-        {/* Tabs */}
-        <div className="flex items-center border-b border-border px-4">
-          <button
-            onClick={() => setActiveTab('listings')}
-            className={cn(
-              "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-              activeTab === 'listings'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Offers
-            {listings.length > 0 && (
-              <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
-                {listings.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('amenities')}
-            className={cn(
-              "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-              activeTab === 'amenities'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Amenities
-          </button>
-        </div>
-
-        {/* Quick chips - only show when on listings tab */}
-        {activeTab === 'listings' && listings.length > 0 && (
-          <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none border-b border-border/50">
-            {QUICK_CHIPS.map((chip) => (
-              <button
-                key={chip.label}
-                onClick={() => handleQuickChip(chip.prompt)}
-                disabled={isChatLoading || isDifyLoading}
-                className={cn(
-                  "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
-                  "bg-muted text-muted-foreground",
-                  "hover:bg-primary/10 hover:text-primary",
-                  "disabled:opacity-50 disabled:pointer-events-none"
-                )}
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Tab content */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          {activeTab === 'listings' ? (
-            <ListingsPanel
-              listings={listings}
-              isLoading={isDifyLoading}
-              error={null}
-              onSearch={handleSearch}
-              isDemoMode={isDemoMode}
-              assistantMessage={lastAssistantMessage}
+        {/* Show offer details or tabs */}
+        <AnimatePresence mode="wait">
+          {selectedListing ? (
+            <OfferDetailsPanel
+              key="details"
+              listing={selectedListing}
+              onBack={handleBackFromDetails}
             />
           ) : (
-            <AmenitiesPanel
-              data={amenitiesData}
-              isLoading={isAmenitiesLoading}
-              error={amenitiesError}
-            />
-          )}
-        </div>
+            <motion.div
+              key="tabs"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 flex flex-col min-h-0"
+            >
+              {/* Tabs */}
+              <div className="flex items-center border-b border-border px-4">
+                <button
+                  onClick={() => setActiveTab('listings')}
+                  className={cn(
+                    "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                    activeTab === 'listings'
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Offers
+                  {listings.length > 0 && (
+                    <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                      {listings.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab('amenities')}
+                  className={cn(
+                    "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                    activeTab === 'amenities'
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Amenities
+                </button>
+              </div>
 
-        {/* Chat bar */}
-        <ChatBar
-          onSend={handleSendMessage}
-          onSearch={handleSearch}
-          isLoading={isChatLoading || isDifyLoading}
-          hasLocation={!!location}
-          hasBudget={priceMax > 0}
-        />
+              {/* Quick chips - only show when on listings tab */}
+              {activeTab === 'listings' && listings.length > 0 && (
+                <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none border-b border-border/50">
+                  {QUICK_CHIPS.map((chip) => (
+                    <button
+                      key={chip.label}
+                      onClick={() => handleQuickChip(chip.prompt)}
+                      disabled={isChatLoading || isDifyLoading}
+                      className={cn(
+                        "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+                        "bg-muted text-muted-foreground",
+                        "hover:bg-primary/10 hover:text-primary",
+                        "disabled:opacity-50 disabled:pointer-events-none"
+                      )}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Tab content */}
+              <div className="flex-1 overflow-y-auto min-h-0">
+                {activeTab === 'listings' ? (
+                  <ListingsPanel
+                    listings={listings}
+                    isLoading={isDifyLoading}
+                    error={null}
+                    onSearch={handleSearch}
+                    isDemoMode={isDemoMode}
+                    assistantMessage={lastAssistantMessage}
+                    onViewDetails={handleViewDetails}
+                  />
+                ) : (
+                  <AmenitiesPanel
+                    data={amenitiesData}
+                    isLoading={isAmenitiesLoading}
+                    error={amenitiesError}
+                  />
+                )}
+              </div>
+
+              {/* Chat bar */}
+              <ChatBar
+                onSend={handleSendMessage}
+                onSearch={handleSearch}
+                isLoading={isChatLoading || isDifyLoading}
+                hasLocation={!!location}
+                hasBudget={priceMax > 0}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );

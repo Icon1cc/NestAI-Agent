@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Minus, ExternalLink, Trophy, Loader2 } from 'lucide-react';
+import { X, Check, Minus, ExternalLink, Trophy, Loader2, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { useDify } from '@/hooks/useDify';
 import type { Listing, DifyCompareResponse } from '@/types';
+import { getCategoryLabel, normalizeCategory } from '@/types';
 import { cn } from '@/lib/utils';
 
 interface CompareModalProps {
@@ -52,14 +53,34 @@ function CompareRow({ label, value1, value2, winner, format = 'text' }: CompareR
   );
 }
 
+// Extract decision hints from AI text
+function extractDecisionHints(text1: string, text2: string): string[] {
+  const hints: string[] = [];
+  const keywords = ['quiet', 'parks', 'transit', 'schools', 'central', 'value', 'space', 'modern'];
+  
+  keywords.forEach(keyword => {
+    if (text1.toLowerCase().includes(keyword) && !text2.toLowerCase().includes(keyword)) {
+      hints.push(`Best for ${keyword}: Property 1`);
+    } else if (text2.toLowerCase().includes(keyword) && !text1.toLowerCase().includes(keyword)) {
+      hints.push(`Best for ${keyword}: Property 2`);
+    }
+  });
+  
+  return hints.slice(0, 3);
+}
+
 export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
   const { selectedOfferIds, clearSelection } = useAppStore();
-  const { compareOffers, isLoading } = useDify();
+  const { compareOffers, isLoading, resolveOfferAmenities } = useDify();
   
   const [compareResult, setCompareResult] = useState<DifyCompareResponse | null>(null);
 
   const offer1 = listings.find(l => l.id === selectedOfferIds[0]);
   const offer2 = listings.find(l => l.id === selectedOfferIds[1]);
+
+  // Get amenities for each offer
+  const amenities1 = offer1 ? resolveOfferAmenities(offer1) : [];
+  const amenities2 = offer2 ? resolveOfferAmenities(offer2) : [];
 
   // Fetch comparison when modal opens with 2 offers
   useEffect(() => {
@@ -68,7 +89,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
       const id1 = parseInt(offer1.id.replace('dify-', '')) || 0;
       const id2 = parseInt(offer2.id.replace('dify-', '')) || 0;
       
-      // Call compare API (will fail gracefully if backend not set up)
+      // Call compare API
       compareOffers(id1, id2).then(result => {
         if (result) {
           setCompareResult(result);
@@ -90,20 +111,23 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
     ? (offer1.rooms > offer2.rooms ? 1 : offer1.rooms < offer2.rooms ? 2 : null)
     : null;
   const scoreWinner = offer1 && offer2
-    ? (offer1.score > offer2.score ? 1 : offer1.score < offer2.score ? 2 : null)
+    ? (offer1.rank > offer2.rank ? 1 : offer1.rank < offer2.rank ? 2 : null)
     : null;
-  const distanceWinner = offer1 && offer2
-    ? ((offer1.distance || 999) < (offer2.distance || 999) ? 1 
-      : (offer1.distance || 999) > (offer2.distance || 999) ? 2 : null)
-    : null;
+  const amenitiesWinner = amenities1.length > amenities2.length ? 1 
+    : amenities1.length < amenities2.length ? 2 : null;
 
   const handleClose = () => {
     setCompareResult(null);
     onClose();
   };
 
-  // Convert score to display format
-  const displayScore = (score: number) => Math.round(score * 10);
+  // Get decision hints
+  const decisionHints = compareResult 
+    ? extractDecisionHints(compareResult.assistant_text_property1, compareResult.assistant_text_property2)
+    : [];
+
+  // Convert rank to display format
+  const displayScore = (rank: number) => Math.round(rank * 100);
 
   return (
     <AnimatePresence>
@@ -127,7 +151,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
             exit={{ scale: 0.95, opacity: 0 }}
             className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
           >
-            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto nest-card-elevated pointer-events-auto">
+            <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto nest-card-elevated pointer-events-auto">
               {!offer1 || !offer2 ? (
                 <div className="p-12 text-center">
                   <p className="text-muted-foreground">Select exactly 2 listings to compare</p>
@@ -147,8 +171,25 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
 
                   {/* Content */}
                   <div className="p-6">
+                    {/* Decision hints */}
+                    {decisionHints.length > 0 && (
+                      <div className="mb-6 p-4 rounded-xl bg-accent/10 border border-accent/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="w-4 h-4 text-accent" />
+                          <span className="text-sm font-medium">Quick Decision Guide</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {decisionHints.map((hint, i) => (
+                            <span key={i} className="px-3 py-1 rounded-full text-xs bg-accent/20 text-accent">
+                              {hint}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Images and AI Analysis */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 gap-6 mb-6">
                       {/* Offer 1 */}
                       <div>
                         <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3">
@@ -158,7 +199,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                             <div className="w-full h-full bg-muted" />
                           )}
                           <div className="absolute top-2 left-2 px-2 py-1 rounded-lg text-xs font-bold nest-score-high">
-                            {displayScore(offer1.score)}/100
+                            {displayScore(offer1.rank)}/100
                           </div>
                         </div>
                         <h3 className="font-semibold text-sm line-clamp-2 mb-2">{offer1.title}</h3>
@@ -177,6 +218,20 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                             <p className="text-sm text-foreground">{compareResult.assistant_text_property1}</p>
                           </div>
                         ) : null}
+
+                        {/* Amenities for offer 1 */}
+                        {amenities1.length > 0 && (
+                          <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Nearby ({amenities1.length})</p>
+                            <div className="flex flex-wrap gap-1">
+                              {amenities1.slice(0, 5).map((a) => (
+                                <span key={a.amenity_id} className="text-xs px-2 py-0.5 rounded bg-muted">
+                                  {getCategoryLabel(normalizeCategory(a.category))}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Offer 2 */}
@@ -188,7 +243,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                             <div className="w-full h-full bg-muted" />
                           )}
                           <div className="absolute top-2 left-2 px-2 py-1 rounded-lg text-xs font-bold nest-score-high">
-                            {displayScore(offer2.score)}/100
+                            {displayScore(offer2.rank)}/100
                           </div>
                         </div>
                         <h3 className="font-semibold text-sm line-clamp-2 mb-2">{offer2.title}</h3>
@@ -207,6 +262,20 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                             <p className="text-sm text-foreground">{compareResult.assistant_text_property2}</p>
                           </div>
                         ) : null}
+
+                        {/* Amenities for offer 2 */}
+                        {amenities2.length > 0 && (
+                          <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Nearby ({amenities2.length})</p>
+                            <div className="flex flex-wrap gap-1">
+                              {amenities2.slice(0, 5).map((a) => (
+                                <span key={a.amenity_id} className="text-xs px-2 py-0.5 rounded bg-muted">
+                                  {getCategoryLabel(normalizeCategory(a.category))}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -237,20 +306,21 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                       )}
                       <CompareRow 
                         label="AI Score" 
-                        value1={`${displayScore(offer1.score)}/100`} 
-                        value2={`${displayScore(offer2.score)}/100`} 
+                        value1={`${displayScore(offer1.rank)}/100`} 
+                        value2={`${displayScore(offer2.rank)}/100`} 
                         winner={scoreWinner}
                       />
                       <CompareRow 
-                        label="Distance" 
-                        value1={offer1.distance ? `${offer1.distance.toFixed(1)} km` : '—'} 
-                        value2={offer2.distance ? `${offer2.distance.toFixed(1)} km` : '—'} 
-                        winner={distanceWinner}
+                        label="Nearby Amenities" 
+                        value1={amenities1.length} 
+                        value2={amenities2.length} 
+                        winner={amenitiesWinner}
+                        format="number"
                       />
                     </div>
 
                     {/* Pros & Cons */}
-                    <div className="grid grid-cols-2 gap-4 py-4 mt-2">
+                    <div className="grid grid-cols-2 gap-6 py-4 mt-2">
                       <div>
                         <p className="text-xs font-medium text-muted-foreground mb-2">Pros</p>
                         <div className="space-y-1">
@@ -295,14 +365,14 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
 
                     {/* Action buttons */}
                     <div className="grid grid-cols-2 gap-4 pt-4">
-                      {offer1.source_url && offer1.source_url !== '#' ? (
+                      {offer1.redirect_url && offer1.redirect_url !== '#' ? (
                         <a
-                          href={offer1.source_url}
+                          href={offer1.redirect_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="nest-btn-primary flex items-center justify-center gap-2 text-sm"
                         >
-                          View on {offer1.provider}
+                          Open Listing 1
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       ) : (
@@ -310,14 +380,14 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                           No external link
                         </div>
                       )}
-                      {offer2.source_url && offer2.source_url !== '#' ? (
+                      {offer2.redirect_url && offer2.redirect_url !== '#' ? (
                         <a
-                          href={offer2.source_url}
+                          href={offer2.redirect_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="nest-btn-primary flex items-center justify-center gap-2 text-sm"
                         >
-                          View on {offer2.provider}
+                          Open Listing 2
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       ) : (
