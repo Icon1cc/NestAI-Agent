@@ -14,19 +14,18 @@ import type { RadiusKm } from '@/types';
 
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
-const COUNTRIES = [
-  { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'AT', name: 'Austria' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'US', name: 'United States' },
+// Major French cities ordered alphabetically
+const FRENCH_CITIES = [
+  { code: 'bordeaux', name: 'Bordeaux' },
+  { code: 'lille', name: 'Lille' },
+  { code: 'lyon', name: 'Lyon' },
+  { code: 'marseille', name: 'Marseille' },
+  { code: 'montpellier', name: 'Montpellier' },
+  { code: 'nantes', name: 'Nantes' },
+  { code: 'nice', name: 'Nice' },
+  { code: 'paris', name: 'Paris' },
+  { code: 'strasbourg', name: 'Strasbourg' },
+  { code: 'toulouse', name: 'Toulouse' },
 ];
 
 interface SettingsModalProps {
@@ -94,22 +93,22 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   />
                 </div>
 
-                {/* Country selector */}
+                {/* City selector */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <Globe className="w-5 h-5 text-primary" />
-                    <Label className="text-sm font-medium">Default Country</Label>
+                    <Label className="text-sm font-medium">Default City</Label>
                   </div>
                   <Select
                     value={countryCode || 'all'}
                     onValueChange={(v) => setCountryCode(v === 'all' ? null : v)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Countries" />
+                      <SelectValue placeholder="All Cities" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Countries</SelectItem>
-                      {COUNTRIES.map(c => (
+                    <SelectContent className="z-[200] bg-popover">
+                      <SelectItem value="all">All Cities</SelectItem>
+                      {FRENCH_CITIES.map(c => (
                         <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -129,7 +128,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[200] bg-popover">
                       {RADIUS_OPTIONS.map(r => (
                         <SelectItem key={r} value={r.toString()}>{r} km</SelectItem>
                       ))}
