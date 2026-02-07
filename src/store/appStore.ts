@@ -74,7 +74,7 @@ export const useAppStore = create<AppStore>()(
       setRadiusKm: (radiusKm) => set({ radiusKm }),
       listingType: 'rent',
       setListingType: (listingType) => set({ listingType }),
-      countryCode: null,
+      countryCode: 'FR',
       setCountryCode: (countryCode) => set({ countryCode }),
       isDarkMode: false,
       toggleDarkMode: () => {
@@ -154,9 +154,7 @@ export const useAppStore = create<AppStore>()(
       name: 'nestai-store',
       partialize: (state) => ({
         isDarkMode: state.isDarkMode,
-        radiusKm: state.radiusKm,
         listingType: state.listingType,
-        countryCode: state.countryCode,
       }),
     }
   )
