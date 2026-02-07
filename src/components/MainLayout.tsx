@@ -124,7 +124,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     .slice(-1)[0]?.content;
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] pt-16">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] pt-16 gap-4 px-2 sm:px-4">
       {/* Map Section */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}

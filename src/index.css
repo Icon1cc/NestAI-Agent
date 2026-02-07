@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,137 +7,133 @@
 
 @layer base {
   :root {
-    /* Core palette - Warm sage and cream */
-    --background: 45 20% 98%;
-    --foreground: 200 15% 15%;
+    /* Core palette - Liquid glass with cyan + ember highlights */
+    --background: 214 38% 96%;
+    --foreground: 220 25% 12%;
 
-    --card: 45 25% 99%;
-    --card-foreground: 200 15% 15%;
+    --card: 214 50% 99%;
+    --card-foreground: 220 25% 12%;
 
-    --popover: 45 25% 99%;
-    --popover-foreground: 200 15% 15%;
+    --popover: 214 50% 99%;
+    --popover-foreground: 220 25% 12%;
 
-    /* Primary - Deep sage green */
-    --primary: 160 35% 35%;
-    --primary-foreground: 45 20% 98%;
+    --primary: 188 72% 46%;
+    --primary-foreground: 220 30% 8%;
 
-    /* Secondary - Warm neutral */
-    --secondary: 35 20% 92%;
-    --secondary-foreground: 200 15% 25%;
+    --secondary: 214 32% 92%;
+    --secondary-foreground: 220 25% 18%;
 
-    /* Muted - Soft gray-green */
-    --muted: 160 10% 94%;
-    --muted-foreground: 200 10% 45%;
+    --muted: 214 32% 92%;
+    --muted-foreground: 220 15% 48%;
 
-    /* Accent - Warm coral for CTAs */
-    --accent: 15 75% 55%;
-    --accent-foreground: 45 20% 98%;
+    --accent: 32 94% 56%;
+    --accent-foreground: 220 30% 8%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 45 20% 98%;
+    --destructive-foreground: 50 100% 98%;
 
-    --border: 160 15% 88%;
-    --input: 160 15% 88%;
-    --ring: 160 35% 35%;
+    --border: 214 20% 82%;
+    --input: 214 20% 82%;
+    --ring: 188 72% 46%;
 
-    --radius: 0.75rem;
+    --radius: 0.9rem;
 
     /* Custom NestAI tokens */
-    --nest-glow: 160 40% 50%;
-    --nest-surface: 45 30% 97%;
-    --nest-surface-elevated: 0 0% 100%;
-    --nest-shadow: 200 20% 20%;
-    --nest-success: 160 60% 40%;
-    --nest-warning: 35 90% 50%;
-    --nest-info: 200 80% 50%;
+    --nest-glow: 188 80% 60%;
+    --nest-surface: 214 45% 98%;
+    --nest-surface-elevated: 214 42% 99%;
+    --nest-shadow: 220 32% 16%;
+    --nest-success: 150 65% 40%;
+    --nest-warning: 40 90% 52%;
+    --nest-info: 205 85% 50%;
 
     /* Map specific */
-    --map-marker-primary: 160 35% 35%;
-    --map-marker-secondary: 15 75% 55%;
-    --map-radius-fill: 160 35% 35%;
+    --map-marker-primary: 188 72% 46%;
+    --map-marker-secondary: 32 94% 56%;
+    --map-radius-fill: 188 72% 46%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(160 35% 35%) 0%, hsl(180 30% 40%) 100%);
-    --gradient-surface: linear-gradient(180deg, hsl(45 25% 99%) 0%, hsl(45 20% 96%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(15 75% 55%) 0%, hsl(25 80% 60%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(188 80% 55%) 0%, hsl(210 78% 55%) 45%, hsl(188 70% 48%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(214 52% 99%) 0%, hsl(214 44% 95%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(32 94% 56%) 0%, hsl(18 88% 58%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(var(--nest-shadow) / 0.03);
-    --shadow-md: 0 4px 12px -2px hsl(var(--nest-shadow) / 0.06), 0 2px 4px -2px hsl(var(--nest-shadow) / 0.04);
-    --shadow-lg: 0 12px 32px -4px hsl(var(--nest-shadow) / 0.08), 0 4px 12px -4px hsl(var(--nest-shadow) / 0.04);
-    --shadow-xl: 0 24px 48px -8px hsl(var(--nest-shadow) / 0.12), 0 8px 24px -8px hsl(var(--nest-shadow) / 0.06);
-    --shadow-glow: 0 0 40px -10px hsl(var(--nest-glow) / 0.3);
+    --shadow-sm: 0 1px 3px 0 hsl(var(--nest-shadow) / 0.06), 0 1px 2px -1px hsl(var(--nest-shadow) / 0.04);
+    --shadow-md: 0 6px 20px -6px hsl(var(--nest-shadow) / 0.12), 0 2px 8px -4px hsl(var(--nest-shadow) / 0.1);
+    --shadow-lg: 0 18px 40px -12px hsl(var(--nest-shadow) / 0.16), 0 8px 22px -10px hsl(var(--nest-shadow) / 0.12);
+    --shadow-xl: 0 26px 70px -24px hsl(var(--nest-shadow) / 0.22), 0 14px 38px -22px hsl(var(--nest-shadow) / 0.16);
+    --shadow-glow: 0 0 50px -16px hsl(var(--nest-glow) / 0.4);
 
     /* Sidebar */
-    --sidebar-background: 45 25% 97%;
-    --sidebar-foreground: 200 15% 20%;
-    --sidebar-primary: 160 35% 35%;
-    --sidebar-primary-foreground: 45 20% 98%;
-    --sidebar-accent: 160 20% 92%;
-    --sidebar-accent-foreground: 200 15% 20%;
-    --sidebar-border: 160 15% 88%;
-    --sidebar-ring: 160 35% 35%;
+    --sidebar-background: 214 45% 98%;
+    --sidebar-foreground: 220 25% 18%;
+    --sidebar-primary: 188 72% 46%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 214 28% 94%;
+    --sidebar-accent-foreground: 220 25% 18%;
+    --sidebar-border: 214 22% 82%;
+    --sidebar-ring: 188 72% 46%;
   }
 
   .dark {
-    --background: 200 20% 8%;
-    --foreground: 45 15% 92%;
+    --background: 220 35% 8%;
+    --foreground: 220 18% 92%;
 
-    --card: 200 18% 10%;
-    --card-foreground: 45 15% 92%;
+    --card: 220 28% 12%;
+    --card-foreground: 220 18% 92%;
 
-    --popover: 200 18% 10%;
-    --popover-foreground: 45 15% 92%;
+    --popover: 220 28% 12%;
+    --popover-foreground: 220 18% 92%;
 
-    --primary: 160 45% 50%;
-    --primary-foreground: 200 20% 8%;
+    --primary: 188 75% 52%;
+    --primary-foreground: 220 30% 8%;
 
-    --secondary: 200 15% 15%;
-    --secondary-foreground: 45 15% 85%;
+    --secondary: 220 26% 16%;
+    --secondary-foreground: 220 18% 88%;
 
-    --muted: 200 15% 18%;
-    --muted-foreground: 200 10% 60%;
+    --muted: 220 24% 18%;
+    --muted-foreground: 220 12% 70%;
 
-    --accent: 15 80% 55%;
-    --accent-foreground: 200 20% 8%;
+    --accent: 32 96% 58%;
+    --accent-foreground: 220 32% 8%;
 
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 45 20% 98%;
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 220 32% 8%;
 
-    --border: 200 15% 18%;
-    --input: 200 15% 18%;
-    --ring: 160 45% 50%;
+    --border: 220 22% 20%;
+    --input: 220 22% 20%;
+    --ring: 188 75% 52%;
 
-    --nest-glow: 160 50% 55%;
-    --nest-surface: 200 18% 10%;
-    --nest-surface-elevated: 200 16% 14%;
-    --nest-shadow: 220 40% 5%;
-    --nest-success: 160 60% 45%;
-    --nest-warning: 35 90% 55%;
-    --nest-info: 200 80% 55%;
+    --nest-glow: 188 82% 62%;
+    --nest-surface: 220 30% 10%;
+    --nest-surface-elevated: 220 24% 14%;
+    --nest-shadow: 220 40% 8%;
+    --nest-success: 150 65% 46%;
+    --nest-warning: 40 92% 60%;
+    --nest-info: 205 88% 58%;
 
-    --map-marker-primary: 160 45% 50%;
-    --map-marker-secondary: 15 80% 55%;
-    --map-radius-fill: 160 45% 50%;
+    --map-marker-primary: 188 75% 52%;
+    --map-marker-secondary: 32 96% 58%;
+    --map-radius-fill: 188 75% 52%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(160 45% 50%) 0%, hsl(180 40% 45%) 100%);
-    --gradient-surface: linear-gradient(180deg, hsl(200 18% 10%) 0%, hsl(200 20% 8%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(15 80% 55%) 0%, hsl(25 85% 60%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(188 78% 54%) 0%, hsl(210 72% 50%) 45%, hsl(192 72% 48%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(220 32% 12%) 0%, hsl(220 28% 9%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(32 96% 58%) 0%, hsl(18 88% 56%) 100%);
 
-    --shadow-sm: 0 1px 2px 0 hsl(var(--nest-shadow) / 0.2);
-    --shadow-md: 0 4px 12px -2px hsl(var(--nest-shadow) / 0.3), 0 2px 4px -2px hsl(var(--nest-shadow) / 0.2);
-    --shadow-lg: 0 12px 32px -4px hsl(var(--nest-shadow) / 0.4), 0 4px 12px -4px hsl(var(--nest-shadow) / 0.2);
-    --shadow-xl: 0 24px 48px -8px hsl(var(--nest-shadow) / 0.5), 0 8px 24px -8px hsl(var(--nest-shadow) / 0.3);
-    --shadow-glow: 0 0 60px -10px hsl(var(--nest-glow) / 0.4);
+    --shadow-sm: 0 1px 3px 0 hsl(var(--nest-shadow) / 0.28), 0 1px 2px -1px hsl(var(--nest-shadow) / 0.16);
+    --shadow-md: 0 8px 24px -8px hsl(var(--nest-shadow) / 0.32), 0 4px 12px -6px hsl(var(--nest-shadow) / 0.24);
+    --shadow-lg: 0 18px 48px -16px hsl(var(--nest-shadow) / 0.42), 0 8px 28px -14px hsl(var(--nest-shadow) / 0.28);
+    --shadow-xl: 0 28px 78px -28px hsl(var(--nest-shadow) / 0.55), 0 16px 46px -24px hsl(var(--nest-shadow) / 0.34);
+    --shadow-glow: 0 0 70px -18px hsl(var(--nest-glow) / 0.5);
 
-    --sidebar-background: 200 18% 10%;
-    --sidebar-foreground: 45 15% 85%;
-    --sidebar-primary: 160 45% 50%;
-    --sidebar-primary-foreground: 200 20% 8%;
-    --sidebar-accent: 200 15% 15%;
-    --sidebar-accent-foreground: 45 15% 85%;
-    --sidebar-border: 200 15% 18%;
-    --sidebar-ring: 160 45% 50%;
+    --sidebar-background: 220 30% 10%;
+    --sidebar-foreground: 220 18% 90%;
+    --sidebar-primary: 188 75% 52%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 220 26% 16%;
+    --sidebar-accent-foreground: 220 18% 88%;
+    --sidebar-border: 220 22% 20%;
+    --sidebar-ring: 188 75% 52%;
   }
 }
 
@@ -147,7 +144,31 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-image:
+      radial-gradient(120% 80% at 15% 20%, hsla(188, 85%, 60%, 0.18), transparent 52%),
+      radial-gradient(90% 60% at 82% 2%, hsla(32, 94%, 56%, 0.16), transparent 48%),
+      linear-gradient(180deg, hsla(214, 38%, 96%, 0.9) 0%, hsla(214, 38%, 94%, 0.82) 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    pointer-events: none;
+    background:
+      radial-gradient(35% 35% at 24% 18%, hsla(188, 82%, 62%, 0.22), transparent),
+      radial-gradient(42% 42% at 78% 8%, hsla(32, 96%, 58%, 0.16), transparent),
+      radial-gradient(30% 30% at 62% 80%, hsla(210, 78%, 55%, 0.12), transparent);
+    filter: blur(70px) saturate(140%);
+    opacity: 0.9;
+    mix-blend-mode: screen;
+    z-index: -1;
   }
 
   /* Custom scrollbar */
@@ -168,13 +189,17 @@
 @layer components {
   /* Premium card styles */
   .nest-card {
-    @apply bg-card rounded-xl border border-border/50;
+    @apply bg-card/80 rounded-2xl border border-border/60 backdrop-blur-xl;
     box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
   }
 
   .nest-card-elevated {
-    @apply bg-card rounded-xl border border-border/30;
+    @apply bg-card/90 rounded-2xl border border-border/40 backdrop-blur-2xl;
     box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
   }
 
   .nest-card-interactive {
@@ -193,17 +218,42 @@
 
   /* Glass effect */
   .nest-glass {
-    @apply bg-background/80 backdrop-blur-xl border border-border/50;
+    @apply bg-background/70 backdrop-blur-2xl border border-border/40;
     box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nest-card::after,
+  .nest-card-elevated::after,
+  .nest-glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 120% at 10% 10%, hsla(var(--primary) / 0.18), transparent 55%),
+      radial-gradient(140% 140% at 90% 0%, hsla(var(--accent) / 0.16), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    mix-blend-mode: screen;
+  }
+
+  .nest-card:hover::after,
+  .nest-card-elevated:hover::after,
+  .nest-glass:hover::after {
+    opacity: 1;
   }
 
   /* Premium input */
   .nest-input {
-    @apply h-12 px-4 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200;
+    @apply h-12 px-4 rounded-xl bg-muted/60 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/60 transition-all duration-200 backdrop-blur;
+    box-shadow: inset 0 1px 0 hsla(var(--foreground) / 0.04);
   }
 
   .nest-input-lg {
-    @apply h-14 px-5 text-lg rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200;
+    @apply h-14 px-5 text-lg rounded-xl bg-muted/60 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/60 transition-all duration-200 backdrop-blur;
+    box-shadow: inset 0 1px 0 hsla(var(--foreground) / 0.04);
   }
 
   /* Hero button */
@@ -294,8 +344,8 @@
 
   /* Map container */
   .nest-map-container {
-    @apply w-full h-full rounded-xl overflow-hidden;
-    box-shadow: var(--shadow-lg);
+    @apply w-full h-full rounded-[1.4rem] overflow-hidden border border-border/40 backdrop-blur-xl bg-card/70;
+    box-shadow: var(--shadow-xl);
   }
 
   /* Listing card */

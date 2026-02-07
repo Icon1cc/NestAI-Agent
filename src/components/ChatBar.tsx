@@ -75,7 +75,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="w-full px-4 pb-4 pt-2 border-t border-border/50 bg-background"
+      className="w-full px-4 pb-4 pt-2 border-t border-border/40 bg-background/70 backdrop-blur-2xl"
     >
       {/* Budget chips - shown when no budget is set */}
       {showBudgetChips && (

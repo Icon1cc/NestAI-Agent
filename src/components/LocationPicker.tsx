@@ -51,8 +51,10 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-lg mx-auto px-4"
+      className="w-full max-w-lg mx-auto px-4 relative"
     >
+      <div className="absolute -left-16 -top-24 w-48 h-48 bg-primary/20 blur-[70px] rounded-full pointer-events-none" />
+      <div className="absolute -right-10 -bottom-16 w-44 h-44 bg-accent/18 blur-[70px] rounded-full pointer-events-none" />
       <div className="nest-card-elevated p-8 space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">

@@ -86,9 +86,11 @@ export function TopBar() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="fixed top-0 left-0 right-0 z-50 h-16 nest-glass"
+      className="fixed top-0 left-0 right-0 z-50 h-16 nest-glass overflow-hidden"
     >
-      <div className="h-full max-w-[1800px] mx-auto px-4 flex items-center justify-between gap-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/12 via-white/6 to-white/4 opacity-70 pointer-events-none" />
+      <div className="absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-80 pointer-events-none" />
+      <div className="h-full max-w-[1800px] mx-auto px-4 flex items-center justify-between gap-4 relative">
         {/* Left: Menu + Logo */}
         <div className="flex items-center gap-3">
           <button
