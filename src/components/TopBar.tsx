@@ -10,14 +10,29 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import type { RadiusKm, ListingType } from '@/types';
+import type { RadiusKm } from '@/types';
 
 // Only radius options: 1, 3, 7, 10 km
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
+// Major French cities ordered alphabetically
+const FRENCH_CITIES = [
+  { code: 'bordeaux', name: 'Bordeaux', lat: 44.8378, lng: -0.5792 },
+  { code: 'lille', name: 'Lille', lat: 50.6292, lng: 3.0573 },
+  { code: 'lyon', name: 'Lyon', lat: 45.7640, lng: 4.8357 },
+  { code: 'marseille', name: 'Marseille', lat: 43.2965, lng: 5.3698 },
+  { code: 'montpellier', name: 'Montpellier', lat: 43.6108, lng: 3.8767 },
+  { code: 'nantes', name: 'Nantes', lat: 47.2184, lng: -1.5536 },
+  { code: 'nice', name: 'Nice', lat: 43.7102, lng: 7.2620 },
+  { code: 'paris', name: 'Paris', lat: 48.8566, lng: 2.3522 },
+  { code: 'strasbourg', name: 'Strasbourg', lat: 48.5734, lng: 7.7521 },
+  { code: 'toulouse', name: 'Toulouse', lat: 43.6047, lng: 1.4442 },
+];
+
 export function TopBar() {
   const {
     location,
+    setLocation,
     radiusKm,
     setRadiusKm,
     listingType,
@@ -30,8 +45,41 @@ export function TopBar() {
     setSettingsOpen,
   } = useAppStore();
 
-  const hasLocation = !!location;
   const canCompare = selectedOfferIds.length === 2;
+
+  // Get current city code from location
+  const getCurrentCityCode = () => {
+    if (!location) return 'all';
+    const matchedCity = FRENCH_CITIES.find(
+      c => Math.abs(c.lat - location.lat) < 0.1 && Math.abs(c.lng - location.lng) < 0.1
+    );
+    return matchedCity?.code || 'custom';
+  };
+
+  const handleCityChange = (code: string) => {
+    if (code === 'all') {
+      // Center on France
+      setLocation({
+        label: 'France',
+        lat: 46.2276,
+        lng: 2.2137,
+        countryCode: 'FR',
+        country: 'France',
+      });
+    } else {
+      const city = FRENCH_CITIES.find(c => c.code === code);
+      if (city) {
+        setLocation({
+          label: `${city.name}, France`,
+          lat: city.lat,
+          lng: city.lng,
+          countryCode: 'FR',
+          city: city.name,
+          country: 'France',
+        });
+      }
+    }
+  };
 
   return (
     <motion.header
@@ -53,7 +101,7 @@ export function TopBar() {
           
           <Logo size="md" showText />
           
-          {/* Location chip */}
+          {/* Location chip - show current location */}
           {location && (
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -68,23 +116,31 @@ export function TopBar() {
 
         {/* Right: Controls */}
         <div className="flex items-center gap-2">
-          {/* Radius selector */}
+          {/* City selector */}
+          <Select
+            value={getCurrentCityCode()}
+            onValueChange={handleCityChange}
+          >
+            <SelectTrigger className="h-9 w-[130px] text-sm bg-muted/50 border-border/50">
+              <SelectValue placeholder="Select city" />
+            </SelectTrigger>
+            <SelectContent className="z-[200] bg-popover">
+              <SelectItem value="all">All Cities</SelectItem>
+              {FRENCH_CITIES.map(c => (
+                <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Radius selector - always enabled */}
           <Select
             value={radiusKm.toString()}
             onValueChange={(v) => setRadiusKm(parseInt(v) as RadiusKm)}
-            disabled={!hasLocation}
           >
-            <SelectTrigger 
-              className={cn(
-                "h-9 w-[90px] text-sm",
-                hasLocation 
-                  ? "bg-muted/50 border-border/50" 
-                  : "bg-muted/30 border-border/30 opacity-50"
-              )}
-            >
+            <SelectTrigger className="h-9 w-[90px] text-sm bg-muted/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-[200] bg-popover">
               {RADIUS_OPTIONS.map(r => (
                 <SelectItem key={r} value={r.toString()}>{r} km</SelectItem>
               ))}
@@ -92,10 +148,7 @@ export function TopBar() {
           </Select>
 
           {/* Listing type toggle (Rent/Buy) */}
-          <div className={cn(
-            "flex items-center h-9 rounded-lg p-0.5 bg-muted/50 border border-border/50",
-            !hasLocation && "opacity-50 pointer-events-none"
-          )}>
+          <div className="flex items-center h-9 rounded-lg p-0.5 bg-muted/50 border border-border/50">
             <button
               onClick={() => setListingType('rent')}
               className={cn(
