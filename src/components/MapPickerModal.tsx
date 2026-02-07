@@ -1,15 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Loader2 } from 'lucide-react';
+import { X, MapPin, Loader2, Check } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useReverseGeocode } from '@/hooks/useNominatim';
 import { useAppStore } from '@/store/appStore';
-import { Slider } from '@/components/ui/slider';
-import type { Location, RadiusKm } from '@/types';
+import type { Location } from '@/types';
 import 'leaflet/dist/leaflet.css';
-
-const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
 // Fix Leaflet marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -61,39 +58,52 @@ function MapCenter({ center }: MapCenterProps) {
   return null;
 }
 
+// Component to sync map with store location changes
+function MapLocationSync() {
+  const map = useMap();
+  const { location, radiusKm } = useAppStore();
+  
+  useEffect(() => {
+    if (location) {
+      const zoom = radiusKm <= 1 ? 15 : radiusKm <= 3 ? 14 : radiusKm <= 7 ? 13 : 12;
+      map.setView([location.lat, location.lng], zoom);
+    }
+  }, [location, radiusKm, map]);
+  
+  return null;
+}
+
 interface MapPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
-  const { radiusKm, setRadiusKm, setLocation } = useAppStore();
+  const { location, radiusKm, setLocation } = useAppStore();
   const { reverseGeocode, isLoading } = useReverseGeocode();
   
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [locationLabel, setLocationLabel] = useState<string>('');
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
-  const [localRadius, setLocalRadius] = useState<RadiusKm>(radiusKm);
 
-  // Default center (Paris)
-  const defaultCenter: [number, number] = [48.8566, 2.3522];
-  
-  // Map radius value to slider index
-  const radiusToIndex = (r: RadiusKm) => RADIUS_OPTIONS.indexOf(r);
-  const indexToRadius = (i: number) => RADIUS_OPTIONS[i] as RadiusKm;
+  // Use current location or default to Paris
+  const mapCenter: [number, number] = location 
+    ? [location.lat, location.lng] 
+    : [48.8566, 2.3522];
 
   const handleLocationSelect = useCallback(async (lat: number, lng: number) => {
     setSelectedPosition([lat, lng]);
     setLocationLabel('Loading...');
     
-    const location = await reverseGeocode(lat, lng);
-    if (location) {
-      setLocationLabel(location.label);
-      setPendingLocation(location);
+    const loc = await reverseGeocode(lat, lng);
+    if (loc) {
+      setLocationLabel(loc.label);
+      setPendingLocation(loc);
     } else {
-      setLocationLabel(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      const label = `Selected location`;
+      setLocationLabel(label);
       setPendingLocation({
-        label: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        label,
         lat,
         lng,
       });
@@ -102,28 +112,29 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
 
   const handleConfirm = () => {
     if (pendingLocation) {
-      setRadiusKm(localRadius);
       setLocation(pendingLocation);
+      setSelectedPosition(null);
+      setLocationLabel('');
+      setPendingLocation(null);
       onClose();
     }
   };
 
-  const handleCancel = () => {
+  const handleClose = () => {
     setSelectedPosition(null);
     setLocationLabel('');
     setPendingLocation(null);
     onClose();
   };
 
-  // Reset state when modal opens
+  // Reset selection when modal opens
   useEffect(() => {
     if (isOpen) {
       setSelectedPosition(null);
       setLocationLabel('');
       setPendingLocation(null);
-      setLocalRadius(radiusKm);
     }
-  }, [isOpen, radiusKm]);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -132,24 +143,13 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] bg-background"
+          className="fixed inset-0 z-40 bg-background pt-16"
         >
-          {/* Header */}
-          <div className="absolute top-0 left-0 right-0 z-[110] h-16 nest-glass flex items-center justify-between px-4">
-            <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-primary" />
-              <h2 className="font-semibold text-lg">Select Location</h2>
-            </div>
-            <button onClick={handleCancel} className="nest-icon-btn">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Map */}
-          <div className="absolute inset-0 pt-16 pb-24">
+          {/* Map fills the space below TopBar */}
+          <div className="w-full h-full relative">
             <MapContainer
-              center={defaultCenter}
-              zoom={12}
+              center={mapCenter}
+              zoom={14}
               className="w-full h-full"
               zoomControl={false}
             >
@@ -158,11 +158,12 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <MapClickHandler onLocationSelect={handleLocationSelect} />
+              <MapLocationSync />
               
-              {/* Always show radius circle at default center or selected position */}
+              {/* Always show radius circle */}
               <Circle
-                center={selectedPosition || defaultCenter}
-                radius={localRadius * 1000}
+                center={selectedPosition || mapCenter}
+                radius={radiusKm * 1000}
                 pathOptions={{
                   color: 'hsl(160, 35%, 35%)',
                   fillColor: 'hsl(160, 35%, 35%)',
@@ -190,69 +191,54 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
               )}
             </MapContainer>
 
-            {/* Crosshair hint */}
+            {/* Close button */}
+            <button
+              onClick={handleClose}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-card rounded-lg shadow-nest-md flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+              title="Close map picker"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Instruction hint when no selection */}
             {!selectedPosition && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="bg-background/80 backdrop-blur-sm rounded-xl px-4 py-3 text-center">
-                  <p className="text-sm text-muted-foreground">Click anywhere on the map to select a location</p>
+              <div className="absolute top-4 left-4 right-16 z-10">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-nest-md">
+                  <p className="text-sm text-muted-foreground">
+                    Click anywhere on the map to select a location, or use the city dropdown above
+                  </p>
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Footer */}
-          <div className="absolute bottom-0 left-0 right-0 z-[110] p-4 nest-glass">
-            <div className="max-w-lg mx-auto space-y-4">
-              {/* Radius slider */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Search radius</span>
-                  <span className="font-medium">{localRadius} km</span>
-                </div>
-                <Slider
-                  value={[radiusToIndex(localRadius)]}
-                  onValueChange={([idx]) => setLocalRadius(indexToRadius(idx))}
-                  min={0}
-                  max={RADIUS_OPTIONS.length - 1}
-                  step={1}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  {RADIUS_OPTIONS.map((r) => (
-                    <span key={r}>{r}km</span>
-                  ))}
-                </div>
-              </div>
-
-              {selectedPosition && (
-                <div className="flex items-start gap-2 text-sm">
-                  <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <div className="min-w-0">
-                    {isLoading ? (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        <span>Loading address...</span>
-                      </div>
-                    ) : (
-                      <p className="text-foreground truncate">{locationLabel}</p>
-                    )}
+            {/* Selection info and confirm button */}
+            {selectedPosition && (
+              <div className="absolute bottom-4 left-4 right-4 z-10">
+                <div className="bg-card/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-nest-lg flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+                    <div className="min-w-0">
+                      {isLoading ? (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Loading address...</span>
+                        </div>
+                      ) : (
+                        <p className="text-foreground font-medium truncate">{locationLabel}</p>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={!pendingLocation || isLoading}
+                    className="nest-btn-hero px-4 py-2 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Confirm</span>
+                  </button>
                 </div>
-              )}
-              
-              <div className="flex gap-3">
-                <button onClick={handleCancel} className="nest-btn-secondary flex-1">
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  disabled={!pendingLocation || isLoading}
-                  className="nest-btn-hero flex-1 disabled:opacity-50"
-                >
-                  Confirm Location
-                </button>
               </div>
-            </div>
+            )}
           </div>
         </motion.div>
       )}
