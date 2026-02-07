@@ -35,9 +35,14 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
 
   const handleUseMyLocation = async () => {
     clearError();
-    const location = await getCurrentLocation();
-    if (location) {
-      setLocation(location);
+    try {
+      const location = await getCurrentLocation();
+      if (location) {
+        setLocation(location);
+      }
+    } catch (err) {
+      console.error('Location error:', err);
+      // Error is already set by the hook
     }
   };
 
@@ -198,6 +203,9 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
                       Try accessing this page via HTTPS or localhost.
                     </p>
                   )}
+                  <p className="mt-2 text-xs opacity-80">
+                    💡 If you have a location spoofing extension, try disabling it or use "Pick on map" instead.
+                  </p>
                 </div>
               </div>
             </motion.div>
