@@ -8,6 +8,7 @@ import { useReverseGeocode } from '@/hooks/useNominatim';
 import { normalizeCategory } from '@/types';
 import type { Listing, DifyAmenity } from '@/types';
 import 'leaflet/dist/leaflet.css';
+import { useI18n } from '@/lib/i18n';
 
 // Fix Leaflet marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -154,6 +155,7 @@ interface ListingPopupProps {
 
 function ListingPopupContent({ listing, onViewDetails }: ListingPopupProps) {
   const displayScore = Math.round(listing.rank * 100);
+  const t = useI18n();
   
   return (
     <div className="w-64 p-3">
@@ -171,7 +173,7 @@ function ListingPopupContent({ listing, onViewDetails }: ListingPopupProps) {
       </p>
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
         <span className="font-medium">{displayScore}/100</span>
-        {listing.rooms > 0 && <span>{listing.rooms} rooms</span>}
+        {listing.rooms > 0 && <span>{listing.rooms} {t('rooms').toLowerCase()}</span>}
         {listing.areaM2 > 0 && <span>{listing.areaM2} m²</span>}
       </div>
       {listing.summary && (
@@ -181,7 +183,7 @@ function ListingPopupContent({ listing, onViewDetails }: ListingPopupProps) {
         onClick={onViewDetails}
         className="block w-full py-2 text-center text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
-        View Details
+        {t('offer_details')}
       </button>
     </div>
   );
@@ -206,6 +208,7 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
   } = useAppStore();
   const { reverseGeocode } = useReverseGeocode();
   const mapRef = useRef<L.Map | null>(null);
+  const t = useI18n();
 
   const centerIcon = useMemo(() => createCenterIcon(), []);
 
@@ -344,14 +347,14 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
         <button
           onClick={handleRecenter}
           className="w-10 h-10 bg-card rounded-lg shadow-nest-md flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-          title="Recenter map"
+          title={t('recenter_map')}
         >
           <Crosshair className="w-5 h-5" />
         </button>
         <button
           onClick={onChangeLocation}
           className="w-10 h-10 bg-card rounded-lg shadow-nest-md flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-          title="Change location"
+          title={t('change_location')}
         >
           <MapPin className="w-5 h-5" />
         </button>
@@ -360,8 +363,8 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
       {/* Location label */}
       <div className="absolute bottom-4 left-4 z-10">
         <div className="bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-nest-md">
-          <p className="text-xs text-muted-foreground">Searching within</p>
-          <p className="text-sm font-medium">{radiusKm} km of {location.city || location.label.split(',')[0]}</p>
+          <p className="text-xs text-muted-foreground">{t('searching_within')}</p>
+          <p className="text-sm font-medium">{radiusKm} {t('km_of')} {location.city || location.label.split(',')[0]}</p>
         </div>
       </div>
     </motion.div>

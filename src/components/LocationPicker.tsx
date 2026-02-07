@@ -7,6 +7,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useAppStore } from '@/store/appStore';
 import { cn } from '@/lib/utils';
 import type { NominatimResult } from '@/types';
+import { useI18n } from '@/lib/i18n';
 
 interface LocationPickerProps {
   onPickOnMap: () => void;
@@ -16,6 +17,7 @@ interface LocationPickerProps {
 export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps) {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const t = useI18n();
   
   const { setLocation, countryCode } = useAppStore();
   const { results, isLoading, error, search, clear, resultToLocation } = useNominatimSearch();
@@ -61,9 +63,9 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
           <div className="flex justify-center mb-4">
             <Logo size="lg" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Find your perfect home</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('location_title')}</h1>
           <p className="text-muted-foreground">
-            Search by city, neighborhood, or address to explore amenities and listings
+            {t('location_subtitle')}
           </p>
         </div>
 
@@ -79,7 +81,7 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
                 setShowResults(true);
               }}
               onFocus={() => setShowResults(true)}
-              placeholder="Search city, neighborhood, address..."
+              placeholder={t('search_placeholder')}
               className="nest-input-lg w-full pl-12 pr-10"
             />
             {query && (
@@ -107,7 +109,7 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
                 {isLoading ? (
                   <div className="p-4 flex items-center justify-center gap-2 text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Searching...</span>
+                    <span>{t('searching')}</span>
                   </div>
                 ) : error ? (
                   <div className="p-4 flex items-center gap-2 text-muted-foreground">
@@ -153,7 +155,7 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
             ) : (
               <Navigation className="w-4 h-4" />
             )}
-            <span>Use my location</span>
+            <span>{t('use_my_location')}</span>
           </button>
 
           <button
@@ -161,7 +163,7 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
             className="nest-btn-secondary w-full flex items-center justify-center gap-2"
           >
             <MapPin className="w-4 h-4" />
-            <span>Pick on map</span>
+            <span>{t('pick_on_map')}</span>
           </button>
 
           <div className="relative">
@@ -169,7 +171,7 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
               <span className="w-full border-t border-border/50" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or</span>
+              <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
             </div>
           </div>
 
@@ -183,7 +185,7 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
             )}
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            <span>Try Demo Mode</span>
+            <span>{t('try_demo_mode')}</span>
           </button>
         </div>
 

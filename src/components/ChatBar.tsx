@@ -5,6 +5,7 @@ import { useVoice } from '@/hooks/useVoice';
 import { useAppStore } from '@/store/appStore';
 import { BUDGET_CHIPS } from '@/types';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
 interface ChatBarProps {
   onSend: (message: string) => void;
@@ -17,6 +18,7 @@ interface ChatBarProps {
 export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = false }: ChatBarProps) {
   const [input, setInput] = useState('');
   const { priceMax, setPriceRange, addMessage } = useAppStore();
+  const t = useI18n();
   
   const { 
     isListening, 
@@ -80,7 +82,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
       {/* Budget chips - shown when no budget is set */}
       {showBudgetChips && (
         <div className="mb-3">
-          <p className="text-xs text-muted-foreground mb-2">Set your budget:</p>
+          <p className="text-xs text-muted-foreground mb-2">{t('set_budget')}</p>
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             {BUDGET_CHIPS.map((chip) => (
               <button
@@ -146,7 +148,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={hasLocation ? "Ask about the area or describe what you're looking for..." : "Select a location first"}
+            placeholder={hasLocation ? t('chat_placeholder') : t('chat_placeholder')}
             disabled={!hasLocation || isLoading}
             className="nest-input w-full pr-12"
           />
@@ -194,7 +196,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
           className="nest-btn-hero flex-shrink-0 flex items-center gap-2"
         >
           <Home className="w-4 h-4" />
-          <span className="hidden lg:inline">Search homes</span>
+          <span className="hidden lg:inline">{t('search_homes')}</span>
         </button>
       </form>
     </motion.div>

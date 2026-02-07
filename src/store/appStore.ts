@@ -51,6 +51,8 @@ interface AppStore {
   setSettingsOpen: (open: boolean) => void;
   activeTab: 'amenities' | 'listings';
   setActiveTab: (tab: 'amenities' | 'listings') => void;
+  language: 'en' | 'fr' | 'de';
+  setLanguage: (lang: 'en' | 'fr' | 'de') => void;
   isPanelOpen: boolean;
   setPanelOpen: (open: boolean) => void;
   togglePanel: () => void;
@@ -143,6 +145,8 @@ export const useAppStore = create<AppStore>()(
       setSettingsOpen: (open) => set({ isSettingsOpen: open }),
       activeTab: 'listings',
       setActiveTab: (activeTab) => set({ activeTab }),
+      language: 'en',
+      setLanguage: (language) => set({ language }),
       isPanelOpen: true,
       setPanelOpen: (isPanelOpen) => set({ isPanelOpen }),
       togglePanel: () => set({ isPanelOpen: !get().isPanelOpen }),
@@ -220,6 +224,7 @@ export const useAppStore = create<AppStore>()(
         listingType: state.listingType,
         sessionId: state.sessionId,
         userId: state.userId,
+        language: state.language,
       }),
     }
   )

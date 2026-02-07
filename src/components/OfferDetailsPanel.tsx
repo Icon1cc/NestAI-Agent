@@ -22,6 +22,7 @@ import type { Listing, DifyAmenity } from '@/types';
 import { getCategoryLabel, calculateDistance, normalizeCategory } from '@/types';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useI18n } from '@/lib/i18n';
 
 interface OfferDetailsPanelProps {
   listing: Listing;
@@ -44,6 +45,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
   const { resolveOfferAmenities } = useDify();
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const t = useI18n();
 
   const isSelected = selectedOfferIds.includes(listing.id);
   const displayScore = Math.round(listing.rank * 100);
@@ -87,7 +89,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h2 className="font-semibold text-foreground flex-1 line-clamp-1">
-          Offer Details
+          {t('offer_details')}
         </h2>
         <button
           onClick={() => toggleOfferSelection(listing.id)}
@@ -98,7 +100,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
               : "bg-muted text-muted-foreground hover:bg-muted/80"
           )}
         >
-          {isSelected ? 'Selected' : 'Select'}
+          {isSelected ? t('selected') : t('select')}
         </button>
       </div>
 
@@ -161,17 +163,17 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
           </div>
 
           {/* Summary */}
-          {listing.summary && (
-            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-              <p className="text-foreground text-sm leading-relaxed">{listing.summary}</p>
-            </div>
-          )}
+            {listing.summary && (
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+                <p className="text-foreground text-sm leading-relaxed">{listing.summary}</p>
+              </div>
+            )}
 
           {/* Pros and Cons */}
           <div className="grid grid-cols-1 gap-4">
             {listing.pros && listing.pros.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-foreground mb-2">Pros</h3>
+                <h3 className="text-sm font-medium text-foreground mb-2">{t('pros')}</h3>
                 <div className="space-y-1.5">
                   {listing.pros.map((pro, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
@@ -184,7 +186,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
             )}
             {listing.cons && listing.cons.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-foreground mb-2">Cons</h3>
+                <h3 className="text-sm font-medium text-foreground mb-2">{t('cons')}</h3>
                 <div className="space-y-1.5">
                   {listing.cons.map((con, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
@@ -205,7 +207,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
               rel="noopener noreferrer"
               className="nest-btn-primary w-full flex items-center justify-center gap-2"
             >
-              <span>Open Listing</span>
+              <span>{t('open_listing')}</span>
               <ExternalLink className="w-4 h-4" />
             </a>
           )}
@@ -214,7 +216,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
           {listing.nice_to_have && Object.keys(listing.nice_to_have).length > 0 && (
             <Collapsible open={isMoreInfoOpen} onOpenChange={setIsMoreInfoOpen}>
               <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                <span className="text-sm font-medium">More Info</span>
+                <span className="text-sm font-medium">{t('more_info')}</span>
                 <ChevronDown className={cn(
                   "w-4 h-4 transition-transform",
                   isMoreInfoOpen && "rotate-180"
@@ -225,43 +227,43 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
                   {listing.nice_to_have.posted_date && (
                     <div className="flex items-center gap-3 text-sm">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Posted:</span>
+                      <span className="text-muted-foreground">{t('posted')}:</span>
                       <span className="text-foreground">{listing.nice_to_have.posted_date}</span>
                     </div>
                   )}
                   {listing.nice_to_have.area_m2 && listing.nice_to_have.area_m2 > 0 && (
                     <div className="flex items-center gap-3 text-sm">
                       <Maximize2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Area:</span>
+                      <span className="text-muted-foreground">{t('area')}:</span>
                       <span className="text-foreground">{listing.nice_to_have.area_m2} m²</span>
                     </div>
                   )}
                   {listing.nice_to_have.rooms && listing.nice_to_have.rooms > 0 && (
                     <div className="flex items-center gap-3 text-sm">
                       <BedDouble className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Rooms:</span>
+                      <span className="text-muted-foreground">{t('rooms')}:</span>
                       <span className="text-foreground">{listing.nice_to_have.rooms}</span>
                     </div>
                   )}
                   {listing.nice_to_have.deposit && listing.nice_to_have.deposit > 0 && (
                     <div className="flex items-center gap-3 text-sm">
                       <Wallet className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Deposit:</span>
+                      <span className="text-muted-foreground">{t('deposit')}:</span>
                       <span className="text-foreground">€{listing.nice_to_have.deposit.toLocaleString()}</span>
                     </div>
                   )}
                   {listing.nice_to_have.furnished !== undefined && (
                     <div className="flex items-center gap-3 text-sm">
                       <Sofa className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Furnished:</span>
-                      <span className="text-foreground">{listing.nice_to_have.furnished ? 'Yes' : 'No'}</span>
+                      <span className="text-muted-foreground">{t('furnished')}:</span>
+                      <span className="text-foreground">{listing.nice_to_have.furnished ? t('yes') : t('no')}</span>
                     </div>
                   )}
                   {listing.nice_to_have.requirements && listing.nice_to_have.requirements.length > 0 && (
                     <div className="flex items-start gap-3 text-sm">
                       <FileText className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <span className="text-muted-foreground">Requirements:</span>
+                        <span className="text-muted-foreground">{t('requirements')}:</span>
                         <ul className="mt-1 space-y-1">
                           {listing.nice_to_have.requirements.map((req, i) => (
                             <li key={i} className="text-foreground">• {req}</li>
@@ -278,13 +280,13 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
           {/* Associated Amenities */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-foreground">Nearby Amenities</h3>
+              <h3 className="text-sm font-medium text-foreground">{t('nearby_amenities')}</h3>
               {offerAmenities.length > 0 && (
                 <button 
                   onClick={handleViewAmenities}
                   className="text-xs text-primary hover:underline"
                 >
-                  View on map
+                  {t('view_on_map')}
                 </button>
               )}
             </div>
@@ -293,7 +295,7 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
               <div className="p-4 rounded-lg bg-muted/50 text-center">
                 <Navigation className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  Amenities not available for this offer.
+                  {t('amenities_not_available')}
                 </p>
               </div>
             ) : (

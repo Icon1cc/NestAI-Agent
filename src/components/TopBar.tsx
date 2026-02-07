@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 import type { RadiusKm } from '@/types';
 
 // Only radius options: 1, 3, 7, 10 km
@@ -44,6 +45,7 @@ export function TopBar() {
     setCompareModalOpen,
     setSettingsOpen,
   } = useAppStore();
+  const t = useI18n();
 
   const canCompare = selectedOfferIds.length === 2;
 
@@ -124,10 +126,10 @@ export function TopBar() {
             onValueChange={handleCityChange}
           >
             <SelectTrigger className="h-9 w-[130px] text-sm bg-muted/50 border-border/50">
-              <SelectValue placeholder="Select city" />
+              <SelectValue placeholder={t('all_cities')} />
             </SelectTrigger>
             <SelectContent className="z-[200] bg-popover">
-              <SelectItem value="all">All Cities</SelectItem>
+              <SelectItem value="all">{t('all_cities')}</SelectItem>
               {FRENCH_CITIES.map(c => (
                 <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
               ))}
@@ -160,7 +162,7 @@ export function TopBar() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              Rent
+              {t('rent')}
             </button>
             <button
               onClick={() => setListingType('buy')}
@@ -171,7 +173,7 @@ export function TopBar() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              Buy
+              {t('buy')}
             </button>
           </div>
 

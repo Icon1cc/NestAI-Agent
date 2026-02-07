@@ -10,15 +10,16 @@ import { useAppStore } from '@/store/appStore';
 import { useAmenities } from '@/hooks/useAmenities';
 import { useDify } from '@/hooks/useDify';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
 // Quick action chips for refining search
 const QUICK_CHIPS = [
-  { label: 'Quieter', prompt: 'I want a quieter area' },
-  { label: 'More parks', prompt: 'I want more parks nearby' },
-  { label: 'Closer transit', prompt: 'I want closer to public transit' },
-  { label: 'Cheaper', prompt: 'I want something cheaper' },
-  { label: 'Better schools', prompt: 'I need better schools nearby' },
-  { label: 'More fitness', prompt: 'I want more fitness options' },
+  { labelKey: 'quick_chip_quieter', prompt: 'I want a quieter area' },
+  { labelKey: 'quick_chip_parks', prompt: 'I want more parks nearby' },
+  { labelKey: 'quick_chip_transit', prompt: 'I want closer to public transit' },
+  { labelKey: 'quick_chip_cheaper', prompt: 'I want something cheaper' },
+  { labelKey: 'quick_chip_schools', prompt: 'I need better schools nearby' },
+  { labelKey: 'quick_chip_fitness', prompt: 'I want more fitness options' },
 ];
 
 interface MainLayoutProps {
@@ -26,7 +27,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ onChangeLocation }: MainLayoutProps) {
-  const { 
+  const {
     location, 
     radiusKm, 
     listingType,
@@ -42,6 +43,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     setPanelOpen,
     togglePanel,
   } = useAppStore();
+  const t = useI18n();
 
   const { 
     data: amenitiesData, 
@@ -172,12 +174,12 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
               {isPanelOpen ? (
                 <>
                   <PanelRightClose className="w-4 h-4" />
-                  Hide panel
+                  {t('hide_panel')}
                 </>
               ) : (
                 <>
                   <PanelRightOpen className="w-4 h-4" />
-                  Show panel
+                  {t('show_panel')}
                 </>
               )}
             </button>
@@ -223,29 +225,29 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                       onClick={() => setActiveTab('listings')}
                       className={cn(
                         "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-                        activeTab === 'listings'
-                          ? "border-primary text-primary"
-                          : "border-transparent text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      Offers
-                      {listings.length > 0 && (
-                        <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
-                          {listings.length}
-                        </span>
-                      )}
+                    activeTab === 'listings'
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {t('offers_tab')}
+                  {listings.length > 0 && (
+                    <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                      {listings.length}
+                    </span>
+                  )}
                     </button>
                     <button
                       onClick={() => setActiveTab('amenities')}
                       className={cn(
                         "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-                        activeTab === 'amenities'
-                          ? "border-primary text-primary"
-                          : "border-transparent text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      Amenities
-                    </button>
+                      activeTab === 'amenities'
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {t('amenities_tab')}
+                  </button>
                   </div>
 
                   {/* Quick chips - only show when on listings tab */}
@@ -253,7 +255,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                     <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none border-b border-border/50 bg-card/60 backdrop-blur">
                       {QUICK_CHIPS.map((chip) => (
                         <button
-                          key={chip.label}
+                          key={chip.labelKey}
                           onClick={() => handleQuickChip(chip.prompt)}
                           disabled={isChatLoading || isDifyLoading}
                           className={cn(
@@ -263,7 +265,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                             "disabled:opacity-50 disabled:pointer-events-none"
                           )}
                         >
-                          {chip.label}
+                          {t(chip.labelKey as any)}
                         </button>
                       ))}
                     </div>

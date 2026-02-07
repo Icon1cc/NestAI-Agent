@@ -3,6 +3,7 @@ import { Home, Bed, Maximize2, MapPin, ExternalLink, Check, Loader2, Sparkles } 
 import { useAppStore } from '@/store/appStore';
 import type { Listing } from '@/types';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
 interface ListingCardProps {
   listing: Listing;
@@ -195,12 +196,15 @@ export function ListingsPanel({
   onViewDetails,
 }: ListingsPanelProps) {
   const { selectedOfferIds, toggleOfferSelection, listingType } = useAppStore();
+  const t = useI18n();
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Loader2 className="w-8 h-8 animate-spin mb-3" />
-        <p>Finding {listingType === 'rent' ? 'rentals' : 'properties'}...</p>
+        <p>
+          {listingType === 'rent' ? t('loading_listings') : t('loading_properties')}
+        </p>
       </div>
     );
   }
@@ -225,16 +229,16 @@ export function ListingsPanel({
           <>
             <Home className="w-12 h-12 text-muted-foreground/50 mb-4" />
             <p className="text-muted-foreground mb-2">
-              No offers yet
+              {t('no_offers_title')}
             </p>
             <p className="text-sm text-muted-foreground mb-4">
-              Ask NestAI to search for {listingType === 'rent' ? 'rentals' : 'properties'}
+              {t('no_offers_subtitle')}
             </p>
           </>
         )}
         <button onClick={onSearch} className="nest-btn-hero flex items-center gap-2">
           <Sparkles className="w-4 h-4" />
-          Search with NestAI
+          {t('search_with_nestai')}
         </button>
       </div>
     );
@@ -258,13 +262,13 @@ export function ListingsPanel({
 
       <div className="flex items-center justify-between px-1">
         <h2 className="nest-section-title">
-          {listings.length} {listingType === 'rent' ? 'Rentals' : 'Properties'}
+          {listings.length} {listingType === 'rent' ? t('rent') : t('buy')}
           {isDemoMode && <span className="ml-2 text-accent">(Demo)</span>}
         </h2>
         {selectedOfferIds.length > 0 && (
           <p className="text-sm text-muted-foreground">
-            {selectedOfferIds.length}/2 selected
-            <span className="ml-2 text-xs">(Ctrl+click to multi-select)</span>
+            {selectedOfferIds.length}/2 {t('selected')}
+            <span className="ml-2 text-xs">(Ctrl+click)</span>
           </p>
         )}
       </div>

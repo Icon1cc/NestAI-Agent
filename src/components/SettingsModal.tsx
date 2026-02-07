@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { X, Moon, Sun, Globe, Ruler } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import {
@@ -11,6 +12,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import type { RadiusKm } from '@/types';
+import { useI18n } from '@/lib/i18n';
 
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
@@ -43,7 +45,22 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setCountryCode,
     listingType,
     setListingType,
+    language,
+    setLanguage,
   } = useAppStore();
+  const t = useI18n();
+  const [pendingLanguage, setPendingLanguage] = useState(language);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPendingLanguage(language);
+    }
+  }, [isOpen, language]);
+
+  const handleApplyAndClose = () => {
+    setLanguage(pendingLanguage);
+    onClose();
+  };
 
   return (
     <AnimatePresence>
@@ -70,7 +87,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="w-full max-w-md nest-card-elevated pointer-events-auto">
               {/* Header */}
               <div className="p-6 border-b border-border/50 flex items-center justify-between">
-                <h2 className="text-xl font-bold">Settings</h2>
+                <h2 className="text-xl font-bold">{t('settings_title')}</h2>
                 <button onClick={onClose} className="nest-icon-btn">
                   <X className="w-5 h-5" />
                 </button>
@@ -83,7 +100,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   <div className="flex items-center gap-3">
                     {isDarkMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
                     <Label htmlFor="theme-toggle" className="text-sm font-medium">
-                      Dark Mode
+                      {t('dark_mode')}
                     </Label>
                   </div>
                   <Switch
@@ -93,21 +110,42 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   />
                 </div>
 
+                {/* Language selector */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-primary" />
+                    <Label className="text-sm font-medium">{t('language_label')}</Label>
+                  </div>
+                  <Select
+                    value={pendingLanguage}
+                    onValueChange={(v) => setPendingLanguage(v as 'en' | 'fr' | 'de')}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="z-[200] bg-popover">
+                      <SelectItem value="en">English (EN)</SelectItem>
+                      <SelectItem value="fr">Français (FR)</SelectItem>
+                      <SelectItem value="de">Deutsch (DE)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* City selector */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <Globe className="w-5 h-5 text-primary" />
-                    <Label className="text-sm font-medium">Default City</Label>
+                    <Label className="text-sm font-medium">{t('default_city')}</Label>
                   </div>
                   <Select
                     value={countryCode || 'all'}
                     onValueChange={(v) => setCountryCode(v === 'all' ? null : v)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Cities" />
+                      <SelectValue placeholder={t('all_cities')} />
                     </SelectTrigger>
                     <SelectContent className="z-[200] bg-popover">
-                      <SelectItem value="all">All Cities</SelectItem>
+                      <SelectItem value="all">{t('all_cities')}</SelectItem>
                       {FRENCH_CITIES.map(c => (
                         <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
                       ))}
@@ -119,7 +157,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <Ruler className="w-5 h-5 text-primary" />
-                    <Label className="text-sm font-medium">Default Search Radius</Label>
+                    <Label className="text-sm font-medium">{t('default_radius')}</Label>
                   </div>
                   <Select
                     value={radiusKm.toString()}
@@ -138,7 +176,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                 {/* Listing type preference */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Default Listing Type</Label>
+                  <Label className="text-sm font-medium">{t('default_listing_type')}</Label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setListingType('rent')}
@@ -148,7 +186,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           : 'bg-muted text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      Rent
+                      {t('rent')}
                     </button>
                     <button
                       onClick={() => setListingType('buy')}
@@ -158,7 +196,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           : 'bg-muted text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      Buy
+                      {t('buy')}
                     </button>
                   </div>
                 </div>
@@ -166,8 +204,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
               {/* Footer */}
               <div className="p-6 border-t border-border/50">
-                <button onClick={onClose} className="nest-btn-primary w-full">
-                  Done
+                <button onClick={handleApplyAndClose} className="nest-btn-primary w-full">
+                  {t('done')}
                 </button>
               </div>
             </div>

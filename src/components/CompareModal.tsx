@@ -6,6 +6,7 @@ import { useDify } from '@/hooks/useDify';
 import type { Listing, DifyCompareResponse } from '@/types';
 import { getCategoryLabel, normalizeCategory } from '@/types';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
 interface CompareModalProps {
   isOpen: boolean;
@@ -72,6 +73,7 @@ function extractDecisionHints(text1: string, text2: string): string[] {
 export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
   const { selectedOfferIds, clearSelection } = useAppStore();
   const { compareOffers, isLoading, resolveOfferAmenities } = useDify();
+  const t = useI18n();
   
   const [compareResult, setCompareResult] = useState<DifyCompareResponse | null>(null);
 
@@ -154,16 +156,16 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto nest-card-elevated pointer-events-auto">
               {!offer1 || !offer2 ? (
                 <div className="p-12 text-center">
-                  <p className="text-muted-foreground">Select exactly 2 listings to compare</p>
+                  <p className="text-muted-foreground">{t('select_two_listings')}</p>
                   <button onClick={handleClose} className="nest-btn-primary mt-4">
-                    Close
+                    {t('close')}
                   </button>
                 </div>
               ) : (
                 <>
                   {/* Header */}
                   <div className="sticky top-0 bg-card z-10 p-6 border-b border-border/50 flex items-center justify-between">
-                    <h2 className="text-xl font-bold">Compare Listings</h2>
+                    <h2 className="text-xl font-bold">{t('compare_listings')}</h2>
                     <button onClick={handleClose} className="nest-icon-btn">
                       <X className="w-5 h-5" />
                     </button>
@@ -176,7 +178,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                       <div className="mb-6 p-4 rounded-xl bg-accent/10 border border-accent/20">
                         <div className="flex items-center gap-2 mb-2">
                           <Sparkles className="w-4 h-4 text-accent" />
-                          <span className="text-sm font-medium">Quick Decision Guide</span>
+                          <span className="text-sm font-medium">{t('quick_decision_guide')}</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {decisionHints.map((hint, i) => (
@@ -222,7 +224,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                         {/* Amenities for offer 1 */}
                         {amenities1.length > 0 && (
                           <div className="mt-3 p-3 bg-muted/30 rounded-lg">
-                            <p className="text-xs font-medium text-muted-foreground mb-2">Nearby ({amenities1.length})</p>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">{t('nearby')} ({amenities1.length})</p>
                             <div className="flex flex-wrap gap-1">
                               {amenities1.slice(0, 5).map((a) => (
                                 <span key={a.amenity_id} className="text-xs px-2 py-0.5 rounded bg-muted">
@@ -266,7 +268,7 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
                         {/* Amenities for offer 2 */}
                         {amenities2.length > 0 && (
                           <div className="mt-3 p-3 bg-muted/30 rounded-lg">
-                            <p className="text-xs font-medium text-muted-foreground mb-2">Nearby ({amenities2.length})</p>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">{t('nearby')} ({amenities2.length})</p>
                             <div className="flex flex-wrap gap-1">
                               {amenities2.slice(0, 5).map((a) => (
                                 <span key={a.amenity_id} className="text-xs px-2 py-0.5 rounded bg-muted">

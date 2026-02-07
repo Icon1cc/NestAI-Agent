@@ -3,6 +3,7 @@ import { ShoppingCart, Trees, Train, ChevronDown, ChevronUp, Loader2, Graduation
 import { useState } from 'react';
 import type { AmenitiesData, Amenity, AmenityCategory } from '@/types';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
 interface AmenityCardProps {
   category: AmenityCategory;
@@ -96,11 +97,13 @@ interface AmenitiesPanelProps {
 }
 
 export function AmenitiesPanel({ data, isLoading, error }: AmenitiesPanelProps) {
+  const t = useI18n();
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Loader2 className="w-8 h-8 animate-spin mb-3" />
-        <p>Loading amenities...</p>
+        <p>{t('loading_amenities')}</p>
       </div>
     );
   }
@@ -116,7 +119,7 @@ export function AmenitiesPanel({ data, isLoading, error }: AmenitiesPanelProps) 
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <p className="text-sm">Search for listings to see nearby amenities</p>
+        <p className="text-sm">{t('no_amenities')}</p>
       </div>
     );
   }
@@ -130,42 +133,42 @@ export function AmenitiesPanel({ data, isLoading, error }: AmenitiesPanelProps) 
           category="groceries"
           items={data.groceries}
           icon={<ShoppingCart className="w-5 h-5 text-white" />}
-          label="Groceries"
+          label={t('amenity_groceries')}
           color="bg-emerald-500"
         />
         <AmenityCard
           category="parks"
           items={data.parks}
           icon={<Trees className="w-5 h-5 text-white" />}
-          label="Parks & Gardens"
+          label={t('amenity_parks')}
           color="bg-green-600"
         />
         <AmenityCard
           category="schools"
           items={data.schools}
           icon={<GraduationCap className="w-5 h-5 text-white" />}
-          label="Schools & Education"
+          label={t('amenity_schools')}
           color="bg-purple-500"
         />
         <AmenityCard
           category="transit"
           items={data.transit}
           icon={<Train className="w-5 h-5 text-white" />}
-          label="Public Transit"
+          label={t('amenity_transit')}
           color="bg-blue-500"
         />
         <AmenityCard
           category="healthcare"
           items={data.healthcare}
           icon={<Stethoscope className="w-5 h-5 text-white" />}
-          label="Healthcare"
+          label={t('amenity_healthcare')}
           color="bg-red-500"
         />
         <AmenityCard
           category="fitness"
           items={data.fitness}
           icon={<Dumbbell className="w-5 h-5 text-white" />}
-          label="Fitness & Sports"
+          label={t('amenity_fitness')}
           color="bg-orange-500"
         />
       </div>
