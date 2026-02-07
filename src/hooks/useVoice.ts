@@ -139,10 +139,16 @@ export function useVoice() {
   }, []);
 
   const startListening = useCallback(() => {
-    // Initialize recognition if not already done
-    if (!recognitionRef.current) {
-      recognitionRef.current = initRecognition();
+    // Always create a fresh recognition instance to avoid "already started" errors
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {
+        // Ignore abort errors
+      }
     }
+    
+    recognitionRef.current = initRecognition();
 
     if (!recognitionRef.current) {
       setState(prev => ({ 
@@ -152,16 +158,23 @@ export function useVoice() {
       return;
     }
 
+    // Clear previous state and set listening
     setState(prev => ({ ...prev, isListening: true, transcript: '', error: null }));
     isListeningRef.current = true;
 
-    try {
-      recognitionRef.current.start();
-    } catch (err) {
-      console.error('Failed to start speech recognition:', err);
-      setState(prev => ({ ...prev, isListening: false }));
-      isListeningRef.current = false;
-    }
+    // Small delay to ensure previous instance is fully stopped
+    setTimeout(() => {
+      try {
+        if (recognitionRef.current && isListeningRef.current) {
+          recognitionRef.current.start();
+          console.log('Speech recognition started successfully');
+        }
+      } catch (err) {
+        console.error('Failed to start speech recognition:', err);
+        setState(prev => ({ ...prev, isListening: false, error: 'Failed to start microphone. Please try again.' }));
+        isListeningRef.current = false;
+      }
+    }, 100);
   }, [initRecognition]);
 
   const stopListening = useCallback(() => {
