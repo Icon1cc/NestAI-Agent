@@ -39,58 +39,79 @@ export function useGeolocation() {
       return null;
     }
 
-    return new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // Reverse geocode to get label
-          const location = await reverseGeocode(latitude, longitude);
-          
-          if (location) {
-            setIsLoading(false);
-            resolve(location);
-          } else {
-            // Fallback: return coordinates without label
-            setIsLoading(false);
-            resolve({
-              label: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-              lat: latitude,
-              lng: longitude,
+    try {
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            
+            // Reverse geocode to get label
+            try {
+              const location = await reverseGeocode(latitude, longitude);
+              
+              if (location) {
+                setIsLoading(false);
+                resolve(location);
+              } else {
+                // Fallback: return coordinates without label
+                setIsLoading(false);
+                resolve({
+                  label: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+                  lat: latitude,
+                  lng: longitude,
+                });
+              }
+            } catch (geoError) {
+              console.error('Reverse geocode error:', geoError);
+              setIsLoading(false);
+              resolve({
+                label: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+                lat: latitude,
+                lng: longitude,
+              });
+            }
+          },
+          (err) => {
+            console.error('Geolocation error:', err);
+            let message = 'Unable to get your location';
+
+            switch (err.code) {
+              case 1: // PERMISSION_DENIED
+                message = 'Location access was denied. Please enable location permissions in your browser settings, or use "Pick on map" instead.';
+                break;
+              case 2: // POSITION_UNAVAILABLE
+                message = 'Your location is currently unavailable. Please use "Pick on map" instead.';
+                break;
+              case 3: // TIMEOUT
+                message = 'Location request timed out. Please try again or use "Pick on map".';
+                break;
+            }
+
+            setError({
+              code: err.code,
+              message,
+              isSecurityError: false,
             });
+            setIsLoading(false);
+            resolve(null);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000,
           }
-        },
-        (err) => {
-          let message = 'Unable to get your location';
-          let isSecurityError = false;
-
-          switch (err.code) {
-            case 1: // PERMISSION_DENIED
-              message = 'Location access was denied. Please enable location permissions in your browser settings.';
-              break;
-            case 2: // POSITION_UNAVAILABLE
-              message = 'Your location is currently unavailable. Please try again.';
-              break;
-            case 3: // TIMEOUT
-              message = 'Location request timed out. Please try again.';
-              break;
-          }
-
-          setError({
-            code: err.code,
-            message,
-            isSecurityError,
-          });
-          setIsLoading(false);
-          resolve(null);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000,
-        }
-      );
-    });
+        );
+      });
+    } catch (e) {
+      console.error('Unexpected geolocation error:', e);
+      setError({
+        code: 0,
+        message: 'An unexpected error occurred. Please use "Pick on map" instead.',
+        isSecurityError: false,
+      });
+      setIsLoading(false);
+      return null;
+    }
   }, [reverseGeocode]);
 
   return {
