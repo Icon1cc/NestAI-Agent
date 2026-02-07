@@ -10,14 +10,14 @@ import { SettingsModal } from '@/components/SettingsModal';
 import { useAppStore } from '@/store/appStore';
 import { useAmenities } from '@/hooks/useAmenities';
 
-// Berlin demo location as per spec
-const BERLIN_DEMO_LOCATION = {
-  label: 'Berlin, Germany',
-  lat: 52.52,
-  lng: 13.405,
-  countryCode: 'DE',
-  city: 'Berlin',
-  country: 'Germany',
+// Paris demo location as per spec (default is Paris)
+const PARIS_DEMO_LOCATION = {
+  label: 'Paris, France',
+  lat: 48.8566,
+  lng: 2.3522,
+  countryCode: 'FR',
+  city: 'Paris',
+  country: 'France',
 };
 
 export default function Index() {
@@ -57,9 +57,9 @@ export default function Index() {
   }, [setMapPickerOpen]);
 
   const handleDemoMode = useCallback(async () => {
-    // Set demo mode with Berlin location
+    // Set demo mode with Paris location
     setDemoMode(true);
-    setLocation(BERLIN_DEMO_LOCATION);
+    setLocation(PARIS_DEMO_LOCATION);
     setRadiusKm(3);
     setPriceRange(0, 1200);
     
@@ -70,7 +70,7 @@ export default function Index() {
     });
     
     // Fetch amenities - listings will be fetched by MainLayout's useEffect when demo mode triggers
-    await fetchAmenities(BERLIN_DEMO_LOCATION, 3);
+    await fetchAmenities(PARIS_DEMO_LOCATION, 3);
     
     setActiveTab('listings');
   }, [setDemoMode, setLocation, setRadiusKm, setPriceRange, addMessage, fetchAmenities, setActiveTab]);
