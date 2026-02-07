@@ -14,21 +14,22 @@ import type { RadiusKm, ListingType } from '@/types';
 
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
-// Countries with their capital city coordinates
-const COUNTRIES = [
-  { code: 'DE', name: 'Germany', capital: 'Berlin', lat: 52.5200, lng: 13.4050 },
-  { code: 'FR', name: 'France', capital: 'Paris', lat: 48.8566, lng: 2.3522 },
-  { code: 'NL', name: 'Netherlands', capital: 'Amsterdam', lat: 52.3676, lng: 4.9041 },
-  { code: 'ES', name: 'Spain', capital: 'Madrid', lat: 40.4168, lng: -3.7038 },
-  { code: 'IT', name: 'Italy', capital: 'Rome', lat: 41.9028, lng: 12.4964 },
-  { code: 'PT', name: 'Portugal', capital: 'Lisbon', lat: 38.7223, lng: -9.1393 },
-  { code: 'AT', name: 'Austria', capital: 'Vienna', lat: 48.2082, lng: 16.3738 },
-  { code: 'CH', name: 'Switzerland', capital: 'Bern', lat: 46.9480, lng: 7.4474 },
-  { code: 'BE', name: 'Belgium', capital: 'Brussels', lat: 50.8503, lng: 4.3517 },
-  { code: 'PL', name: 'Poland', capital: 'Warsaw', lat: 52.2297, lng: 21.0122 },
-  { code: 'GB', name: 'United Kingdom', capital: 'London', lat: 51.5074, lng: -0.1278 },
-  { code: 'US', name: 'United States', capital: 'Washington D.C.', lat: 38.9072, lng: -77.0369 },
+// Major French cities ordered alphabetically
+const FRENCH_CITIES = [
+  { code: 'bordeaux', name: 'Bordeaux', lat: 44.8378, lng: -0.5792 },
+  { code: 'lille', name: 'Lille', lat: 50.6292, lng: 3.0573 },
+  { code: 'lyon', name: 'Lyon', lat: 45.7640, lng: 4.8357 },
+  { code: 'marseille', name: 'Marseille', lat: 43.2965, lng: 5.3698 },
+  { code: 'montpellier', name: 'Montpellier', lat: 43.6108, lng: 3.8767 },
+  { code: 'nantes', name: 'Nantes', lat: 47.2184, lng: -1.5536 },
+  { code: 'nice', name: 'Nice', lat: 43.7102, lng: 7.2620 },
+  { code: 'paris', name: 'Paris', lat: 48.8566, lng: 2.3522 },
+  { code: 'strasbourg', name: 'Strasbourg', lat: 48.5734, lng: 7.7521 },
+  { code: 'toulouse', name: 'Toulouse', lat: 43.6047, lng: 1.4442 },
 ];
+
+// France center for "All Cities" view
+const FRANCE_CENTER = { lat: 46.6034, lng: 2.3488 };
 
 export function TopBar() {
   const {
@@ -48,21 +49,29 @@ export function TopBar() {
     setSettingsOpen,
   } = useAppStore();
 
-  const handleCountryChange = (code: string) => {
+  const handleCityChange = (code: string) => {
     if (code === 'all') {
       setCountryCode(null);
+      // Focus on entire France
+      setLocation({
+        label: 'France',
+        lat: FRANCE_CENTER.lat,
+        lng: FRANCE_CENTER.lng,
+        countryCode: 'FR',
+        country: 'France',
+      });
     } else {
       setCountryCode(code);
-      // Auto-focus map to capital city
-      const country = COUNTRIES.find(c => c.code === code);
-      if (country) {
+      // Focus on selected city
+      const city = FRENCH_CITIES.find(c => c.code === code);
+      if (city) {
         setLocation({
-          label: `${country.capital}, ${country.name}`,
-          lat: country.lat,
-          lng: country.lng,
-          countryCode: country.code,
-          city: country.capital,
-          country: country.name,
+          label: `${city.name}, France`,
+          lat: city.lat,
+          lng: city.lng,
+          countryCode: 'FR',
+          city: city.name,
+          country: 'France',
         });
       }
     }
@@ -106,18 +115,18 @@ export function TopBar() {
 
         {/* Right: Controls */}
         <div className="flex items-center gap-2">
-          {/* Country selector */}
+          {/* City selector */}
           <div className="hidden sm:block">
             <Select
               value={countryCode || 'all'}
-              onValueChange={handleCountryChange}
+              onValueChange={handleCityChange}
             >
-              <SelectTrigger className="h-9 w-[130px] bg-muted/50 border-border/50 text-sm">
-                <SelectValue placeholder="Country" />
+              <SelectTrigger className="h-9 w-[140px] bg-muted/50 border-border/50 text-sm">
+                <SelectValue placeholder="City" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {COUNTRIES.map(c => (
+                <SelectItem value="all">All Cities</SelectItem>
+                {FRENCH_CITIES.map(c => (
                   <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
