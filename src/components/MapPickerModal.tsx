@@ -71,8 +71,8 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
   const [locationLabel, setLocationLabel] = useState<string>('');
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
 
-  // Default center (Berlin)
-  const defaultCenter: [number, number] = [52.52, 13.405];
+  // Default center (Paris)
+  const defaultCenter: [number, number] = [48.8566, 2.3522];
 
   const handleLocationSelect = useCallback(async (lat: number, lng: number) => {
     setSelectedPosition([lat, lng]);
