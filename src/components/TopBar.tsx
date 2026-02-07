@@ -15,23 +15,24 @@ import type { RadiusKm, ListingType } from '@/types';
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
 const COUNTRIES = [
-  { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'AT', name: 'Austria' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'US', name: 'United States' },
+  { code: 'DE', name: 'Germany', lat: 51.1657, lng: 10.4515 },
+  { code: 'FR', name: 'France', lat: 46.2276, lng: 2.2137 },
+  { code: 'NL', name: 'Netherlands', lat: 52.1326, lng: 5.2913 },
+  { code: 'ES', name: 'Spain', lat: 40.4637, lng: -3.7492 },
+  { code: 'IT', name: 'Italy', lat: 41.8719, lng: 12.5674 },
+  { code: 'PT', name: 'Portugal', lat: 39.3999, lng: -8.2245 },
+  { code: 'AT', name: 'Austria', lat: 47.5162, lng: 14.5501 },
+  { code: 'CH', name: 'Switzerland', lat: 46.8182, lng: 8.2275 },
+  { code: 'BE', name: 'Belgium', lat: 50.5039, lng: 4.4699 },
+  { code: 'PL', name: 'Poland', lat: 51.9194, lng: 19.1451 },
+  { code: 'GB', name: 'United Kingdom', lat: 55.3781, lng: -3.4360 },
+  { code: 'US', name: 'United States', lat: 37.0902, lng: -95.7129 },
 ];
 
 export function TopBar() {
   const {
     location,
+    setLocation,
     radiusKm,
     setRadiusKm,
     listingType,
@@ -45,6 +46,25 @@ export function TopBar() {
     setCompareModalOpen,
     setSettingsOpen,
   } = useAppStore();
+
+  const handleCountryChange = (code: string) => {
+    if (code === 'all') {
+      setCountryCode(null);
+    } else {
+      setCountryCode(code);
+      // Auto-focus map to country center
+      const country = COUNTRIES.find(c => c.code === code);
+      if (country) {
+        setLocation({
+          label: country.name,
+          lat: country.lat,
+          lng: country.lng,
+          countryCode: country.code,
+          country: country.name,
+        });
+      }
+    }
+  };
 
   const hasLocation = !!location;
   const canCompare = selectedOfferIds.length === 2;
@@ -88,7 +108,7 @@ export function TopBar() {
           <div className="hidden sm:block">
             <Select
               value={countryCode || 'all'}
-              onValueChange={(v) => setCountryCode(v === 'all' ? null : v)}
+              onValueChange={handleCountryChange}
             >
               <SelectTrigger className="h-9 w-[130px] bg-muted/50 border-border/50 text-sm">
                 <SelectValue placeholder="Country" />
