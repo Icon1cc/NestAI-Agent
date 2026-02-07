@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { openDB, type IDBPDatabase } from 'idb';
-import type { AmenitiesData, Amenity, Location, RadiusKm } from '@/types';
+import type { AmenitiesData, Amenity, Location, RadiusKm, AmenityCategory } from '@/types';
 
 const DB_NAME = 'nestai-cache';
 const STORE_NAME = 'amenities';
@@ -18,7 +18,7 @@ interface CacheEntry {
 }
 
 async function getDB(): Promise<IDBPDatabase> {
-  return openDB(DB_NAME, 1, {
+  return openDB(DB_NAME, 2, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'key' });
@@ -28,7 +28,7 @@ async function getDB(): Promise<IDBPDatabase> {
 }
 
 function getCacheKey(lat: number, lng: number, radiusKm: RadiusKm): string {
-  return `${lat.toFixed(4)}:${lng.toFixed(4)}:${radiusKm}:amenities`;
+  return `${lat.toFixed(4)}:${lng.toFixed(4)}:${radiusKm}:amenities:v2`;
 }
 
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -45,6 +45,7 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
+// Build combined Overpass query for all 6 categories
 function buildOverpassQuery(lat: number, lng: number, radiusM: number): string {
   return `
 [out:json][timeout:12];
@@ -54,15 +55,17 @@ function buildOverpassQuery(lat: number, lng: number, radiusM: number): string {
   node["shop"="grocery"](around:${radiusM},${lat},${lng});
   node["shop"="convenience"](around:${radiusM},${lat},${lng});
   
-  // Gyms
-  node["leisure"="fitness_centre"](around:${radiusM},${lat},${lng});
-  node["leisure"="sports_centre"](around:${radiusM},${lat},${lng});
-  node["sport"="fitness"](around:${radiusM},${lat},${lng});
-  
   // Parks
   node["leisure"="park"](around:${radiusM},${lat},${lng});
   way["leisure"="park"](around:${radiusM},${lat},${lng});
   node["leisure"="garden"](around:${radiusM},${lat},${lng});
+  
+  // Schools
+  node["amenity"="school"](around:${radiusM},${lat},${lng});
+  way["amenity"="school"](around:${radiusM},${lat},${lng});
+  node["amenity"="university"](around:${radiusM},${lat},${lng});
+  node["amenity"="college"](around:${radiusM},${lat},${lng});
+  node["amenity"="kindergarten"](around:${radiusM},${lat},${lng});
   
   // Transit
   node["public_transport"="stop_position"](around:${radiusM},${lat},${lng});
@@ -71,6 +74,19 @@ function buildOverpassQuery(lat: number, lng: number, radiusM: number): string {
   node["railway"="station"](around:${radiusM},${lat},${lng});
   node["railway"="tram_stop"](around:${radiusM},${lat},${lng});
   node["station"="subway"](around:${radiusM},${lat},${lng});
+  
+  // Healthcare
+  node["amenity"="hospital"](around:${radiusM},${lat},${lng});
+  node["amenity"="clinic"](around:${radiusM},${lat},${lng});
+  node["amenity"="doctors"](around:${radiusM},${lat},${lng});
+  node["amenity"="pharmacy"](around:${radiusM},${lat},${lng});
+  node["amenity"="dentist"](around:${radiusM},${lat},${lng});
+  
+  // Fitness
+  node["leisure"="fitness_centre"](around:${radiusM},${lat},${lng});
+  node["leisure"="sports_centre"](around:${radiusM},${lat},${lng});
+  node["sport"="fitness"](around:${radiusM},${lat},${lng});
+  node["leisure"="swimming_pool"](around:${radiusM},${lat},${lng});
 );
 out center tags;
 `.trim();
@@ -86,15 +102,20 @@ function categorizeElement(element: any, centerLat: number, centerLng: number): 
   const name = tags.name || tags['name:en'] || 'Unknown';
   const distance = calculateDistance(centerLat, centerLng, lat, lng);
 
-  let category: Amenity['category'] | null = null;
+  let category: AmenityCategory | null = null;
 
   // Categorize based on tags
   if (tags.shop === 'supermarket' || tags.shop === 'grocery' || tags.shop === 'convenience') {
     category = 'groceries';
-  } else if (tags.leisure === 'fitness_centre' || tags.leisure === 'sports_centre' || tags.sport === 'fitness') {
-    category = 'gyms';
   } else if (tags.leisure === 'park' || tags.leisure === 'garden') {
     category = 'parks';
+  } else if (
+    tags.amenity === 'school' || 
+    tags.amenity === 'university' || 
+    tags.amenity === 'college' ||
+    tags.amenity === 'kindergarten'
+  ) {
+    category = 'schools';
   } else if (
     tags.public_transport ||
     tags.highway === 'bus_stop' ||
@@ -103,6 +124,21 @@ function categorizeElement(element: any, centerLat: number, centerLng: number): 
     tags.station === 'subway'
   ) {
     category = 'transit';
+  } else if (
+    tags.amenity === 'hospital' ||
+    tags.amenity === 'clinic' ||
+    tags.amenity === 'doctors' ||
+    tags.amenity === 'pharmacy' ||
+    tags.amenity === 'dentist'
+  ) {
+    category = 'healthcare';
+  } else if (
+    tags.leisure === 'fitness_centre' || 
+    tags.leisure === 'sports_centre' || 
+    tags.sport === 'fitness' ||
+    tags.leisure === 'swimming_pool'
+  ) {
+    category = 'fitness';
   }
 
   if (!category) return null;
@@ -115,6 +151,8 @@ function categorizeElement(element: any, centerLat: number, centerLng: number): 
     lng,
     distance,
     tags,
+    amenity_id: element.id,
+    description: tags.description || name,
   };
 }
 
@@ -175,9 +213,11 @@ export function useAmenities() {
 
         const amenities: AmenitiesData = {
           groceries: [],
-          gyms: [],
           parks: [],
+          schools: [],
           transit: [],
+          healthcare: [],
+          fitness: [],
         };
 
         for (const element of elements) {

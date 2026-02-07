@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Dumbbell, Trees, Train, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { ShoppingCart, Trees, Train, ChevronDown, ChevronUp, Loader2, GraduationCap, Stethoscope, Dumbbell } from 'lucide-react';
 import { useState } from 'react';
 import type { AmenitiesData, Amenity, AmenityCategory } from '@/types';
 import { cn } from '@/lib/utils';
@@ -134,13 +134,6 @@ export function AmenitiesPanel({ data, isLoading, error }: AmenitiesPanelProps) 
           color="bg-emerald-500"
         />
         <AmenityCard
-          category="gyms"
-          items={data.gyms}
-          icon={<Dumbbell className="w-5 h-5 text-white" />}
-          label="Gyms & Fitness"
-          color="bg-orange-500"
-        />
-        <AmenityCard
           category="parks"
           items={data.parks}
           icon={<Trees className="w-5 h-5 text-white" />}
@@ -148,11 +141,32 @@ export function AmenitiesPanel({ data, isLoading, error }: AmenitiesPanelProps) 
           color="bg-green-600"
         />
         <AmenityCard
+          category="schools"
+          items={data.schools}
+          icon={<GraduationCap className="w-5 h-5 text-white" />}
+          label="Schools & Education"
+          color="bg-purple-500"
+        />
+        <AmenityCard
           category="transit"
           items={data.transit}
           icon={<Train className="w-5 h-5 text-white" />}
           label="Public Transit"
           color="bg-blue-500"
+        />
+        <AmenityCard
+          category="healthcare"
+          items={data.healthcare}
+          icon={<Stethoscope className="w-5 h-5 text-white" />}
+          label="Healthcare"
+          color="bg-red-500"
+        />
+        <AmenityCard
+          category="fitness"
+          items={data.fitness}
+          icon={<Dumbbell className="w-5 h-5 text-white" />}
+          label="Fitness & Sports"
+          color="bg-orange-500"
         />
       </div>
     </div>

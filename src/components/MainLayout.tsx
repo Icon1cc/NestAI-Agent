@@ -7,6 +7,7 @@ import { ChatBar } from './ChatBar';
 import { useAppStore } from '@/store/appStore';
 import { useAmenities } from '@/hooks/useAmenities';
 import { useListings } from '@/hooks/useListings';
+import { useVoice } from '@/hooks/useVoice';
 import { cn } from '@/lib/utils';
 
 interface MainLayoutProps {
@@ -22,6 +23,8 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     setActiveTab,
     isDemoMode,
     addMessage,
+    messages,
+    priceMax,
   } = useAppStore();
 
   const { 
@@ -38,7 +41,10 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     fetchListings,
   } = useListings();
 
+  const { speak } = useVoice();
+
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [assistantMessage, setAssistantMessage] = useState<string>('');
 
   // Fetch amenities and listings when location or radius changes
   useEffect(() => {
@@ -69,22 +75,39 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     addMessage({ role: 'user', content: message });
     setIsChatLoading(true);
 
-    // Simulate AI response for now
-    // In production, this would call the Dify API
+    // Simulate AI response for now (in production, this would call the Dify API)
+    // The actual Dify integration requires backend setup
     setTimeout(() => {
-      addMessage({
-        role: 'assistant',
-        content: `I understand you're looking for ${message}. Based on your location in ${location.city || location.label.split(',')[0]}, I've analyzed the area and listings. Would you like me to refine the search with specific filters?`,
-      });
+      const hasBudget = priceMax > 0;
+      let response: string;
+      
+      if (!hasBudget && !message.toLowerCase().includes('budget')) {
+        response = `I understand you're looking for ${message}. What's your monthly budget? You can use the quick chips below or tell me directly.`;
+      } else {
+        response = `Based on your preferences for "${message}" in ${location.city || location.label.split(',')[0]}, I've found some great options. The listings are ranked by how well they match your criteria.`;
+        // Trigger a search to show listings
+        handleSearch();
+      }
+      
+      addMessage({ role: 'assistant', content: response });
+      setAssistantMessage(response);
       setIsChatLoading(false);
+      
+      // Optionally read response aloud
+      // speak(response);
     }, 1500);
-  }, [location, addMessage]);
+  }, [location, addMessage, priceMax, handleSearch]);
 
   const handleRecenter = useCallback(() => {
     // Map will recenter automatically via the MapRecenter component
   }, []);
 
   if (!location) return null;
+
+  // Get last assistant message for display
+  const lastAssistantMessage = messages
+    .filter(m => m.role === 'assistant')
+    .slice(-1)[0]?.content;
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] pt-16">
@@ -118,7 +141,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
-            Area & Amenities
+            Amenities
           </button>
           <button
             onClick={() => setActiveTab('listings')}
@@ -129,7 +152,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
-            Listings
+            Offers
             {listings.length > 0 && (
               <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
                 {listings.length}
@@ -153,6 +176,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
               error={listingsError}
               onSearch={handleSearch}
               isDemoMode={isDemoMode}
+              assistantMessage={lastAssistantMessage}
             />
           )}
         </div>
@@ -163,6 +187,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
           onSearch={handleSearch}
           isLoading={isChatLoading || isListingsLoading}
           hasLocation={!!location}
+          hasBudget={priceMax > 0}
         />
       </motion.div>
     </div>

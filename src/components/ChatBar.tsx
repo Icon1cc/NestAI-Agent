@@ -1,27 +1,23 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Send, Sparkles, Loader2, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Mic, Send, Sparkles, Loader2, MicOff, VolumeX } from 'lucide-react';
 import { useVoice } from '@/hooks/useVoice';
+import { useAppStore } from '@/store/appStore';
+import { BUDGET_CHIPS } from '@/types';
 import { cn } from '@/lib/utils';
-
-const QUICK_CHIPS = [
-  { label: 'Quieter', prompt: 'I prefer a quieter neighborhood' },
-  { label: 'More parks', prompt: 'I want to be near parks and green spaces' },
-  { label: 'Cheaper', prompt: 'Show me more affordable options' },
-  { label: 'Near transit', prompt: 'I need good public transit access' },
-  { label: 'Safer', prompt: 'Safety is a priority for me' },
-  { label: 'Nightlife', prompt: 'I want to be near restaurants and bars' },
-];
 
 interface ChatBarProps {
   onSend: (message: string) => void;
   onSearch: () => void;
   isLoading: boolean;
   hasLocation: boolean;
+  hasBudget?: boolean;
 }
 
-export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarProps) {
+export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = false }: ChatBarProps) {
   const [input, setInput] = useState('');
+  const { priceMax, setPriceRange } = useAppStore();
+  
   const { 
     isListening, 
     isSpeaking, 
@@ -43,8 +39,10 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
     }
   };
 
-  const handleChipClick = (prompt: string) => {
-    onSend(prompt);
+  const handleBudgetChipClick = (min: number, max: number) => {
+    setPriceRange(min, max);
+    // Trigger search with budget context
+    onSend(`My budget is ${min > 0 ? `€${min} to ` : 'under '}€${max}`);
   };
 
   const handleMicClick = () => {
@@ -58,43 +56,54 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
   // Sync transcript to input
   const displayValue = isListening ? transcript : input;
 
+  // Show budget chips if no budget set
+  const showBudgetChips = hasLocation && !hasBudget && priceMax === 0;
+
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className="w-full px-4 pb-4 pt-2"
     >
-      {/* Quick chips */}
-      <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-none mb-2">
-        {QUICK_CHIPS.map((chip) => (
-          <button
-            key={chip.label}
-            onClick={() => handleChipClick(chip.prompt)}
-            disabled={!hasLocation || isLoading}
-            className={cn(
-              "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
-              "bg-muted/50 text-muted-foreground border border-border/50",
-              "hover:bg-muted hover:text-foreground hover:border-border",
-              "disabled:opacity-50 disabled:pointer-events-none"
-            )}
-          >
-            {chip.label}
-          </button>
-        ))}
-      </div>
+      {/* Budget chips - shown when no budget is set */}
+      {showBudgetChips && (
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground mb-2">Set your budget:</p>
+          <div className="flex gap-2 overflow-x-auto scrollbar-none">
+            {BUDGET_CHIPS.map((chip) => (
+              <button
+                key={chip.label}
+                onClick={() => handleBudgetChipClick(chip.min, chip.max)}
+                disabled={!hasLocation || isLoading}
+                className={cn(
+                  "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+                  "bg-accent/10 text-accent border border-accent/20",
+                  "hover:bg-accent/20 hover:border-accent/40",
+                  "disabled:opacity-50 disabled:pointer-events-none"
+                )}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Input bar */}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
         {/* Voice indicator */}
-        {isListening && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm"
-          >
-            Listening...
-          </motion.div>
-        )}
+        <AnimatePresence>
+          {isListening && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm whitespace-nowrap"
+            >
+              🎙️ Listening...
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mic button */}
         {isSupported && (
@@ -168,7 +177,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
           className="nest-btn-hero flex-shrink-0 flex items-center gap-2"
         >
           <Sparkles className="w-4 h-4" />
-          <span className="hidden sm:inline">Search Listings</span>
+          <span className="hidden sm:inline">Search with NestAI</span>
         </button>
       </form>
     </motion.div>

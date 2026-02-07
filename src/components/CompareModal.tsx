@@ -1,7 +1,9 @@
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Minus, ExternalLink, Trophy } from 'lucide-react';
+import { X, Check, Minus, ExternalLink, Trophy, Loader2 } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
-import type { Listing } from '@/types';
+import { useDify } from '@/hooks/useDify';
+import type { Listing, DifyCompareResponse } from '@/types';
 import { cn } from '@/lib/utils';
 
 interface CompareModalProps {
@@ -52,9 +54,30 @@ function CompareRow({ label, value1, value2, winner, format = 'text' }: CompareR
 
 export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
   const { selectedOfferIds, clearSelection } = useAppStore();
+  const { compareOffers, isLoading } = useDify();
+  
+  const [compareResult, setCompareResult] = useState<DifyCompareResponse | null>(null);
 
   const offer1 = listings.find(l => l.id === selectedOfferIds[0]);
   const offer2 = listings.find(l => l.id === selectedOfferIds[1]);
+
+  // Fetch comparison when modal opens with 2 offers
+  useEffect(() => {
+    if (isOpen && offer1 && offer2) {
+      // Extract property IDs from offer IDs
+      const id1 = parseInt(offer1.id.replace('dify-', '')) || 0;
+      const id2 = parseInt(offer2.id.replace('dify-', '')) || 0;
+      
+      // Call compare API (will fail gracefully if backend not set up)
+      compareOffers(id1, id2).then(result => {
+        if (result) {
+          setCompareResult(result);
+        }
+      }).catch(() => {
+        // Ignore errors - we'll show manual comparison
+      });
+    }
+  }, [isOpen, offer1, offer2, compareOffers]);
 
   // Determine winners for each category
   const priceWinner = offer1 && offer2 
@@ -75,8 +98,12 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
     : null;
 
   const handleClose = () => {
+    setCompareResult(null);
     onClose();
   };
+
+  // Convert score to display format
+  const displayScore = (score: number) => Math.round(score * 10);
 
   return (
     <AnimatePresence>
@@ -120,133 +147,184 @@ export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
 
                   {/* Content */}
                   <div className="p-6">
-                    {/* Images */}
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div /> {/* Empty cell for label column */}
-                      <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
-                        {offer1.photos[0] ? (
-                          <img src={offer1.photos[0]} alt={offer1.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-muted" />
-                        )}
-                        <div className="absolute top-2 left-2 nest-score-high">
-                          {offer1.score.toFixed(1)}
+                    {/* Images and AI Analysis */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {/* Offer 1 */}
+                      <div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3">
+                          {offer1.photos[0] ? (
+                            <img src={offer1.photos[0]} alt={offer1.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-muted" />
+                          )}
+                          <div className="absolute top-2 left-2 px-2 py-1 rounded-lg text-xs font-bold nest-score-high">
+                            {displayScore(offer1.score)}/100
+                          </div>
                         </div>
+                        <h3 className="font-semibold text-sm line-clamp-2 mb-2">{offer1.title}</h3>
+                        <p className="text-lg font-bold text-primary mb-2">
+                          €{offer1.price.amount.toLocaleString()}
+                          {offer1.price.period === 'month' && <span className="text-sm font-normal text-muted-foreground">/mo</span>}
+                        </p>
+                        
+                        {/* AI Analysis for Offer 1 */}
+                        {isLoading ? (
+                          <div className="p-3 bg-muted/50 rounded-lg">
+                            <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                          </div>
+                        ) : compareResult?.assistant_text_property1 ? (
+                          <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                            <p className="text-sm text-foreground">{compareResult.assistant_text_property1}</p>
+                          </div>
+                        ) : null}
                       </div>
-                      <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
-                        {offer2.photos[0] ? (
-                          <img src={offer2.photos[0]} alt={offer2.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-muted" />
-                        )}
-                        <div className="absolute top-2 left-2 nest-score-high">
-                          {offer2.score.toFixed(1)}
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Titles */}
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <span className="text-sm text-muted-foreground font-medium">Title</span>
-                      <p className="text-sm font-semibold line-clamp-2">{offer1.title}</p>
-                      <p className="text-sm font-semibold line-clamp-2">{offer2.title}</p>
+                      {/* Offer 2 */}
+                      <div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3">
+                          {offer2.photos[0] ? (
+                            <img src={offer2.photos[0]} alt={offer2.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-muted" />
+                          )}
+                          <div className="absolute top-2 left-2 px-2 py-1 rounded-lg text-xs font-bold nest-score-high">
+                            {displayScore(offer2.score)}/100
+                          </div>
+                        </div>
+                        <h3 className="font-semibold text-sm line-clamp-2 mb-2">{offer2.title}</h3>
+                        <p className="text-lg font-bold text-primary mb-2">
+                          €{offer2.price.amount.toLocaleString()}
+                          {offer2.price.period === 'month' && <span className="text-sm font-normal text-muted-foreground">/mo</span>}
+                        </p>
+                        
+                        {/* AI Analysis for Offer 2 */}
+                        {isLoading ? (
+                          <div className="p-3 bg-muted/50 rounded-lg">
+                            <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                          </div>
+                        ) : compareResult?.assistant_text_property2 ? (
+                          <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                            <p className="text-sm text-foreground">{compareResult.assistant_text_property2}</p>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
 
                     {/* Comparison rows */}
-                    <CompareRow 
-                      label="Price" 
-                      value1={offer1.price.amount} 
-                      value2={offer2.price.amount} 
-                      winner={priceWinner}
-                      format="currency"
-                    />
-                    <CompareRow 
-                      label="Area" 
-                      value1={`${offer1.areaM2} m²`} 
-                      value2={`${offer2.areaM2} m²`} 
-                      winner={areaWinner}
-                    />
-                    <CompareRow 
-                      label="Rooms" 
-                      value1={offer1.rooms} 
-                      value2={offer2.rooms} 
-                      winner={roomsWinner}
-                    />
-                    <CompareRow 
-                      label="AI Score" 
-                      value1={offer1.score.toFixed(1)} 
-                      value2={offer2.score.toFixed(1)} 
-                      winner={scoreWinner}
-                    />
-                    <CompareRow 
-                      label="Distance" 
-                      value1={offer1.distance ? `${offer1.distance.toFixed(1)} km` : '—'} 
-                      value2={offer2.distance ? `${offer2.distance.toFixed(1)} km` : '—'} 
-                      winner={distanceWinner}
-                    />
-
-                    {/* Pros & Cons */}
-                    <div className="grid grid-cols-3 gap-4 py-4 mt-2">
-                      <span className="text-sm text-muted-foreground font-medium">Pros</span>
-                      <div className="space-y-1">
-                        {offer1.pros?.slice(0, 3).map((pro, i) => (
-                          <p key={i} className="text-xs text-nest-success flex items-start gap-1">
-                            <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                            {pro}
-                          </p>
-                        ))}
-                      </div>
-                      <div className="space-y-1">
-                        {offer2.pros?.slice(0, 3).map((pro, i) => (
-                          <p key={i} className="text-xs text-nest-success flex items-start gap-1">
-                            <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                            {pro}
-                          </p>
-                        ))}
-                      </div>
+                    <div className="border-t border-border/50 pt-4">
+                      <CompareRow 
+                        label="Price" 
+                        value1={offer1.price.amount} 
+                        value2={offer2.price.amount} 
+                        winner={priceWinner}
+                        format="currency"
+                      />
+                      {(offer1.areaM2 > 0 || offer2.areaM2 > 0) && (
+                        <CompareRow 
+                          label="Area" 
+                          value1={offer1.areaM2 > 0 ? `${offer1.areaM2} m²` : '—'} 
+                          value2={offer2.areaM2 > 0 ? `${offer2.areaM2} m²` : '—'} 
+                          winner={areaWinner}
+                        />
+                      )}
+                      {(offer1.rooms > 0 || offer2.rooms > 0) && (
+                        <CompareRow 
+                          label="Rooms" 
+                          value1={offer1.rooms || '—'} 
+                          value2={offer2.rooms || '—'} 
+                          winner={roomsWinner}
+                        />
+                      )}
+                      <CompareRow 
+                        label="AI Score" 
+                        value1={`${displayScore(offer1.score)}/100`} 
+                        value2={`${displayScore(offer2.score)}/100`} 
+                        winner={scoreWinner}
+                      />
+                      <CompareRow 
+                        label="Distance" 
+                        value1={offer1.distance ? `${offer1.distance.toFixed(1)} km` : '—'} 
+                        value2={offer2.distance ? `${offer2.distance.toFixed(1)} km` : '—'} 
+                        winner={distanceWinner}
+                      />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 py-4 border-t border-border/50">
-                      <span className="text-sm text-muted-foreground font-medium">Cons</span>
-                      <div className="space-y-1">
-                        {offer1.cons?.slice(0, 3).map((con, i) => (
-                          <p key={i} className="text-xs text-muted-foreground flex items-start gap-1">
-                            <Minus className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                            {con}
-                          </p>
-                        ))}
+                    {/* Pros & Cons */}
+                    <div className="grid grid-cols-2 gap-4 py-4 mt-2">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Pros</p>
+                        <div className="space-y-1">
+                          {offer1.pros?.slice(0, 3).map((pro, i) => (
+                            <p key={i} className="text-xs text-nest-success flex items-start gap-1">
+                              <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                              {pro}
+                            </p>
+                          ))}
+                        </div>
+                        <p className="text-xs font-medium text-muted-foreground mt-3 mb-2">Cons</p>
+                        <div className="space-y-1">
+                          {offer1.cons?.slice(0, 2).map((con, i) => (
+                            <p key={i} className="text-xs text-muted-foreground flex items-start gap-1">
+                              <Minus className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                              {con}
+                            </p>
+                          ))}
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        {offer2.cons?.slice(0, 3).map((con, i) => (
-                          <p key={i} className="text-xs text-muted-foreground flex items-start gap-1">
-                            <Minus className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                            {con}
-                          </p>
-                        ))}
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Pros</p>
+                        <div className="space-y-1">
+                          {offer2.pros?.slice(0, 3).map((pro, i) => (
+                            <p key={i} className="text-xs text-nest-success flex items-start gap-1">
+                              <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                              {pro}
+                            </p>
+                          ))}
+                        </div>
+                        <p className="text-xs font-medium text-muted-foreground mt-3 mb-2">Cons</p>
+                        <div className="space-y-1">
+                          {offer2.cons?.slice(0, 2).map((con, i) => (
+                            <p key={i} className="text-xs text-muted-foreground flex items-start gap-1">
+                              <Minus className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                              {con}
+                            </p>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
                     {/* Action buttons */}
-                    <div className="grid grid-cols-3 gap-4 pt-6">
-                      <div /> {/* Empty cell */}
-                      <a
-                        href={offer1.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="nest-btn-primary flex items-center justify-center gap-2 text-sm"
-                      >
-                        View Listing
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                      <a
-                        href={offer2.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="nest-btn-primary flex items-center justify-center gap-2 text-sm"
-                      >
-                        View Listing
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
+                    <div className="grid grid-cols-2 gap-4 pt-4">
+                      {offer1.source_url && offer1.source_url !== '#' ? (
+                        <a
+                          href={offer1.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="nest-btn-primary flex items-center justify-center gap-2 text-sm"
+                        >
+                          View on {offer1.provider}
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : (
+                        <div className="nest-btn-secondary text-center text-sm opacity-50">
+                          No external link
+                        </div>
+                      )}
+                      {offer2.source_url && offer2.source_url !== '#' ? (
+                        <a
+                          href={offer2.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="nest-btn-primary flex items-center justify-center gap-2 text-sm"
+                        >
+                          View on {offer2.provider}
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : (
+                        <div className="nest-btn-secondary text-center text-sm opacity-50">
+                          No external link
+                        </div>
+                      )}
                     </div>
                   </div>
 

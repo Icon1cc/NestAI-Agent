@@ -9,6 +9,16 @@ import type {
   DifyMessage 
 } from '@/types';
 
+// Generate a simple session ID
+function generateSessionId(): string {
+  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+// Generate a simple user ID
+function generateUserId(): number {
+  return Math.floor(Math.random() * 1000000);
+}
+
 interface AppStore {
   // Location
   location: Location | null;
@@ -23,6 +33,11 @@ interface AppStore {
   setCountryCode: (code: string | null) => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  
+  // Price filters
+  priceMin: number;
+  priceMax: number;
+  setPriceRange: (min: number, max: number) => void;
   
   // UI state
   isMapPickerOpen: boolean;
@@ -54,6 +69,11 @@ interface AppStore {
   memorySummary: string;
   setMemorySummary: (summary: string) => void;
   
+  // Session
+  sessionId: string;
+  userId: number;
+  resetSession: () => void;
+  
   // Demo mode
   isDemoMode: boolean;
   setDemoMode: (demo: boolean) => void;
@@ -74,7 +94,7 @@ export const useAppStore = create<AppStore>()(
       setRadiusKm: (radiusKm) => set({ radiusKm }),
       listingType: 'rent',
       setListingType: (listingType) => set({ listingType }),
-      countryCode: 'paris',
+      countryCode: null,
       setCountryCode: (countryCode) => set({ countryCode }),
       isDarkMode: false,
       toggleDarkMode: () => {
@@ -87,11 +107,15 @@ export const useAppStore = create<AppStore>()(
         }
       },
       
+      // Price filters
+      priceMin: 0,
+      priceMax: 0,
+      setPriceRange: (priceMin, priceMax) => set({ priceMin, priceMax }),
+      
       // UI state
       isMapPickerOpen: false,
       setMapPickerOpen: (open) => set({ 
         isMapPickerOpen: open,
-        // Close other overlays
         isHistoryDrawerOpen: open ? false : get().isHistoryDrawerOpen,
         isCompareModalOpen: open ? false : get().isCompareModalOpen,
       }),
@@ -137,6 +161,15 @@ export const useAppStore = create<AppStore>()(
       memorySummary: '',
       setMemorySummary: (memorySummary) => set({ memorySummary }),
       
+      // Session
+      sessionId: generateSessionId(),
+      userId: generateUserId(),
+      resetSession: () => set({ 
+        sessionId: generateSessionId(),
+        messages: [],
+        memorySummary: '',
+      }),
+      
       // Demo mode
       isDemoMode: false,
       setDemoMode: (isDemoMode) => set({ isDemoMode }),
@@ -148,6 +181,9 @@ export const useAppStore = create<AppStore>()(
         listings: [], 
         selectedOfferIds: [],
         isDemoMode: false,
+        messages: [],
+        priceMin: 0,
+        priceMax: 0,
       }),
     }),
     {
@@ -155,6 +191,8 @@ export const useAppStore = create<AppStore>()(
       partialize: (state) => ({
         isDarkMode: state.isDarkMode,
         listingType: state.listingType,
+        sessionId: state.sessionId,
+        userId: state.userId,
       }),
     }
   )
