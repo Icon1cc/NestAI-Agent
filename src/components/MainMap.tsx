@@ -146,7 +146,7 @@ export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="relative w-full h-full nest-map-container"
+      className="relative w-full h-full nest-map-container z-0"
     >
       <MapContainer
         center={[location.lat, location.lng]}
@@ -196,7 +196,7 @@ export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps
       </MapContainer>
 
       {/* Map controls */}
-      <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         <button
           onClick={handleRecenter}
           className="w-10 h-10 bg-card rounded-lg shadow-nest-md flex items-center justify-center text-foreground hover:bg-muted transition-colors"
@@ -214,7 +214,7 @@ export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps
       </div>
 
       {/* Location label */}
-      <div className="absolute bottom-4 left-4 z-[1000]">
+      <div className="absolute bottom-4 left-4 z-10">
         <div className="bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-nest-md">
           <p className="text-xs text-muted-foreground">Searching within</p>
           <p className="text-sm font-medium">{radiusKm} km of {location.city || location.label.split(',')[0]}</p>
