@@ -1,0 +1,196 @@
+import { motion } from 'framer-motion';
+import { Menu, MapPin, Settings, GitCompare, Sun, Moon } from 'lucide-react';
+import { Logo } from './Logo';
+import { useAppStore } from '@/store/appStore';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import type { RadiusKm, ListingType } from '@/types';
+
+const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
+
+const COUNTRIES = [
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'US', name: 'United States' },
+];
+
+export function TopBar() {
+  const {
+    location,
+    radiusKm,
+    setRadiusKm,
+    listingType,
+    setListingType,
+    countryCode,
+    setCountryCode,
+    isDarkMode,
+    toggleDarkMode,
+    selectedOfferIds,
+    setHistoryDrawerOpen,
+    setCompareModalOpen,
+    setSettingsOpen,
+  } = useAppStore();
+
+  const hasLocation = !!location;
+  const canCompare = selectedOfferIds.length === 2;
+
+  return (
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="fixed top-0 left-0 right-0 z-50 h-16 nest-glass"
+    >
+      <div className="h-full max-w-[1800px] mx-auto px-4 flex items-center justify-between gap-4">
+        {/* Left: Menu + Logo */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setHistoryDrawerOpen(true)}
+            className="nest-icon-btn"
+            aria-label="Open history"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          
+          <Logo size="md" showText />
+          
+          {/* Location chip */}
+          {location && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="hidden md:flex items-center gap-1.5 nest-chip-primary max-w-[200px]"
+            >
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate text-xs">{location.city || location.label.split(',')[0]}</span>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Right: Controls */}
+        <div className="flex items-center gap-2">
+          {/* Country selector */}
+          <div className="hidden sm:block">
+            <Select
+              value={countryCode || 'all'}
+              onValueChange={(v) => setCountryCode(v === 'all' ? null : v)}
+            >
+              <SelectTrigger className="h-9 w-[130px] bg-muted/50 border-border/50 text-sm">
+                <SelectValue placeholder="Country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {COUNTRIES.map(c => (
+                  <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Radius selector */}
+          <Select
+            value={radiusKm.toString()}
+            onValueChange={(v) => setRadiusKm(parseInt(v) as RadiusKm)}
+            disabled={!hasLocation}
+          >
+            <SelectTrigger 
+              className={cn(
+                "h-9 w-[90px] text-sm",
+                hasLocation 
+                  ? "bg-muted/50 border-border/50" 
+                  : "bg-muted/30 border-border/30 opacity-50"
+              )}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {RADIUS_OPTIONS.map(r => (
+                <SelectItem key={r} value={r.toString()}>{r} km</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Listing type toggle */}
+          <div className={cn(
+            "flex items-center h-9 rounded-lg p-0.5 bg-muted/50 border border-border/50",
+            !hasLocation && "opacity-50 pointer-events-none"
+          )}>
+            <button
+              onClick={() => setListingType('rent')}
+              className={cn(
+                "px-3 h-8 rounded-md text-sm font-medium transition-all",
+                listingType === 'rent' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Rent
+            </button>
+            <button
+              onClick={() => setListingType('buy')}
+              className={cn(
+                "px-3 h-8 rounded-md text-sm font-medium transition-all",
+                listingType === 'buy' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Buy
+            </button>
+          </div>
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="nest-icon-btn"
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
+          {/* Settings */}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="nest-icon-btn"
+            aria-label="Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+
+          {/* Compare button */}
+          <button
+            onClick={() => setCompareModalOpen(true)}
+            disabled={!canCompare}
+            className={cn(
+              "nest-icon-btn relative",
+              canCompare && "text-accent"
+            )}
+            aria-label="Compare offers"
+          >
+            <GitCompare className="w-5 h-5" />
+            {selectedOfferIds.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
+                {selectedOfferIds.length}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+    </motion.header>
+  );
+}

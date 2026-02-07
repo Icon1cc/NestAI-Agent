@@ -2,95 +2,141 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* NestAI Design System - Premium, Soothing, Fast */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core palette - Warm sage and cream */
+    --background: 45 20% 98%;
+    --foreground: 200 15% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 45 25% 99%;
+    --card-foreground: 200 15% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 45 25% 99%;
+    --popover-foreground: 200 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Deep sage green */
+    --primary: 160 35% 35%;
+    --primary-foreground: 45 20% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Warm neutral */
+    --secondary: 35 20% 92%;
+    --secondary-foreground: 200 15% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Soft gray-green */
+    --muted: 160 10% 94%;
+    --muted-foreground: 200 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Warm coral for CTAs */
+    --accent: 15 75% 55%;
+    --accent-foreground: 45 20% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 20% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 160 15% 88%;
+    --input: 160 15% 88%;
+    --ring: 160 35% 35%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom NestAI tokens */
+    --nest-glow: 160 40% 50%;
+    --nest-surface: 45 30% 97%;
+    --nest-surface-elevated: 0 0% 100%;
+    --nest-shadow: 200 20% 20%;
+    --nest-success: 160 60% 40%;
+    --nest-warning: 35 90% 50%;
+    --nest-info: 200 80% 50%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Map specific */
+    --map-marker-primary: 160 35% 35%;
+    --map-marker-secondary: 15 75% 55%;
+    --map-radius-fill: 160 35% 35%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(160 35% 35%) 0%, hsl(180 30% 40%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(45 25% 99%) 0%, hsl(45 20% 96%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(15 75% 55%) 0%, hsl(25 80% 60%) 100%);
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(var(--nest-shadow) / 0.03);
+    --shadow-md: 0 4px 12px -2px hsl(var(--nest-shadow) / 0.06), 0 2px 4px -2px hsl(var(--nest-shadow) / 0.04);
+    --shadow-lg: 0 12px 32px -4px hsl(var(--nest-shadow) / 0.08), 0 4px 12px -4px hsl(var(--nest-shadow) / 0.04);
+    --shadow-xl: 0 24px 48px -8px hsl(var(--nest-shadow) / 0.12), 0 8px 24px -8px hsl(var(--nest-shadow) / 0.06);
+    --shadow-glow: 0 0 40px -10px hsl(var(--nest-glow) / 0.3);
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 45 25% 97%;
+    --sidebar-foreground: 200 15% 20%;
+    --sidebar-primary: 160 35% 35%;
+    --sidebar-primary-foreground: 45 20% 98%;
+    --sidebar-accent: 160 20% 92%;
+    --sidebar-accent-foreground: 200 15% 20%;
+    --sidebar-border: 160 15% 88%;
+    --sidebar-ring: 160 35% 35%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 200 20% 8%;
+    --foreground: 45 15% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 200 18% 10%;
+    --card-foreground: 45 15% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 200 18% 10%;
+    --popover-foreground: 45 15% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 160 45% 50%;
+    --primary-foreground: 200 20% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 200 15% 15%;
+    --secondary-foreground: 45 15% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 200 15% 18%;
+    --muted-foreground: 200 10% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 15 80% 55%;
+    --accent-foreground: 200 20% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 45 20% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 200 15% 18%;
+    --input: 200 15% 18%;
+    --ring: 160 45% 50%;
+
+    --nest-glow: 160 50% 55%;
+    --nest-surface: 200 18% 10%;
+    --nest-surface-elevated: 200 16% 14%;
+    --nest-shadow: 220 40% 5%;
+    --nest-success: 160 60% 45%;
+    --nest-warning: 35 90% 55%;
+    --nest-info: 200 80% 55%;
+
+    --map-marker-primary: 160 45% 50%;
+    --map-marker-secondary: 15 80% 55%;
+    --map-radius-fill: 160 45% 50%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(160 45% 50%) 0%, hsl(180 40% 45%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(200 18% 10%) 0%, hsl(200 20% 8%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(15 80% 55%) 0%, hsl(25 85% 60%) 100%);
+
+    --shadow-sm: 0 1px 2px 0 hsl(var(--nest-shadow) / 0.2);
+    --shadow-md: 0 4px 12px -2px hsl(var(--nest-shadow) / 0.3), 0 2px 4px -2px hsl(var(--nest-shadow) / 0.2);
+    --shadow-lg: 0 12px 32px -4px hsl(var(--nest-shadow) / 0.4), 0 4px 12px -4px hsl(var(--nest-shadow) / 0.2);
+    --shadow-xl: 0 24px 48px -8px hsl(var(--nest-shadow) / 0.5), 0 8px 24px -8px hsl(var(--nest-shadow) / 0.3);
+    --shadow-glow: 0 0 60px -10px hsl(var(--nest-glow) / 0.4);
+
+    --sidebar-background: 200 18% 10%;
+    --sidebar-foreground: 45 15% 85%;
+    --sidebar-primary: 160 45% 50%;
+    --sidebar-primary-foreground: 200 20% 8%;
+    --sidebar-accent: 200 15% 15%;
+    --sidebar-accent-foreground: 45 15% 85%;
+    --sidebar-border: 200 15% 18%;
+    --sidebar-ring: 160 45% 50%;
   }
 }
 
@@ -100,6 +146,264 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/50 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
+  }
+}
+
+@layer components {
+  /* Premium card styles */
+  .nest-card {
+    @apply bg-card rounded-xl border border-border/50;
+    box-shadow: var(--shadow-md);
+  }
+
+  .nest-card-elevated {
+    @apply bg-card rounded-xl border border-border/30;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .nest-card-interactive {
+    @apply nest-card transition-all duration-200 cursor-pointer;
+  }
+
+  .nest-card-interactive:hover {
+    box-shadow: var(--shadow-lg);
+    @apply border-primary/20 scale-[1.01];
+  }
+
+  /* Glow effects */
+  .nest-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Glass effect */
+  .nest-glass {
+    @apply bg-background/80 backdrop-blur-xl border border-border/50;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Premium input */
+  .nest-input {
+    @apply h-12 px-4 rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200;
+  }
+
+  .nest-input-lg {
+    @apply h-14 px-5 text-lg rounded-xl bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200;
+  }
+
+  /* Hero button */
+  .nest-btn-hero {
+    @apply h-12 px-6 rounded-xl font-medium text-accent-foreground transition-all duration-200;
+    background: var(--gradient-accent);
+    box-shadow: var(--shadow-md), 0 0 20px -5px hsl(var(--accent) / 0.4);
+  }
+
+  .nest-btn-hero:hover {
+    box-shadow: var(--shadow-lg), 0 0 30px -5px hsl(var(--accent) / 0.5);
+    @apply scale-[1.02];
+  }
+
+  .nest-btn-hero:active {
+    @apply scale-[0.98];
+  }
+
+  /* Primary button */
+  .nest-btn-primary {
+    @apply h-11 px-5 rounded-xl font-medium bg-primary text-primary-foreground transition-all duration-200;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nest-btn-primary:hover {
+    @apply bg-primary/90;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Secondary button */
+  .nest-btn-secondary {
+    @apply h-11 px-5 rounded-xl font-medium bg-secondary text-secondary-foreground border border-border/50 transition-all duration-200;
+  }
+
+  .nest-btn-secondary:hover {
+    @apply bg-secondary/80 border-border;
+  }
+
+  /* Ghost button */
+  .nest-btn-ghost {
+    @apply h-11 px-5 rounded-xl font-medium text-foreground hover:bg-muted/50 transition-all duration-200;
+  }
+
+  /* Icon button */
+  .nest-icon-btn {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200;
+  }
+
+  .nest-icon-btn-sm {
+    @apply w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200;
+  }
+
+  /* Chip/Tag */
+  .nest-chip {
+    @apply inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-sm font-medium bg-muted text-muted-foreground;
+  }
+
+  .nest-chip-primary {
+    @apply nest-chip bg-primary/10 text-primary;
+  }
+
+  .nest-chip-accent {
+    @apply nest-chip bg-accent/10 text-accent;
+  }
+
+  /* Badge */
+  .nest-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary;
+  }
+
+  .nest-badge-success {
+    @apply nest-badge bg-emerald-500/10 text-emerald-600 dark:text-emerald-400;
+  }
+
+  .nest-badge-warning {
+    @apply nest-badge bg-amber-500/10 text-amber-600 dark:text-amber-400;
+  }
+
+  /* Section title */
+  .nest-section-title {
+    @apply text-sm font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+
+  /* Skeleton loading */
+  .nest-skeleton {
+    @apply animate-pulse bg-muted rounded-lg;
+  }
+
+  /* Map container */
+  .nest-map-container {
+    @apply w-full h-full rounded-xl overflow-hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Listing card */
+  .nest-listing-card {
+    @apply nest-card-interactive p-0 overflow-hidden;
+  }
+
+  /* Modal overlay */
+  .nest-modal-overlay {
+    @apply fixed inset-0 bg-foreground/20 backdrop-blur-sm;
+  }
+
+  /* Drawer */
+  .nest-drawer {
+    @apply fixed top-0 left-0 h-full w-80 bg-card border-r border-border;
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Score indicator */
+  .nest-score {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold;
+  }
+
+  .nest-score-high {
+    @apply nest-score bg-emerald-500/20 text-emerald-600 dark:text-emerald-400;
+  }
+
+  .nest-score-medium {
+    @apply nest-score bg-amber-500/20 text-amber-600 dark:text-amber-400;
+  }
+
+  .nest-score-low {
+    @apply nest-score bg-red-500/20 text-red-600 dark:text-red-400;
+  }
+}
+
+@layer utilities {
+  /* Gradient text */
+  .text-gradient-hero {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-accent {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Leaflet overrides */
+  .leaflet-container {
+    @apply bg-muted font-sans;
+  }
+
+  .leaflet-popup-content-wrapper {
+    @apply bg-card rounded-xl border border-border/50 !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+
+  .leaflet-popup-content {
+    @apply m-0 p-0 !important;
+  }
+
+  .leaflet-popup-tip {
+    @apply bg-card !important;
+  }
+
+  .leaflet-control-zoom {
+    @apply border-0 !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  .leaflet-control-zoom a {
+    @apply bg-card text-foreground border-0 !important;
+  }
+
+  .leaflet-control-zoom a:hover {
+    @apply bg-muted !important;
   }
 }
