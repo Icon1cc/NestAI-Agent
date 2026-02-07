@@ -1,4 +1,3 @@
-import { forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Minus, ExternalLink, Trophy } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
@@ -51,58 +50,57 @@ function CompareRow({ label, value1, value2, winner, format = 'text' }: CompareR
   );
 }
 
-const MotionBackdrop = motion.div;
-const MotionPanel = motion.div;
+export function CompareModal({ isOpen, onClose, listings }: CompareModalProps) {
+  const { selectedOfferIds, clearSelection } = useAppStore();
 
-export const CompareModal = forwardRef<HTMLDivElement, CompareModalProps>(
-  function CompareModal({ isOpen, onClose, listings }, ref) {
-    const { selectedOfferIds, clearSelection } = useAppStore();
+  const offer1 = listings.find(l => l.id === selectedOfferIds[0]);
+  const offer2 = listings.find(l => l.id === selectedOfferIds[1]);
 
-    const offer1 = listings.find(l => l.id === selectedOfferIds[0]);
-    const offer2 = listings.find(l => l.id === selectedOfferIds[1]);
+  // Determine winners for each category
+  const priceWinner = offer1 && offer2 
+    ? (offer1.price.amount < offer2.price.amount ? 1 : offer1.price.amount > offer2.price.amount ? 2 : null)
+    : null;
+  const areaWinner = offer1 && offer2
+    ? (offer1.areaM2 > offer2.areaM2 ? 1 : offer1.areaM2 < offer2.areaM2 ? 2 : null)
+    : null;
+  const roomsWinner = offer1 && offer2
+    ? (offer1.rooms > offer2.rooms ? 1 : offer1.rooms < offer2.rooms ? 2 : null)
+    : null;
+  const scoreWinner = offer1 && offer2
+    ? (offer1.score > offer2.score ? 1 : offer1.score < offer2.score ? 2 : null)
+    : null;
+  const distanceWinner = offer1 && offer2
+    ? ((offer1.distance || 999) < (offer2.distance || 999) ? 1 
+      : (offer1.distance || 999) > (offer2.distance || 999) ? 2 : null)
+    : null;
 
-    // Determine winners for each category
-    const priceWinner = offer1 && offer2 
-      ? (offer1.price.amount < offer2.price.amount ? 1 : offer1.price.amount > offer2.price.amount ? 2 : null)
-      : null;
-    const areaWinner = offer1 && offer2
-      ? (offer1.areaM2 > offer2.areaM2 ? 1 : offer1.areaM2 < offer2.areaM2 ? 2 : null)
-      : null;
-    const roomsWinner = offer1 && offer2
-      ? (offer1.rooms > offer2.rooms ? 1 : offer1.rooms < offer2.rooms ? 2 : null)
-      : null;
-    const scoreWinner = offer1 && offer2
-      ? (offer1.score > offer2.score ? 1 : offer1.score < offer2.score ? 2 : null)
-      : null;
-    const distanceWinner = offer1 && offer2
-      ? ((offer1.distance || 999) < (offer2.distance || 999) ? 1 
-        : (offer1.distance || 999) > (offer2.distance || 999) ? 2 : null)
-      : null;
+  const handleClose = () => {
+    onClose();
+  };
 
-    const handleClose = () => {
-      onClose();
-    };
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="compare-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 z-[100] bg-foreground/20 backdrop-blur-sm"
+          />
 
-    return (
-      <AnimatePresence>
-        {isOpen && (
-          <div ref={ref} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <MotionBackdrop
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleClose}
-              className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
-            />
-
-            {/* Modal */}
-            <MotionPanel
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto nest-card-elevated"
-            >
+          {/* Modal */}
+          <motion.div
+            key="compare-modal"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+          >
+            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto nest-card-elevated pointer-events-auto">
               {!offer1 || !offer2 ? (
                 <div className="p-12 text-center">
                   <p className="text-muted-foreground">Select exactly 2 listings to compare</p>
@@ -263,10 +261,10 @@ export const CompareModal = forwardRef<HTMLDivElement, CompareModalProps>(
                   </div>
                 </>
               )}
-            </MotionPanel>
-          </div>
-        )}
-      </AnimatePresence>
-    );
-  }
-);
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
