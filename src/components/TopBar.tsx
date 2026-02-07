@@ -14,19 +14,20 @@ import type { RadiusKm, ListingType } from '@/types';
 
 const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
+// Countries with their capital city coordinates
 const COUNTRIES = [
-  { code: 'DE', name: 'Germany', lat: 51.1657, lng: 10.4515 },
-  { code: 'FR', name: 'France', lat: 46.2276, lng: 2.2137 },
-  { code: 'NL', name: 'Netherlands', lat: 52.1326, lng: 5.2913 },
-  { code: 'ES', name: 'Spain', lat: 40.4637, lng: -3.7492 },
-  { code: 'IT', name: 'Italy', lat: 41.8719, lng: 12.5674 },
-  { code: 'PT', name: 'Portugal', lat: 39.3999, lng: -8.2245 },
-  { code: 'AT', name: 'Austria', lat: 47.5162, lng: 14.5501 },
-  { code: 'CH', name: 'Switzerland', lat: 46.8182, lng: 8.2275 },
-  { code: 'BE', name: 'Belgium', lat: 50.5039, lng: 4.4699 },
-  { code: 'PL', name: 'Poland', lat: 51.9194, lng: 19.1451 },
-  { code: 'GB', name: 'United Kingdom', lat: 55.3781, lng: -3.4360 },
-  { code: 'US', name: 'United States', lat: 37.0902, lng: -95.7129 },
+  { code: 'DE', name: 'Germany', capital: 'Berlin', lat: 52.5200, lng: 13.4050 },
+  { code: 'FR', name: 'France', capital: 'Paris', lat: 48.8566, lng: 2.3522 },
+  { code: 'NL', name: 'Netherlands', capital: 'Amsterdam', lat: 52.3676, lng: 4.9041 },
+  { code: 'ES', name: 'Spain', capital: 'Madrid', lat: 40.4168, lng: -3.7038 },
+  { code: 'IT', name: 'Italy', capital: 'Rome', lat: 41.9028, lng: 12.4964 },
+  { code: 'PT', name: 'Portugal', capital: 'Lisbon', lat: 38.7223, lng: -9.1393 },
+  { code: 'AT', name: 'Austria', capital: 'Vienna', lat: 48.2082, lng: 16.3738 },
+  { code: 'CH', name: 'Switzerland', capital: 'Bern', lat: 46.9480, lng: 7.4474 },
+  { code: 'BE', name: 'Belgium', capital: 'Brussels', lat: 50.8503, lng: 4.3517 },
+  { code: 'PL', name: 'Poland', capital: 'Warsaw', lat: 52.2297, lng: 21.0122 },
+  { code: 'GB', name: 'United Kingdom', capital: 'London', lat: 51.5074, lng: -0.1278 },
+  { code: 'US', name: 'United States', capital: 'Washington D.C.', lat: 38.9072, lng: -77.0369 },
 ];
 
 export function TopBar() {
@@ -52,14 +53,15 @@ export function TopBar() {
       setCountryCode(null);
     } else {
       setCountryCode(code);
-      // Auto-focus map to country center
+      // Auto-focus map to capital city
       const country = COUNTRIES.find(c => c.code === code);
       if (country) {
         setLocation({
-          label: country.name,
+          label: `${country.capital}, ${country.name}`,
           lat: country.lat,
           lng: country.lng,
           countryCode: country.code,
+          city: country.capital,
           country: country.name,
         });
       }
