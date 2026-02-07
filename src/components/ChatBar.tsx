@@ -141,7 +141,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
         )}
 
         {/* Text input */}
-        <div className="flex-1 relative">
+        <div className="flex-1 min-w-0 relative">
           <input
             type="text"
             value={input}
@@ -194,7 +194,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
           className="nest-btn-hero flex-shrink-0 flex items-center gap-2"
         >
           <Home className="w-4 h-4" />
-          <span className="hidden sm:inline">Search homes</span>
+          <span className="hidden lg:inline">Search homes</span>
         </button>
       </form>
     </motion.div>

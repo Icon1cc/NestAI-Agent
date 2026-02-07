@@ -51,6 +51,9 @@ interface AppStore {
   setSettingsOpen: (open: boolean) => void;
   activeTab: 'amenities' | 'listings';
   setActiveTab: (tab: 'amenities' | 'listings') => void;
+  isPanelOpen: boolean;
+  setPanelOpen: (open: boolean) => void;
+  togglePanel: () => void;
   
   // Data
   amenities: AmenitiesData | null;
@@ -140,6 +143,9 @@ export const useAppStore = create<AppStore>()(
       setSettingsOpen: (open) => set({ isSettingsOpen: open }),
       activeTab: 'listings',
       setActiveTab: (activeTab) => set({ activeTab }),
+      isPanelOpen: true,
+      setPanelOpen: (isPanelOpen) => set({ isPanelOpen }),
+      togglePanel: () => set({ isPanelOpen: !get().isPanelOpen }),
       
       // Data
       amenities: null,

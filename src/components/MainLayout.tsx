@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { MainMap } from './MainMap';
 import { AmenitiesPanel } from './AmenitiesPanel';
 import { ListingsPanel } from './ListingsPanel';
@@ -37,6 +38,9 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     listings,
     selectedOfferId,
     setSelectedOfferId,
+    isPanelOpen,
+    setPanelOpen,
+    togglePanel,
   } = useAppStore();
 
   const { 
@@ -64,6 +68,13 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
       fetchAmenities(location, radiusKm);
     }
   }, [location, radiusKm, fetchAmenities]);
+
+  // Ensure panel appears when a location gets set
+  useEffect(() => {
+    if (location) {
+      setPanelOpen(true);
+    }
+  }, [location, setPanelOpen]);
 
   // Auto-trigger Dify for demo mode on first load
   useEffect(() => {
@@ -123,13 +134,16 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     .filter(m => m.role === 'assistant')
     .slice(-1)[0]?.content;
 
+  const showPanelControls = !!location;
+
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] pt-16 gap-4 px-2 sm:px-4">
-      {/* Map Section */}
+    <div className="relative h-[calc(100vh-4rem)] pt-16">
+      {/* Map fills the canvas */}
       <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="w-full lg:w-[55%] h-[45vh] lg:h-full p-4 lg:pr-2"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="absolute inset-0"
       >
         <MainMap
           listings={listings}
@@ -138,113 +152,158 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
         />
       </motion.div>
 
-      {/* Results Section */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex-1 flex flex-col min-h-0 lg:h-full"
-      >
-        {/* Show offer details or tabs */}
-        <AnimatePresence mode="wait">
-          {selectedListing ? (
-            <OfferDetailsPanel
-              key="details"
-              listing={selectedListing}
-              onBack={handleBackFromDetails}
-            />
-          ) : (
-            <motion.div
-              key="tabs"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col min-h-0"
+      {/* Panel toggle */}
+      {/* Footer toggle bar anchored inside panel white area */}
+      {showPanelControls && (
+        <div
+          className={cn(
+            "absolute inset-x-3 sm:inset-x-auto sm:right-5 bottom-[-48px] z-50",
+            isPanelOpen ? "w-[calc(100%-1.5rem)] sm:w-[460px] lg:w-[520px]" : "w-auto"
+          )}
+        >
+          <div className="flex justify-end">
+            <button
+              onClick={togglePanel}
+              className={cn(
+                "nest-card h-11 px-4 rounded-xl flex items-center gap-2 text-sm font-medium",
+                "border border-border/50 shadow-md hover:border-primary/50 transition-all"
+              )}
             >
-              {/* Tabs */}
-              <div className="flex items-center border-b border-border px-4">
-                <button
-                  onClick={() => setActiveTab('listings')}
-                  className={cn(
-                    "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-                    activeTab === 'listings'
-                      ? "border-primary text-primary"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Offers
-                  {listings.length > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
-                      {listings.length}
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('amenities')}
-                  className={cn(
-                    "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-                    activeTab === 'amenities'
-                      ? "border-primary text-primary"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Amenities
-                </button>
-              </div>
+              {isPanelOpen ? (
+                <>
+                  <PanelRightClose className="w-4 h-4" />
+                  Hide panel
+                </>
+              ) : (
+                <>
+                  <PanelRightOpen className="w-4 h-4" />
+                  Show panel
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
-              {/* Quick chips - only show when on listings tab */}
-              {activeTab === 'listings' && listings.length > 0 && (
-                <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none border-b border-border/50">
-                  {QUICK_CHIPS.map((chip) => (
+      {/* Floating glass panel */}
+      <AnimatePresence mode="wait">
+        {isPanelOpen && (
+          <motion.div
+            key="glass-panel"
+            initial={{ x: 40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 40, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 210, damping: 26 }}
+            className={cn(
+              "absolute inset-x-3 sm:inset-x-auto sm:right-5 top-24 bottom-4",
+              "w-[calc(100%-1.5rem)] sm:w-[460px] lg:w-[520px]",
+              "flex flex-col overflow-hidden rounded-2xl",
+              "bg-card/75 backdrop-blur-2xl border border-border/40 shadow-[0_24px_80px_-30px_rgba(0,0,0,0.45)]"
+            )}
+          >
+            {/* Show offer details or tabs */}
+            <AnimatePresence mode="wait">
+              {selectedListing ? (
+                <OfferDetailsPanel
+                  key="details"
+                  listing={selectedListing}
+                  onBack={handleBackFromDetails}
+                />
+              ) : (
+                <motion.div
+                  key="tabs"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col min-h-0"
+                >
+                  {/* Tabs */}
+                  <div className="flex items-center border-b border-border px-4 bg-card/70 backdrop-blur">
                     <button
-                      key={chip.label}
-                      onClick={() => handleQuickChip(chip.prompt)}
-                      disabled={isChatLoading || isDifyLoading}
+                      onClick={() => setActiveTab('listings')}
                       className={cn(
-                        "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
-                        "bg-muted text-muted-foreground",
-                        "hover:bg-primary/10 hover:text-primary",
-                        "disabled:opacity-50 disabled:pointer-events-none"
+                        "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                        activeTab === 'listings'
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      {chip.label}
+                      Offers
+                      {listings.length > 0 && (
+                        <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                          {listings.length}
+                        </span>
+                      )}
                     </button>
-                  ))}
-                </div>
-              )}
+                    <button
+                      onClick={() => setActiveTab('amenities')}
+                      className={cn(
+                        "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                        activeTab === 'amenities'
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Amenities
+                    </button>
+                  </div>
 
-              {/* Tab content */}
-              <div className="flex-1 overflow-y-auto min-h-0">
-                {activeTab === 'listings' ? (
-                  <ListingsPanel
-                    listings={listings}
-                    isLoading={isDifyLoading}
-                    error={null}
+                  {/* Quick chips - only show when on listings tab */}
+                  {activeTab === 'listings' && listings.length > 0 && (
+                    <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none border-b border-border/50 bg-card/60 backdrop-blur">
+                      {QUICK_CHIPS.map((chip) => (
+                        <button
+                          key={chip.label}
+                          onClick={() => handleQuickChip(chip.prompt)}
+                          disabled={isChatLoading || isDifyLoading}
+                          className={cn(
+                            "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+                            "bg-muted text-muted-foreground",
+                            "hover:bg-primary/10 hover:text-primary",
+                            "disabled:opacity-50 disabled:pointer-events-none"
+                          )}
+                        >
+                          {chip.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tab content */}
+                  <div className="flex-1 overflow-y-auto min-h-0 bg-card/70 backdrop-blur">
+                    {activeTab === 'listings' ? (
+                      <ListingsPanel
+                        listings={listings}
+                        isLoading={isDifyLoading}
+                        error={null}
+                        onSearch={handleSearch}
+                        isDemoMode={isDemoMode}
+                        assistantMessage={lastAssistantMessage}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ) : (
+                      <AmenitiesPanel
+                        data={amenitiesData}
+                        isLoading={isAmenitiesLoading}
+                        error={amenitiesError}
+                      />
+                    )}
+                  </div>
+
+                  {/* Chat bar */}
+                  <ChatBar
+                    onSend={handleSendMessage}
                     onSearch={handleSearch}
-                    isDemoMode={isDemoMode}
-                    assistantMessage={lastAssistantMessage}
-                    onViewDetails={handleViewDetails}
+                    isLoading={isChatLoading || isDifyLoading}
+                    hasLocation={!!location}
+                    hasBudget={priceMax > 0}
                   />
-                ) : (
-                  <AmenitiesPanel
-                    data={amenitiesData}
-                    isLoading={isAmenitiesLoading}
-                    error={amenitiesError}
-                  />
-                )}
-              </div>
-
-              {/* Chat bar */}
-              <ChatBar
-                onSend={handleSendMessage}
-                onSearch={handleSearch}
-                isLoading={isChatLoading || isDifyLoading}
-                hasLocation={!!location}
-                hasBudget={priceMax > 0}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
