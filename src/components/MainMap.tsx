@@ -117,8 +117,18 @@ function MapRecenter({ lat, lng, radiusKm }: MapRecenterProps) {
   const map = useMap();
   
   useEffect(() => {
-    const zoom = radiusKm <= 1 ? 15 : radiusKm <= 3 ? 14 : radiusKm <= 7 ? 13 : 12;
-    map.setView([lat, lng], zoom);
+    // Calculate bounds that include the full radius circle
+    // Use fitBounds to ensure the entire circle is visible
+    const radiusMeters = radiusKm * 1000;
+    const center = L.latLng(lat, lng);
+    const bounds = center.toBounds(radiusMeters * 2); // Diameter to show full circle
+    
+    map.fitBounds(bounds, {
+      padding: [30, 30], // Add padding around the circle
+      maxZoom: 16, // Don't zoom in too close
+      animate: true,
+      duration: 0.3,
+    });
   }, [lat, lng, radiusKm, map]);
   
   return null;
@@ -226,8 +236,17 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
 
   const handleRecenter = () => {
     if (location && mapRef.current) {
-      const zoom = radiusKm <= 1 ? 15 : radiusKm <= 3 ? 14 : radiusKm <= 7 ? 13 : 12;
-      mapRef.current.setView([location.lat, location.lng], zoom);
+      // Use fitBounds to ensure the radius circle is visible
+      const radiusMeters = radiusKm * 1000;
+      const center = L.latLng(location.lat, location.lng);
+      const bounds = center.toBounds(radiusMeters * 2);
+      
+      mapRef.current.fitBounds(bounds, {
+        padding: [30, 30],
+        maxZoom: 16,
+        animate: true,
+        duration: 0.3,
+      });
     }
     onRecenter();
   };
