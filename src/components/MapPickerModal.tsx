@@ -5,8 +5,11 @@ import { MapContainer, TileLayer, Marker, Circle, useMapEvents, useMap } from 'r
 import L from 'leaflet';
 import { useReverseGeocode } from '@/hooks/useNominatim';
 import { useAppStore } from '@/store/appStore';
-import type { Location } from '@/types';
+import { Slider } from '@/components/ui/slider';
+import type { Location, RadiusKm } from '@/types';
 import 'leaflet/dist/leaflet.css';
+
+const RADIUS_OPTIONS: RadiusKm[] = [1, 3, 7, 10];
 
 // Fix Leaflet marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -64,15 +67,20 @@ interface MapPickerModalProps {
 }
 
 export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
-  const { radiusKm, setLocation } = useAppStore();
+  const { radiusKm, setRadiusKm, setLocation } = useAppStore();
   const { reverseGeocode, isLoading } = useReverseGeocode();
   
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
   const [locationLabel, setLocationLabel] = useState<string>('');
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
+  const [localRadius, setLocalRadius] = useState<RadiusKm>(radiusKm);
 
   // Default center (Paris)
   const defaultCenter: [number, number] = [48.8566, 2.3522];
+  
+  // Map radius value to slider index
+  const radiusToIndex = (r: RadiusKm) => RADIUS_OPTIONS.indexOf(r);
+  const indexToRadius = (i: number) => RADIUS_OPTIONS[i] as RadiusKm;
 
   const handleLocationSelect = useCallback(async (lat: number, lng: number) => {
     setSelectedPosition([lat, lng]);
@@ -94,6 +102,7 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
 
   const handleConfirm = () => {
     if (pendingLocation) {
+      setRadiusKm(localRadius);
       setLocation(pendingLocation);
       onClose();
     }
@@ -112,8 +121,9 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
       setSelectedPosition(null);
       setLocationLabel('');
       setPendingLocation(null);
+      setLocalRadius(radiusKm);
     }
-  }, [isOpen]);
+  }, [isOpen, radiusKm]);
 
   return (
     <AnimatePresence>
@@ -149,6 +159,18 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
               />
               <MapClickHandler onLocationSelect={handleLocationSelect} />
               
+              {/* Always show radius circle at default center or selected position */}
+              <Circle
+                center={selectedPosition || defaultCenter}
+                radius={localRadius * 1000}
+                pathOptions={{
+                  color: 'hsl(160, 35%, 35%)',
+                  fillColor: 'hsl(160, 35%, 35%)',
+                  fillOpacity: 0.1,
+                  weight: 2,
+                }}
+              />
+              
               {selectedPosition && (
                 <>
                   <MapCenter center={selectedPosition} />
@@ -162,16 +184,6 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
                         const pos = marker.getLatLng();
                         handleLocationSelect(pos.lat, pos.lng);
                       },
-                    }}
-                  />
-                  <Circle
-                    center={selectedPosition}
-                    radius={radiusKm * 1000}
-                    pathOptions={{
-                      color: 'hsl(160, 35%, 35%)',
-                      fillColor: 'hsl(160, 35%, 35%)',
-                      fillOpacity: 0.1,
-                      weight: 2,
                     }}
                   />
                 </>
@@ -190,7 +202,28 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
 
           {/* Footer */}
           <div className="absolute bottom-0 left-0 right-0 z-[110] p-4 nest-glass">
-            <div className="max-w-lg mx-auto space-y-3">
+            <div className="max-w-lg mx-auto space-y-4">
+              {/* Radius slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Search radius</span>
+                  <span className="font-medium">{localRadius} km</span>
+                </div>
+                <Slider
+                  value={[radiusToIndex(localRadius)]}
+                  onValueChange={([idx]) => setLocalRadius(indexToRadius(idx))}
+                  min={0}
+                  max={RADIUS_OPTIONS.length - 1}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  {RADIUS_OPTIONS.map((r) => (
+                    <span key={r}>{r}km</span>
+                  ))}
+                </div>
+              </div>
+
               {selectedPosition && (
                 <div className="flex items-start gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
@@ -203,9 +236,6 @@ export function MapPickerModal({ isOpen, onClose }: MapPickerModalProps) {
                     ) : (
                       <p className="text-foreground truncate">{locationLabel}</p>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      {selectedPosition[0].toFixed(5)}, {selectedPosition[1].toFixed(5)}
-                    </p>
                   </div>
                 </div>
               )}
