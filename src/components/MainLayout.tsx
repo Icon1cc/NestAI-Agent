@@ -6,9 +6,18 @@ import { ListingsPanel } from './ListingsPanel';
 import { ChatBar } from './ChatBar';
 import { useAppStore } from '@/store/appStore';
 import { useAmenities } from '@/hooks/useAmenities';
-import { useListings } from '@/hooks/useListings';
-import { useVoice } from '@/hooks/useVoice';
+import { useDify } from '@/hooks/useDify';
 import { cn } from '@/lib/utils';
+
+// Quick action chips for refining search
+const QUICK_CHIPS = [
+  { label: 'Quieter', prompt: 'I want a quieter area' },
+  { label: 'More parks', prompt: 'I want more parks nearby' },
+  { label: 'Closer transit', prompt: 'I want closer to public transit' },
+  { label: 'Cheaper', prompt: 'I want something cheaper' },
+  { label: 'Better schools', prompt: 'I need better schools nearby' },
+  { label: 'More fitness', prompt: 'I want more fitness options' },
+];
 
 interface MainLayoutProps {
   onChangeLocation: () => void;
@@ -22,9 +31,9 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     activeTab, 
     setActiveTab,
     isDemoMode,
-    addMessage,
     messages,
     priceMax,
+    listings,
   } = useAppStore();
 
   const { 
@@ -35,68 +44,57 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
   } = useAmenities();
 
   const {
-    listings,
-    isLoading: isListingsLoading,
-    error: listingsError,
-    fetchListings,
-  } = useListings();
-
-  const { speak } = useVoice();
+    isLoading: isDifyLoading,
+    callDify,
+  } = useDify();
 
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const [assistantMessage, setAssistantMessage] = useState<string>('');
 
-  // Fetch amenities and listings when location or radius changes
+  // Fetch amenities when location or radius changes
   useEffect(() => {
     if (location) {
       fetchAmenities(location, radiusKm);
-      fetchListings(location, radiusKm, listingType, {}, isDemoMode);
     }
-  }, [location, radiusKm, listingType, isDemoMode, fetchAmenities, fetchListings]);
+  }, [location, radiusKm, fetchAmenities]);
+
+  // Auto-trigger Dify for demo mode on first load
+  useEffect(() => {
+    if (isDemoMode && location && listings.length === 0 && !isDifyLoading) {
+      callDify('quiet area, parks nearby, good transit, budget under 1200');
+    }
+  }, [isDemoMode, location, listings.length, isDifyLoading, callDify]);
 
   const handleSearch = useCallback(async () => {
     if (!location) return;
-
-    // Fetch amenities if not already loaded
-    if (!amenitiesData) {
-      await fetchAmenities(location, radiusKm);
-    }
-
-    // Fetch listings
-    await fetchListings(location, radiusKm, listingType, {}, isDemoMode);
     
-    // Switch to listings tab
+    // Call Dify with a general search prompt
+    await callDify(`Find me ${listingType === 'rent' ? 'rentals' : 'properties to buy'} in this area`);
     setActiveTab('listings');
-  }, [location, radiusKm, listingType, isDemoMode, amenitiesData, fetchAmenities, fetchListings, setActiveTab]);
+  }, [location, listingType, callDify, setActiveTab]);
 
   const handleSendMessage = useCallback(async (message: string) => {
     if (!location) return;
-
-    addMessage({ role: 'user', content: message });
+    
     setIsChatLoading(true);
+    
+    // Add user message to store is handled inside useDify, but we need to add it first
+    useAppStore.getState().addMessage({ role: 'user', content: message });
+    
+    // Call Dify with the message
+    await callDify(message);
+    
+    setIsChatLoading(false);
+    setActiveTab('listings');
+  }, [location, callDify, setActiveTab]);
 
-    // Simulate AI response for now (in production, this would call the Dify API)
-    // The actual Dify integration requires backend setup
-    setTimeout(() => {
-      const hasBudget = priceMax > 0;
-      let response: string;
-      
-      if (!hasBudget && !message.toLowerCase().includes('budget')) {
-        response = `I understand you're looking for ${message}. What's your monthly budget? You can use the quick chips below or tell me directly.`;
-      } else {
-        response = `Based on your preferences for "${message}" in ${location.city || location.label.split(',')[0]}, I've found some great options. The listings are ranked by how well they match your criteria.`;
-        // Trigger a search to show listings
-        handleSearch();
-      }
-      
-      addMessage({ role: 'assistant', content: response });
-      setAssistantMessage(response);
-      setIsChatLoading(false);
-      
-      // Optionally read response aloud
-      // speak(response);
-    }, 1500);
-  }, [location, addMessage, priceMax, handleSearch]);
+  const handleQuickChip = useCallback(async (prompt: string) => {
+    if (!location) return;
+    
+    setIsChatLoading(true);
+    useAppStore.getState().addMessage({ role: 'user', content: prompt });
+    await callDify(prompt);
+    setIsChatLoading(false);
+  }, [location, callDify]);
 
   const handleRecenter = useCallback(() => {
     // Map will recenter automatically via the MapRecenter component
@@ -133,17 +131,6 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
         {/* Tabs */}
         <div className="flex items-center border-b border-border px-4">
           <button
-            onClick={() => setActiveTab('amenities')}
-            className={cn(
-              "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-              activeTab === 'amenities'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Amenities
-          </button>
-          <button
             onClick={() => setActiveTab('listings')}
             className={cn(
               "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
@@ -159,24 +146,56 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
               </span>
             )}
           </button>
+          <button
+            onClick={() => setActiveTab('amenities')}
+            className={cn(
+              "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'amenities'
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Amenities
+          </button>
         </div>
+
+        {/* Quick chips - only show when on listings tab */}
+        {activeTab === 'listings' && listings.length > 0 && (
+          <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none border-b border-border/50">
+            {QUICK_CHIPS.map((chip) => (
+              <button
+                key={chip.label}
+                onClick={() => handleQuickChip(chip.prompt)}
+                disabled={isChatLoading || isDifyLoading}
+                className={cn(
+                  "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+                  "bg-muted text-muted-foreground",
+                  "hover:bg-primary/10 hover:text-primary",
+                  "disabled:opacity-50 disabled:pointer-events-none"
+                )}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Tab content */}
         <div className="flex-1 overflow-y-auto min-h-0">
-          {activeTab === 'amenities' ? (
+          {activeTab === 'listings' ? (
+            <ListingsPanel
+              listings={listings}
+              isLoading={isDifyLoading}
+              error={null}
+              onSearch={handleSearch}
+              isDemoMode={isDemoMode}
+              assistantMessage={lastAssistantMessage}
+            />
+          ) : (
             <AmenitiesPanel
               data={amenitiesData}
               isLoading={isAmenitiesLoading}
               error={amenitiesError}
-            />
-          ) : (
-            <ListingsPanel
-              listings={listings}
-              isLoading={isListingsLoading}
-              error={listingsError}
-              onSearch={handleSearch}
-              isDemoMode={isDemoMode}
-              assistantMessage={lastAssistantMessage}
             />
           )}
         </div>
@@ -185,7 +204,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
         <ChatBar
           onSend={handleSendMessage}
           onSearch={handleSearch}
-          isLoading={isChatLoading || isListingsLoading}
+          isLoading={isChatLoading || isDifyLoading}
           hasLocation={!!location}
           hasBudget={priceMax > 0}
         />

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Send, Sparkles, Loader2, MicOff, VolumeX } from 'lucide-react';
+import { Mic, Send, Sparkles, Loader2, MicOff, VolumeX, Home } from 'lucide-react';
 import { useVoice } from '@/hooks/useVoice';
 import { useAppStore } from '@/store/appStore';
 import { BUDGET_CHIPS } from '@/types';
@@ -16,7 +16,7 @@ interface ChatBarProps {
 
 export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = false }: ChatBarProps) {
   const [input, setInput] = useState('');
-  const { priceMax, setPriceRange } = useAppStore();
+  const { priceMax, setPriceRange, addMessage } = useAppStore();
   
   const { 
     isListening, 
@@ -29,9 +29,16 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
     clearTranscript,
   } = useVoice();
 
+  // Update input when transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const message = input.trim() || transcript.trim();
+    const message = input.trim();
     if (message) {
       onSend(message);
       setInput('');
@@ -41,20 +48,25 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
 
   const handleBudgetChipClick = (min: number, max: number) => {
     setPriceRange(min, max);
-    // Trigger search with budget context
-    onSend(`My budget is ${min > 0 ? `€${min} to ` : 'under '}€${max}`);
+    // Send budget message
+    const budgetMessage = `My budget is ${min > 0 ? `€${min} to ` : 'under '}€${max}`;
+    addMessage({ role: 'user', content: budgetMessage });
+    onSend(budgetMessage);
   };
 
   const handleMicClick = () => {
     if (isListening) {
       stopListening();
+      // If we have a transcript, submit it
+      if (transcript.trim()) {
+        onSend(transcript.trim());
+        clearTranscript();
+        setInput('');
+      }
     } else {
       startListening();
     }
   };
-
-  // Sync transcript to input
-  const displayValue = isListening ? transcript : input;
 
   // Show budget chips if no budget set
   const showBudgetChips = hasLocation && !hasBudget && priceMax === 0;
@@ -63,7 +75,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="w-full px-4 pb-4 pt-2"
+      className="w-full px-4 pb-4 pt-2 border-t border-border/50 bg-background"
     >
       {/* Budget chips - shown when no budget is set */}
       {showBudgetChips && (
@@ -98,28 +110,33 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm whitespace-nowrap"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm whitespace-nowrap shadow-lg"
             >
-              🎙️ Listening...
+              🎙️ Listening... release to send
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Mic button */}
+        {/* Mic button - push to talk */}
         {isSupported && (
           <button
             type="button"
-            onClick={handleMicClick}
+            onMouseDown={startListening}
+            onMouseUp={handleMicClick}
+            onMouseLeave={() => isListening && handleMicClick()}
+            onTouchStart={startListening}
+            onTouchEnd={handleMicClick}
             disabled={!hasLocation}
             className={cn(
               "w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0",
               isListening 
-                ? "bg-destructive text-destructive-foreground animate-pulse" 
+                ? "bg-destructive text-destructive-foreground scale-110" 
                 : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80",
               "disabled:opacity-50"
             )}
+            title="Hold to speak"
           >
-            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {isListening ? <MicOff className="w-5 h-5 animate-pulse" /> : <Mic className="w-5 h-5" />}
           </button>
         )}
 
@@ -127,9 +144,9 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
         <div className="flex-1 relative">
           <input
             type="text"
-            value={displayValue}
+            value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={hasLocation ? "Ask about the area or your search..." : "Select a location first"}
+            placeholder={hasLocation ? "Ask about the area or describe what you're looking for..." : "Select a location first"}
             disabled={!hasLocation || isLoading}
             className="nest-input w-full pr-12"
           />
@@ -154,7 +171,7 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
         {/* Send button */}
         <button
           type="submit"
-          disabled={!hasLocation || isLoading || (!input.trim() && !transcript.trim())}
+          disabled={!hasLocation || isLoading || !input.trim()}
           className={cn(
             "w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0",
             "bg-primary text-primary-foreground",
@@ -176,8 +193,8 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
           disabled={!hasLocation || isLoading}
           className="nest-btn-hero flex-shrink-0 flex items-center gap-2"
         >
-          <Sparkles className="w-4 h-4" />
-          <span className="hidden sm:inline">Search with NestAI</span>
+          <Home className="w-4 h-4" />
+          <span className="hidden sm:inline">Search homes</span>
         </button>
       </form>
     </motion.div>

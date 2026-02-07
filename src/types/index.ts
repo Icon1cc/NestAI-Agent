@@ -63,10 +63,12 @@ export interface Listing {
 }
 
 // Dify offer schema (normalized from API)
+// Supports both 'long' and 'lng' for compatibility with Dify API
 export interface DifyOffer {
   property_id: number;
   lat: number;
-  lng: number; // normalized from long/lng
+  lng?: number; // normalized internal field
+  long?: number; // Dify API uses 'long'
   rank: number;
   photos: string[];
   price: number;
@@ -104,11 +106,13 @@ export interface Amenity {
 }
 
 // Normalized internal amenity from Dify
+// Supports both 'long' and 'lng' for compatibility
 export interface DifyAmenity {
   amenity_id: number;
   lat: number;
-  lng: number; // normalized from long
-  category: AmenityCategory;
+  lng?: number; // normalized internal field
+  long?: number; // Dify API uses 'long'
+  category: AmenityCategory | 'healtcare'; // Handle Dify typo
   description: string;
 }
 
