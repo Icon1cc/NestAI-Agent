@@ -1,10 +1,11 @@
-import { useEffect, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from 'react-leaflet';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
+import { MapContainer, TileLayer, Marker, Circle, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { motion } from 'framer-motion';
 import { Crosshair, MapPin } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
-import type { Listing, Amenity, AmenityCategory } from '@/types';
+import { useReverseGeocode } from '@/hooks/useNominatim';
+import type { Listing } from '@/types';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet marker icon issue
@@ -78,6 +79,19 @@ function MapRecenter({ lat, lng, radiusKm }: MapRecenterProps) {
   return null;
 }
 
+interface MapClickHandlerProps {
+  onLocationSelect: (lat: number, lng: number) => void;
+}
+
+function MapClickHandler({ onLocationSelect }: MapClickHandlerProps) {
+  useMapEvents({
+    click: (e) => {
+      onLocationSelect(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
 interface ListingPopupProps {
   listing: Listing;
 }
@@ -126,10 +140,25 @@ interface MainMapProps {
 }
 
 export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps) {
-  const { location, radiusKm, selectedOfferIds } = useAppStore();
+  const { location, radiusKm, selectedOfferIds, setLocation } = useAppStore();
+  const { reverseGeocode } = useReverseGeocode();
   const mapRef = useRef<L.Map | null>(null);
 
   const centerIcon = useMemo(() => createCenterIcon(), []);
+
+  const handleMapClick = useCallback(async (lat: number, lng: number) => {
+    // Update location when map is clicked
+    const newLocation = await reverseGeocode(lat, lng);
+    if (newLocation) {
+      setLocation(newLocation);
+    } else {
+      setLocation({
+        label: 'Selected location',
+        lat,
+        lng,
+      });
+    }
+  }, [reverseGeocode, setLocation]);
 
   const handleRecenter = () => {
     if (location && mapRef.current) {
@@ -161,6 +190,7 @@ export function MainMap({ listings, onRecenter, onChangeLocation }: MainMapProps
         />
         
         <MapRecenter lat={location.lat} lng={location.lng} radiusKm={radiusKm} />
+        <MapClickHandler onLocationSelect={handleMapClick} />
 
         {/* Center marker */}
         <Marker position={[location.lat, location.lng]} icon={centerIcon} />
