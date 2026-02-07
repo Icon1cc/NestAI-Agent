@@ -6,6 +6,7 @@ import { MapPickerModal } from '@/components/MapPickerModal';
 import { MainLayout } from '@/components/MainLayout';
 import { HistoryDrawer } from '@/components/HistoryDrawer';
 import { CompareModal } from '@/components/CompareModal';
+import { SettingsModal } from '@/components/SettingsModal';
 import { useAppStore } from '@/store/appStore';
 import { useListings } from '@/hooks/useListings';
 import { useAmenities } from '@/hooks/useAmenities';
@@ -30,6 +31,8 @@ export default function Index() {
     setHistoryDrawerOpen,
     isCompareModalOpen,
     setCompareModalOpen,
+    isSettingsOpen,
+    setSettingsOpen,
     setDemoMode,
     resetLocation,
     radiusKm,
@@ -108,6 +111,10 @@ export default function Index() {
         isOpen={isCompareModalOpen}
         onClose={() => setCompareModalOpen(false)}
         listings={listings}
+      />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setSettingsOpen(false)}
       />
     </div>
   );
