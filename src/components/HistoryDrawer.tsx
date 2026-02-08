@@ -106,8 +106,8 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
                   <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                     Current Session
                   </h3>
-                  <div className="space-y-2">
-                    {messages.slice(-4).map((msg, i) => (
+                  <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                    {messages.slice(-20).map((msg, i) => (
                       <div
                         key={i}
                         className={cn(
@@ -120,7 +120,7 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
                         <p className="text-xs text-muted-foreground mb-1 font-medium">
                           {msg.role === 'user' ? 'You' : 'NestAI'}
                         </p>
-                        <p className="line-clamp-2">{msg.content}</p>
+                        <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                       </div>
                     ))}
                   </div>

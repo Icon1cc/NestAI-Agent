@@ -9,6 +9,7 @@ import type {
   DifyOffer,
   DifyAmenity,
   OfferAnalysis,
+  ListingType,
 } from '@/types';
 
 // Mock offer data for demo mode - Paris properties following exact Dify contract

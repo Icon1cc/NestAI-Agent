@@ -65,7 +65,10 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
       className="w-full px-4 pb-4 pt-2 border-t border-border/40 bg-background/70 backdrop-blur-2xl"
     >
       {/* Input bar */}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-wrap items-center gap-2 relative sm:flex-nowrap"
+      >
         {/* Voice indicator */}
         <AnimatePresence>
           {isListening && (
@@ -132,33 +135,36 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
         </div>
 
         {/* Send button */}
-        <button
-          type="submit"
-          disabled={!hasLocation || isLoading || !input.trim()}
-          className={cn(
-            "w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0",
-            "bg-primary text-primary-foreground",
-            "hover:bg-primary/90",
-            "disabled:opacity-50 disabled:pointer-events-none"
-          )}
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Send className="w-5 h-5" />
-          )}
-        </button>
+        <div className="flex w-full sm:w-auto sm:flex-none gap-2">
+          <button
+            type="submit"
+            disabled={!hasLocation || isLoading || !input.trim()}
+            className={cn(
+              "w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0",
+              "bg-primary text-primary-foreground",
+              "hover:bg-primary/90",
+              "disabled:opacity-50 disabled:pointer-events-none"
+            )}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
 
-        {/* Search button */}
-        <button
-          type="button"
-          onClick={onSearch}
-          disabled={!hasLocation || isLoading}
-          className="nest-btn-hero flex-shrink-0 flex items-center gap-2"
-        >
-          <Home className="w-4 h-4" />
-          <span className="hidden lg:inline">{t('search_homes')}</span>
-        </button>
+          {/* Search button */}
+          <button
+            type="button"
+            onClick={onSearch}
+            disabled={!hasLocation || isLoading}
+            className="nest-btn-hero flex-1 sm:flex-initial flex items-center justify-center gap-2"
+          >
+            <Home className="w-4 h-4" />
+            <span className="hidden lg:inline">{t('search_homes')}</span>
+            <span className="lg:hidden">{t('search_homes')}</span>
+          </button>
+        </div>
       </form>
     </motion.div>
   );

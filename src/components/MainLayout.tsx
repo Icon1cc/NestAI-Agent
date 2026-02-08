@@ -137,6 +137,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     .slice(-1)[0]?.content;
 
   const showPanelControls = !!location;
+  const visibleMessages = messages;
 
   return (
     <div className="relative h-[calc(100vh-4rem)] pt-16">
@@ -249,6 +250,40 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                     {t('amenities_tab')}
                   </button>
                   </div>
+
+                  {/* Conversation preview */}
+                  {visibleMessages.length > 0 && (
+                    <div className="px-4 py-3 border-b border-border/60 bg-card/70 backdrop-blur">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-[0.08em]">
+                          Conversation
+                        </p>
+                        {messages.length > 8 && (
+                          <span className="text-[11px] text-muted-foreground">
+                            Scroll to see earlier messages
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                        {visibleMessages.map((msg, idx) => (
+                          <div
+                            key={idx}
+                            className={cn(
+                              "p-2.5 rounded-lg text-sm border",
+                              msg.role === 'user'
+                                ? "bg-primary/10 border-primary/20 text-foreground"
+                                : "bg-muted border-border text-foreground/90"
+                            )}
+                          >
+                            <p className="text-[11px] font-semibold text-muted-foreground mb-0.5">
+                              {msg.role === 'user' ? 'You' : 'NestAI'}
+                            </p>
+                            <p className="leading-snug break-words">{msg.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Quick chips - only show when on listings tab */}
                   {activeTab === 'listings' && listings.length > 0 && (
