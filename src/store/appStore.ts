@@ -64,6 +64,8 @@ interface AppStore {
   setListings: (listings: Listing[]) => void;
   difyAmenities: DifyAmenity[];
   setDifyAmenities: (amenities: DifyAmenity[]) => void;
+  difyConversationId: string | null;
+  setDifyConversationId: (id: string | null) => void;
   
   // Selection
   selectedOfferIds: string[];
@@ -153,6 +155,8 @@ export const useAppStore = create<AppStore>()(
       listings: [],
       setListings: (listings) => set({ listings }),
       difyAmenities: [],
+      difyConversationId: null,
+      setDifyConversationId: (difyConversationId) => set({ difyConversationId }),
       setDifyAmenities: (difyAmenities) => set({ difyAmenities }),
       
       // Selection - supports ctrl/cmd click for multi-select
@@ -193,6 +197,7 @@ export const useAppStore = create<AppStore>()(
         sessionId: generateSessionId(),
         messages: [],
         memorySummary: '',
+        difyConversationId: null,
       }),
       
       // Reset
@@ -206,6 +211,7 @@ export const useAppStore = create<AppStore>()(
         priceMin: 0,
         priceMax: 0,
         difyAmenities: [],
+        difyConversationId: null,
       }),
     }),
     {

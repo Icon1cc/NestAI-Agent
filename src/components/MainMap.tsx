@@ -212,6 +212,45 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
 
   const centerIcon = useMemo(() => createCenterIcon(), []);
 
+  // Compute jittered positions for listings that share identical coordinates to avoid marker overlap
+  const jitteredPositions = useMemo(() => {
+    const groups = new Map<string, Listing[]>();
+
+    listings.forEach((listing) => {
+      const key = `${listing.lat.toFixed(6)},${listing.lng.toFixed(6)}`;
+      const arr = groups.get(key) || [];
+      arr.push(listing);
+      groups.set(key, arr);
+    });
+
+    const result = new Map<string, [number, number]>();
+
+    groups.forEach((group) => {
+      // Stable order for deterministic jitter
+      const sorted = [...group].sort((a, b) => a.id.localeCompare(b.id));
+      const count = sorted.length;
+
+      sorted.forEach((listing, idx) => {
+        if (count === 1) {
+          result.set(listing.id, [listing.lat, listing.lng]);
+          return;
+        }
+
+        // Spread markers in a small ring (~20m) around the original point
+        const radiusMeters = 20;
+        const angle = (2 * Math.PI * idx) / count;
+        const latRad = (listing.lat * Math.PI) / 180;
+        const deltaLat = (radiusMeters / 111320) * Math.sin(angle);
+        const deltaLng =
+          (radiusMeters / (111320 * Math.cos(latRad || 0.0001))) * Math.cos(angle);
+
+        result.set(listing.id, [listing.lat + deltaLat, listing.lng + deltaLng]);
+      });
+    });
+
+    return result;
+  }, [listings]);
+
   // Get highlighted amenity IDs based on selected offer
   const activeHighlightIds = useMemo(() => {
     if (selectedOfferId) {
@@ -327,10 +366,11 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
         {listings.map((listing) => {
           const isSelected = selectedOfferIds.includes(listing.id);
           const isViewing = selectedOfferId === listing.id;
+          const jittered = jitteredPositions.get(listing.id) || [listing.lat, listing.lng];
           return (
             <Marker
               key={listing.id}
-              position={[listing.lat, listing.lng]}
+              position={jittered}
               icon={createListingIcon(listing.rank, isSelected, isViewing)}
               zIndexOffset={isViewing ? 1000 : isSelected ? 500 : 0}
             >

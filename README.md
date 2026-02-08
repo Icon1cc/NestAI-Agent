@@ -1,4 +1,4 @@
-# NestAI Agent
+# 🏡 NestAI Agent
 
 **Voice-First AI Real Estate Discovery Platform**
 
@@ -31,6 +31,19 @@ Instead of searching *for* properties, you have a conversation *about* what matt
 
 All through a **voice-first conversational interface** backed by an **advanced Dify AI workflow** that handles multi-turn dialogue, parallel data processing, and intelligent follow-up questions.
 
+### Our Mission: Zero Additional Research Needed
+
+**NestAI Agent is designed to be your complete property discovery solution.** Our goal is simple: once you've explored properties through NestAI, you should have all the information you need to make a confident decision—**no need to visit additional websites, contact agents, or conduct further research.**
+
+Here's how we achieve this:
+
+1. **📍 Select Your Location** – Choose your city or specific neighborhood
+2. **🏘️ Explore the Area** – Discover properties with comprehensive neighborhood insights
+3. **🏠 Choose Your Path** – Decide between rent or buy based on your needs
+4. **✅ Make Your Decision** – Get AI-powered recommendations with all the data you need
+
+**That's it. No additional steps. No hidden information. Everything you need, in one place.**
+
 ### The Problem We Solve
 
 | Traditional Search | NestAI Agent |
@@ -41,6 +54,8 @@ All through a **voice-first conversational interface** backed by an **advanced D
 | Guess if a neighborhood fits your lifestyle | Data-driven pros/cons based on your priorities |
 | Compare properties by switching tabs and memory | Side-by-side AI comparison with contextual insights |
 | Repeat the same search across multiple platforms | One conversation that remembers your preferences |
+| Contact agents for basic information | AI chatbot provides instant, accurate answers |
+| Visit multiple websites for research | Complete information in one application |
 
 NestAI isn't just a search tool—it's an **AI-powered relocation advisor** that understands context, learns your preferences, and guides you to better decisions faster.
 
@@ -54,12 +69,31 @@ NestAI isn't just a search tool—it's an **AI-powered relocation advisor** that
 - Hands-free exploration with optional speech synthesis responses
 - Automatic transcript-to-chat conversion
 
+### 🏠 Rent or Buy: Your Choice
+- **Flexible property search** supporting both rental and purchase options
+- **Easy toggle** between rent and buy modes
+- **Tailored results** with rent-specific pricing (monthly) or purchase prices (total)
+- **Smart filtering** based on your selected transaction type
+
+### 🌍 Multi-Language Support
+- **Available in 3 languages**: English, German (Deutsch), and French (Français)
+- **Seamless language switching** without losing context
+- **Localized content** including currency, measurements, and terminology
+- **Browser language detection** for automatic initial language selection
+
+### 🎨 Adaptive Theme Support
+- **Dark and Light modes** for comfortable viewing in any environment
+- **System preference detection** for automatic theme selection
+- **Instant theme switching** without page reload
+- **Optimized contrast** and color schemes for both modes
+
 ### 🗺️ Intelligent Geospatial Analysis
 - **Location-aware search** via Nominatim geocoding (cities, neighborhoods, addresses)
 - **Interactive map picker** with radius overlay visualization
 - **Live location support** with one-tap geolocation
-- Dynamic radius filtering (1km, 3km, 7km, 10km)
-- Real-time map synchronization with search results
+- **Precision radius filtering**: Choose from 1km, 3km, 7km, or 10km search areas
+- **Real-time map synchronization** with search results
+- **Dynamic radius visualization** with circle overlay on map
 
 ### 🤖 AI-Orchestrated Property Intelligence
 - **Dify-powered advanced chat workflow** with conversation memory
@@ -69,30 +103,54 @@ NestAI isn't just a search tool—it's an **AI-powered relocation advisor** that
 - **Multi-model architecture**: GPT-4 for intent understanding, GPT-4o for property analysis
 
 ### 📊 Data-Driven Recommendations
-- **Match scoring** (1-10 scale) based on your stated preferences
-- **Pros/cons analysis** extracted from property + amenity context
+- **Smart property rating** (1-10 scale) based on your stated preferences
+- **AI-generated pros and cons** for every property—see the good and the bad instantly
+- **Comprehensive evaluation** extracting insights from property + amenity context
 - **Walking distance calculations** using Equirectangular approximation
 - **Sorted amenity lists** showing nearest options per category
-- **Rank-based sorting** with visual score badges
+- **Rank-based sorting** with visual score badges for quick decision-making
+- **Quick property comparison** at a glance with rating badges
+
+### 💬 Intelligent AI Chatbot Assistant
+- **Context-aware conversational AI** that understands your search history
+- **Real-time assistance** for navigating the application
+- **Property search guidance** with natural language understanding
+- **Neighborhood insights** and area information on demand
+- **Search refinement suggestions** based on your preferences
+- **Multi-turn conversations** that remember what you're looking for
+- **Quick answers** to questions about properties, amenities, and locations
 
 ### 🔄 Contextual Comparison
 - **Side-by-side property comparison** with AI-generated insights
 - Select any 2 properties to compare location advantages, amenity access, and value
 - Separate AI analysis for each property relative to the other
+- **Visual comparison cards** highlighting key differences
 
 ### 💾 Smart Session Management
 - **IndexedDB persistence** for conversation history
 - **7-day amenity caching** to minimize API calls
 - **Session restoration** across page reloads
-- **Last-search memory** for location, radius, price range
+- **Last-search memory** for location, radius, price range, and language preference
+
+### 🎯 Streamlined User Journey
+- **Step 1**: Select your city or neighborhood location
+- **Step 2**: Explore properties and neighborhoods through the app
+- **Step 3**: Choose between rent or buy
+- **Step 4**: Make your decision with complete information—**no further research needed**
 
 ### 🎨 Premium User Experience
 - **Calm, high-end design** optimized for focus and clarity
 - **Dual-panel layout**: persistent map + tabbed results (Offers, Amenities, Chat)
 - **Quick-action chips** for common refinements (Quieter, More parks, Closer transit, etc.)
 - **Responsive design** with mobile-first optimizations
-- **Dark/light theme** support
+- **Smooth animations** powered by Framer Motion
 - **Demo mode** for instant exploration (Berlin example with live data)
+
+### 📱 Progressive Web App Features
+- **Installable** on desktop and mobile devices
+- **Offline support** for cached searches and amenity data
+- **Fast loading** with optimized assets and code splitting
+- **Cross-platform compatibility** (Windows, macOS, Linux, iOS, Android)
 
 ---
 
@@ -107,57 +165,85 @@ graph TB
         C[Location Picker] --> D[Map Component]
         B --> E[Dify Proxy API]
         D --> E
+        F[Language Selector] --> B
+        G[Theme Toggle] --> B
+        H[Rent/Buy Toggle] --> E
     end
     
     subgraph "Backend (Node.js)"
-        E --> F[Environment Validation]
-        F --> G[Request Normalization]
-        G --> H[Dify API Client]
+        E --> I[Environment Validation]
+        I --> J[Request Normalization]
+        J --> K[Dify API Client]
     end
     
     subgraph "Dify AI Workflow"
-        H --> I[Intent Understanding - GPT-4]
-        I --> J[Stream Estate API Call]
-        J --> K[Parallel Iteration - 6 threads]
-        K --> L[Per-Property Pipeline]
+        K --> L[Intent Understanding - GPT-4]
+        L --> M[Stream Estate API Call]
+        M --> N[Parallel Iteration - 6 threads]
+        N --> O[Per-Property Pipeline]
         
         subgraph "Property Enrichment Loop"
-            L --> M[Coordinate Extraction]
-            M --> N[OSM Plugin - Amenity Search]
-            N --> O[Distance Calculation]
-            O --> P[Template Assembly]
-            P --> Q[Property Analysis - GPT-4o]
-            Q --> R[Structured JSON Output]
+            O --> P[Coordinate Extraction]
+            P --> Q[OSM Plugin - Amenity Search]
+            Q --> R[Distance Calculation]
+            R --> S[Template Assembly]
+            S --> T[Property Analysis - GPT-4o]
+            T --> U[Structured JSON Output]
         end
         
-        R --> S[Result Aggregation]
+        U --> V[Result Aggregation]
     end
     
     subgraph "External Services"
-        J --> T[Stream Estate API]
-        N --> U[OpenStreetMap Overpass]
-        D --> V[Nominatim Geocoding]
+        M --> W[Stream Estate API]
+        Q --> X[OpenStreetMap Overpass]
+        D --> Y[Nominatim Geocoding]
     end
     
-    S --> H
-    H --> E
+    V --> K
+    K --> E
     E --> B
     E --> D
     
-    style I fill:#4f46e5
-    style Q fill:#4f46e5
-    style N fill:#10b981
+    style L fill:#4f46e5
+    style T fill:#4f46e5
+    style Q fill:#10b981
     style E fill:#f59e0b
 ```
 
+### Dify Workflow Visual
+
+Our complete AI orchestration pipeline, built entirely in Dify, showing the sophisticated multi-stage workflow that powers NestAI's intelligence:
+
+<p align="center">
+  <img src="./docs/images/dify-workflow.png" alt="NestAI Dify Workflow Diagram - Complete AI Pipeline" width="100%">
+</p>
+
+**Workflow Components Breakdown:**
+
+- **🔵 User Input Processing** – Template nodes capture and structure user queries with location, preferences, and constraints
+- **🟣 Intent Understanding** – LLM (GPT-4) interprets natural language and extracts search intent
+- **🟢 HTTP Request** – Calls Stream Estate API to fetch live property listings matching criteria
+- **🟡 Code Transformations** – Parse API responses and prepare data for parallel processing
+- **🔄 Iteration Node** – Processes up to 6 properties simultaneously for maximum speed
+- **📍 Per-Property Pipeline** (inside iteration):
+  - **OSM Search** – Custom plugin queries nearby amenities (groceries, parks, schools, transit, healthcare, fitness)
+  - **Distance Calculation** – Computes walking distances using Equirectangular approximation
+  - **Template Assembly** – Builds structured prompts combining property details with sorted amenities
+  - **LLM Analysis** – GPT-4o with Structured Output generates match scores, pros, cons, and summaries
+  - **Code Merge** – Combines AI analysis with property data into unified format
+- **📤 Output** – Serializes results and returns enriched property listings to frontend
+
+> **Why This Matters:** This visual representation shows how Dify enables complex, production-grade AI workflows without custom orchestration code. Every node is configured through Dify's interface, making the entire pipeline maintainable, debuggable, and extensible.
+
 ### Data Flow: Search Request
 
-1. **User Input** → Voice/text query + location + radius + price range
-2. **Frontend Validation** → Check location exists; build request payload
+1. **User Input** → Voice/text query + location + radius + price range + transaction type (rent/buy)
+2. **Frontend Validation** → Check location exists; build request payload with language preference
 3. **Backend Proxy** → `/api/dify/run` forwards to Dify with secure credentials
 4. **Dify Orchestration**:
    - **LLM 1** (GPT-4): Interpret user intent and context
-   - **HTTP Node**: Fetch live properties from Stream Estate API
+   - **HTTP Node**: Fetch live properties from Stream Estate API (filtered by rent/buy)
    - **Code Node**: Parse JSON response
    - **Iteration Node** (parallel, 6x):
      - Extract property coordinates
@@ -168,7 +254,7 @@ graph TB
      - **Code Node**: Merge analysis with property data
    - **Code Node**: Serialize final results
 5. **Backend Response** → Normalize to unified schema, return to frontend
-6. **Frontend Rendering** → Update map markers, populate offer cards, display assistant text
+6. **Frontend Rendering** → Update map markers, populate offer cards, display assistant text in selected language
 
 ### Technology Stack
 
@@ -189,6 +275,7 @@ graph TB
 | **Geocoding** | Nominatim (OSM) | Address search and reverse geocoding |
 | **Amenity Data** | Overpass API (OSM) | Real-world POI data via custom Dify plugin |
 | **Property Data** | Stream Estate API | Live rental and sale listings |
+| **Internationalization** | react-i18next | Multi-language support (EN, DE, FR) |
 
 ---
 
@@ -251,7 +338,9 @@ npm run preview
 
 ## 🎯 How to Use
 
-### 1. Set Your Location
+### The NestAI 4-Step Journey
+
+#### Step 1: 🌍 Select Your Location
 
 Choose one of three methods:
 
@@ -259,32 +348,43 @@ Choose one of three methods:
 - **📍 Live Location**: Tap "Use my location" (requires HTTPS/localhost)
 - **🗺️ Map Picker**: Open full-screen map, click to place pin, drag to adjust
 
-### 2. Configure Search Parameters
+#### Step 2: 🏘️ Explore Through the App
 
-- **Country** (optional): Filter by country code
-- **Radius**: Select 1km, 3km, 7km, or 10km search area
+Configure your search preferences:
+
+- **Language**: Choose English, German (Deutsch), or French (Français)
+- **Theme**: Switch between Dark and Light modes
+- **Radius**: Select your search area (1km, 3km, 7km, or 10km)
 - **Price Range**: State in natural language or use quick chips
 
-### 3. Describe What You Want
+Describe what you want in the **AI Chatbot**:
 
 **Examples:**
 - *"2-bedroom apartment near parks, quiet street, under €1,500/month"*
 - *"Family home with good schools, close to transit, spacious"*
 - *"Modern studio near fitness centers and groceries, pet-friendly"*
 
-### 4. Explore Results
+#### Step 3: 🏠 Choose Between Rent or Buy
+
+- **Toggle** between rental and purchase modes
+- **View tailored results** with appropriate pricing (monthly rent vs. total purchase price)
+- **Filter instantly** without losing your search context
+
+#### Step 4: ✅ Make Your Decision
+
+Explore comprehensive property information:
 
 **Map View:**
 - Property markers with rank badges
 - Amenity markers (when property selected)
-- Radius circle overlay
+- Radius circle overlay showing your search area
 - Recenter and change location controls
 
 **Offers Tab:**
-- AI-ranked property cards
-- Match scores (1-10)
+- **AI-ranked property cards** sorted by relevance
+- **Match scores (1-10)** showing how well each property fits your needs
+- **AI-generated pros and cons** for every property
 - Photo carousels
-- Pros/cons analysis
 - Price and address
 - Select for comparison
 
@@ -296,25 +396,40 @@ Choose one of three methods:
   - 🚇 Transit
   - 🏥 Healthcare
   - 💪 Fitness
-- Walking distances
-- Expandable lists
+- Walking distances calculated for each amenity
+- Expandable lists with full details
 
 **Chat Tab:**
+- **AI Assistant** ready to answer questions
 - Full conversation history
 - Quick refinement chips
 - Voice input button
 
-### 5. Compare Properties
+**No Further Research Needed:** All the information you need—neighborhood insights, amenity access, property details, pros and cons—is right here. Make your decision with confidence.
+
+### 5. 🔄 Compare Properties (Optional)
 
 1. Select **exactly 2 properties** via checkboxes
 2. Tap **Compare** icon in top bar
 3. View side-by-side analysis with:
-   - Property summaries
+   - Property summaries with ratings
    - AI-generated comparison insights
    - Location advantages
    - Amenity access differences
 
-### 6. Refine Your Search
+### 6. 💬 Get AI Assistance Anytime
+
+Use the **AI Chatbot** to:
+- **Navigate the application**: "How do I change the search radius?"
+- **Search for properties**: "Show me apartments with balconies near parks"
+- **Get neighborhood insights**: "Tell me about the safety of this area"
+- **Refine your search**: "I want something quieter"
+- **Ask about amenities**: "What grocery stores are nearby?"
+- **Compare options**: "Which property has better transit access?"
+
+The chatbot remembers your entire conversation and search context.
+
+### 7. 🎯 Quick Refinements
 
 Use **quick-action chips**:
 - Quieter
@@ -381,12 +496,18 @@ The **only** backend endpoint. Proxies requests to Dify with secure credential i
   "price_min": 0,
   "price_max": 1200,
   "radiusKm": 3,
+  "transaction_type": "rent",
   "location": {
     "lat": 52.52,
     "lng": 13.405
   }
 }
 ```
+
+**Request Parameters:**
+- `transaction_type`: `"rent"` or `"buy"` to filter property types
+- `locale`: `"en"`, `"de"`, or `"fr"` for language preference
+- `radiusKm`: One of `1`, `3`, `7`, or `10`
 
 #### Request Body (Compare Mode)
 
@@ -396,7 +517,8 @@ The **only** backend endpoint. Proxies requests to Dify with secure credential i
   "session_id": "uuid-v4-string",
   "user_id": 12345,
   "offer_id1": 42,
-  "offer_id2": 89
+  "offer_id2": 89,
+  "locale": "en"
 }
 ```
 
@@ -452,6 +574,11 @@ The **only** backend endpoint. Proxies requests to Dify with secure credential i
 }
 ```
 
+**Response Notes:**
+- `rent_or_buy`: `true` = rent, `false` = buy
+- `rank`: 0.0-1.0 (displayed as 1-10 rating in UI)
+- `pros` and `cons`: AI-generated lists for quick decision-making
+
 #### Response (Compare Mode)
 
 ```json
@@ -476,12 +603,15 @@ nestai-agent/
 │   │   ├── chat/           # Chat interface and voice
 │   │   ├── offers/         # Property cards and lists
 │   │   ├── amenities/      # POI display and filtering
+│   │   ├── theme/          # Dark/Light theme toggle
+│   │   ├── language/       # Language selector
 │   │   └── ui/             # shadcn/ui base components
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useDify.ts      # Dify API integration
 │   │   ├── useVoice.ts     # Web Speech API wrapper
 │   │   ├── useLocation.ts  # Geolocation and geocoding
-│   │   └── useAmenities.ts # OSM Overpass queries
+│   │   ├── useAmenities.ts # OSM Overpass queries
+│   │   └── useTheme.ts     # Theme management
 │   ├── store/              # Zustand state management
 │   │   └── appStore.ts     # Global app state
 │   ├── types/              # TypeScript definitions
@@ -490,12 +620,18 @@ nestai-agent/
 │   │   ├── distance.ts     # Haversine calculations
 │   │   ├── geocoding.ts    # Nominatim integration
 │   │   └── cache.ts        # IndexedDB operations
+│   ├── i18n/               # Internationalization
+│   │   ├── locales/        # Translation files (en, de, fr)
+│   │   └── config.ts       # i18next configuration
 │   ├── lib/                # Third-party configurations
 │   └── App.tsx             # Root component
 ├── server/                 # Backend proxy
 │   └── api/
 │       └── dify.ts         # POST /api/dify/run handler
 ├── public/                 # Static assets
+├── docs/                   # Documentation
+│   └── images/            # Documentation images
+│       └── dify-workflow.png  # Dify workflow diagram
 ├── .env.example            # Environment template
 ├── .env.local              # Local secrets (gitignored)
 └── package.json
@@ -527,6 +663,10 @@ npm run analyze          # Bundle size analysis
 
 # Database
 npm run db:clear         # Clear IndexedDB cache
+
+# Internationalization
+npm run i18n:extract     # Extract translation keys
+npm run i18n:validate    # Validate translation files
 ```
 
 ### Code Standards
@@ -556,6 +696,7 @@ export type AmenityCategory =
 2. Add Overpass query in `src/utils/amenities.ts`
 3. Update category icons in `src/components/amenities/CategoryIcon.tsx`
 4. Coordinate with Dify workflow to support new category in OSM plugin
+5. Add translations in `src/i18n/locales/`
 
 ---
 
@@ -572,7 +713,7 @@ export type AmenityCategory =
    # Test backend proxy
    curl -X POST http://localhost:5173/api/dify/run \
      -H "Content-Type: application/json" \
-     -d '{"mode":"chat","user_prompt":"test","location":{"lat":52.52,"lng":13.405},"radiusKm":3,"session_id":"test","user_id":1}'
+     -d '{"mode":"chat","user_prompt":"test","location":{"lat":52.52,"lng":13.405},"radiusKm":3,"transaction_type":"rent","session_id":"test","user_id":1,"locale":"en"}'
    ```
 
 2. **Verify Environment Variables**
@@ -582,7 +723,11 @@ export type AmenityCategory =
    echo $DIFY_WORKFLOW_API_KEY
    ```
 
-3. **Inspect Browser Console**
+3. **Check Transaction Type**
+   - Ensure you've selected either "Rent" or "Buy"
+   - Verify the `transaction_type` parameter is being sent correctly
+
+4. **Inspect Browser Console**
    - Look for `[Dify]` error logs
    - Check Network tab for failed `/api/dify/run` requests
    - Verify response structure matches schema
@@ -592,6 +737,7 @@ export type AmenityCategory =
 - Dify workflow not deployed or paused
 - Stream Estate API key not configured in Dify environment variables
 - Firewall blocking Dify API access
+- Incorrect transaction type filter
 
 ---
 
@@ -652,9 +798,61 @@ export type AmenityCategory =
 
 3. **Language Mismatch**
    - Ensure browser language matches recognition language
+   - Voice recognition adapts to selected app language (EN, DE, FR)
    - Override in `src/hooks/useVoice.ts` if needed
 
 **Fallback:** Use text input in Chat tab for all functionality.
+
+---
+
+### Language Not Switching
+
+**Symptoms:** UI remains in one language despite changing language setting
+
+**Solutions:**
+
+1. **Check i18next Configuration**
+   ```javascript
+   // In browser console
+   i18next.language; // Should match selected language
+   ```
+
+2. **Clear Browser Cache**
+   - Language preference cached in localStorage
+   - Clear cache: DevTools → Application → Local Storage
+
+3. **Translation Files Missing**
+   - Verify all translation files exist in `src/i18n/locales/`
+   - Check for missing keys in translation files
+
+4. **Restart Application**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+### Theme Not Persisting
+
+**Symptoms:** Theme resets to light/dark on page reload
+
+**Solutions:**
+
+1. **Check localStorage**
+   ```javascript
+   // In browser console
+   localStorage.getItem('theme'); // Should be 'light' or 'dark'
+   ```
+
+2. **Clear and Reset**
+   ```javascript
+   localStorage.removeItem('theme');
+   location.reload();
+   ```
+
+3. **Browser Incognito Mode**
+   - localStorage may be disabled in private browsing
+   - Use normal mode for persistence
 
 ---
 
@@ -742,6 +940,39 @@ export type AmenityCategory =
 
 ---
 
+### AI Chatbot Not Responding
+
+**Symptoms:** Chat messages sent but no AI response
+
+**Solutions:**
+
+1. **Check Network Connection**
+   - Verify internet connectivity
+   - Look for network errors in console
+
+2. **Verify Session State**
+   ```javascript
+   // In browser console
+   // Check if session_id and user_id are set
+   ```
+
+3. **Check Dify Workflow Status**
+   - Ensure Dify workflow is active
+   - Verify API key is valid
+   - Check Dify dashboard for errors
+
+4. **Clear Session and Retry**
+   - Use "New Conversation" button
+   - Or clear session: `npm run db:clear`
+
+**Common Causes:**
+- Network timeout
+- Dify API rate limiting
+- Invalid session state
+- Workflow configuration error
+
+---
+
 ## 🚢 Deployment
 
 ### Environment Variables
@@ -769,6 +1000,10 @@ VITE_ANALYTICS_ID=your_analytics_id
 # Feature Flags
 VITE_ENABLE_VOICE=true
 VITE_ENABLE_DEMO_MODE=true
+VITE_DEFAULT_LANGUAGE=en
+
+# Supported Languages
+VITE_SUPPORTED_LANGUAGES=en,de,fr
 ```
 
 ### Build Process
@@ -779,6 +1014,9 @@ npm ci --production=false
 
 # Type check
 npm run type-check
+
+# Validate translations
+npm run i18n:validate
 
 # Build optimized bundle
 npm run build
@@ -808,6 +1046,8 @@ npm run preview
 - [ ] Input validation on backend
 - [ ] CSP headers configured
 - [ ] Dependency vulnerabilities checked (`npm audit`)
+- [ ] XSS protection enabled
+- [ ] Session tokens encrypted
 
 ---
 
@@ -822,6 +1062,7 @@ npm run preview
   - Amenities: 7-day IndexedDB cache
   - Map tiles: Browser cache-control headers
   - Static assets: Fingerprinted filenames
+  - Language files: Lazy-loaded on demand
 - **API Efficiency**:
   - Request debouncing (300-500ms)
   - Stale request cancellation
@@ -830,6 +1071,7 @@ npm run preview
   - Virtual scrolling for long offer lists
   - React.memo for expensive components
   - Zustand selector optimization
+  - Framer Motion animation optimization
 
 ### Performance Metrics (Target)
 
@@ -840,8 +1082,14 @@ npm run preview
 | **Largest Contentful Paint** | < 2.5s | ~2.1s |
 | **Cumulative Layout Shift** | < 0.1 | ~0.05 |
 | **Search Response Time** | < 4s | ~3.2s |
+| **Language Switch Time** | < 200ms | ~150ms |
+| **Theme Toggle Time** | < 100ms | ~80ms |
 
 ---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information.
 
 ### Development Workflow
 
@@ -855,12 +1103,14 @@ npm run preview
 
 We're especially interested in contributions for:
 
-- 🌍 **Internationalization** (i18n support for additional languages)
-- 🎨 **UI/UX improvements** (accessibility, mobile optimizations)
-- 🔌 **Dify workflow enhancements** (new amenity categories, better ranking)
-- 📊 **Analytics integration** (user behavior insights)
-- 🧪 **Test coverage** (unit, integration, E2E tests)
-- 📖 **Documentation** (tutorials, API examples, video walkthroughs)
+- 🌍 **Internationalization** (Additional languages beyond EN, DE, FR)
+- 🎨 **UI/UX improvements** (Accessibility, mobile optimizations)
+- 🔌 **Dify workflow enhancements** (New amenity categories, better ranking)
+- 📊 **Analytics integration** (User behavior insights)
+- 🧪 **Test coverage** (Unit, integration, E2E tests)
+- 📖 **Documentation** (Tutorials, API examples, video walkthroughs)
+- 🤖 **AI chatbot improvements** (Better context understanding, more capabilities)
+- 🏠 **Property data sources** (Additional APIs, better coverage)
 
 ### Code Review Standards
 
@@ -870,6 +1120,7 @@ All contributions must:
 - Include tests for new features
 - Update documentation as needed
 - Follow existing code style and conventions
+- Add translations for all new user-facing text (EN, DE, FR)
 
 ---
 
@@ -883,6 +1134,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - Leaflet: BSD 2-Clause License
 - OpenStreetMap Data: ODbL License
 - Dify: Apache 2.0 License
+- shadcn/ui: MIT License
+- react-i18next: MIT License
 
 ---
 
@@ -892,7 +1145,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 Built with ❤️ during the **{Tech: Europe} Paris AI Hack** by:
 
-- **Rishabh Tiwari** – Founding Engineer, Full stack and UX implementation
+- **Rishabh Tiwari** – Founding Engineer, Full-stack and UX implementation
 - **Vladimir Vova** – Dify workflow architecture and OSM plugin development
 - **Alexandre Boving** – Full-stack integration and API design
 - **Quentin** – User testing
@@ -904,6 +1157,7 @@ Built with ❤️ during the **{Tech: Europe} Paris AI Hack** by:
 - **OpenStreetMap** contributors for comprehensive geospatial data
 - **Stream Estate** for providing live property listing APIs
 - **Lovable AI** for accelerating our UI development
+- **The open-source community** for the incredible tools and libraries
 
 ---
 
@@ -912,8 +1166,78 @@ Built with ❤️ during the **{Tech: Europe} Paris AI Hack** by:
 ### Get Help
 
 - **✉️ Email Support**: rishtiwari98@gmail.com
+- **🐛 Bug Reports**: [GitHub Issues](https://github.com/your-org/nestai-agent/issues)
+- **💡 Feature Requests**: [GitHub Discussions](https://github.com/your-org/nestai-agent/discussions)
+
+### Languages & Support
+
+NestAI Agent is available in:
+- 🇬🇧 **English** (EN)
+- 🇩🇪 **Deutsch** (DE)
+- 🇫🇷 **Français** (FR)
+
+Support is provided in all three languages.
 
 ---
+
+## 🗺️ Roadmap
+
+### Phase 1: Foundation ✅ (Current)
+- [x] Core chat-based property search
+- [x] Dify workflow with parallel processing
+- [x] OpenStreetMap amenity integration
+- [x] Voice-first interface
+- [x] Property comparison mode
+- [x] Rent and buy property support
+- [x] Multi-language support (EN, DE, FR)
+- [x] Dark and light theme modes
+- [x] Precision radius filtering (1km, 3km, 7km, 10km)
+- [x] AI-generated pros and cons
+- [x] Property rating system
+- [x] AI chatbot assistant
+
+### Phase 2: Intelligence (Q2 2026)
+- [ ] Personalized recommendation engine
+- [ ] Historical price trend analysis
+- [ ] Neighborhood safety scores
+- [ ] Commute time integration (Google Maps/OSRM)
+- [ ] Additional language support (ES, IT, PT)
+- [ ] Enhanced AI chatbot with predictive suggestions
+- [ ] Property alert system
+- [ ] Saved search preferences
+
+### Phase 3: Scale (Q3 2026)
+- [ ] Saved searches and email alerts
+- [ ] Collaborative search (family/roommate mode)
+- [ ] Mobile native apps (iOS/Android)
+- [ ] Integration with property management APIs
+- [ ] Virtual tour embedding
+- [ ] Mortgage calculator integration
+- [ ] Lease agreement assistance
+
+### Phase 4: Ecosystem (Q4 2026)
+- [ ] Public API for third-party integrations
+- [ ] Webhook support for new listings
+- [ ] White-label solution for real estate agencies
+- [ ] Advanced analytics dashboard
+- [ ] Machine learning-based ranking improvements
+- [ ] AI-powered neighborhood reports
+- [ ] Integration with moving services
+
+---
+
+<p align="center">
+  <strong>Ready to find your perfect home?</strong><br>
+  <a href="#-quick-start">Get Started Now</a> · 
+  <a href="https://demo.nestai.app">Try Live Demo</a> · 
+  <a href="https://github.com/your-org/nestai-agent/issues">Report Issues</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/stars/your-org/nestai-agent?style=social" alt="GitHub stars">
+  <img src="https://img.shields.io/github/forks/your-org/nestai-agent?style=social" alt="GitHub forks">
+  <img src="https://img.shields.io/github/watchers/your-org/nestai-agent?style=social" alt="GitHub watchers">
+</p>
 
 <p align="center">
   Made with ❤️ and ☕ by the NestAI Team<br>
@@ -923,3 +1247,7 @@ Built with ❤️ during the **{Tech: Europe} Paris AI Hack** by:
 ---
 
 **NestAI Agent** – *Because finding home should feel like coming home.*
+
+🏠 Select your location → 🏘️ Explore through the app → 🏠 Choose rent or buy → ✅ Make your decision
+
+**No agents. No additional research. Just your perfect home.**

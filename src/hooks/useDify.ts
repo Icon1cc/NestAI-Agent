@@ -276,6 +276,8 @@ export function useDify() {
     listings,
     difyAmenities,
     messages,
+    difyConversationId,
+    setDifyConversationId,
   } = useAppStore();
 
   const callDify = useCallback(async (
@@ -331,6 +333,7 @@ export function useDify() {
               query: combinedPrompt,
               user: userIdentity,
               response_mode: 'blocking',
+              conversation_id: difyConversationId || undefined,
             }
           : {
               inputs,
@@ -371,6 +374,16 @@ export function useDify() {
         DIFY_MODE === 'chat'
           ? raw?.data || raw
           : raw?.data?.outputs || raw?.outputs || raw;
+
+      // Capture conversation_id for subsequent chat calls (Dify chat API)
+      const conversationId =
+        raw?.conversation_id ||
+        raw?.data?.conversation_id ||
+        outputs?.conversation_id ||
+        raw?.id;
+      if (conversationId) {
+        setDifyConversationId(String(conversationId));
+      }
 
       // If answer is a JSON string, parse it to surface embedded offers/amenities
       let parsedFromAnswer: any | null = null;
@@ -530,7 +543,7 @@ export function useDify() {
       setIsLoading(false);
       return null;
     }
-  }, [location, sessionId, radiusKm, listingType, addMessage, setListings, setDifyAmenities, messages]);
+  }, [location, sessionId, radiusKm, listingType, addMessage, setListings, setDifyAmenities, messages, difyConversationId, setDifyConversationId]);
 
   // Resolve amenities for an offer
   const resolveOfferAmenities = useCallback((listing: Listing): DifyAmenity[] => {
