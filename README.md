@@ -99,6 +99,7 @@ NestAI isn't just a search tool—it's an **AI-powered relocation advisor** that
 - **Dify-powered advanced chat workflow** with conversation memory
 - **Parallel property enrichment** (6 concurrent threads) for instant results
 - **Custom OpenStreetMap plugin** for amenity discovery (groceries, parks, schools, transit, healthcare, fitness)
+- https://github.com/EraChanZ/dify-osm-plugin (AVAILABLE HERE)
 - **Structured AI evaluation** with JSON schema enforcement (match scores, pros, cons)
 - **Multi-model architecture**: GPT-4 for intent understanding, GPT-4o for property analysis
 
