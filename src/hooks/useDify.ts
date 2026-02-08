@@ -63,7 +63,26 @@ function normalizeOffer(raw: any, index: number): DifyOffer {
     ? Number(propertyIdRaw)
     : index + 1;
 
-  const rank = clamp01(Number(raw?.rank ?? raw?.score ?? 0.6));
+  // Prefer explicit match_score from Dify (typically 0-10 scale) then fall back to rank/score
+  const matchScoreRaw =
+    raw?.match_score ??
+    raw?.matchScore ??
+    raw?.matchscore;
+
+  let rank: number;
+  if (matchScoreRaw !== undefined && matchScoreRaw !== null && !Number.isNaN(Number(matchScoreRaw))) {
+    const matchScore = Number(matchScoreRaw);
+    // Handle common scales: 0-10 or 0-100. If already 0-1 we'll clamp below.
+    let normalized = matchScore;
+    if (matchScore > 1 && matchScore <= 10) {
+      normalized = matchScore / 10; // e.g., 8 -> 0.8 (80/100)
+    } else if (matchScore > 10) {
+      normalized = matchScore / 100; // e.g., 85 -> 0.85
+    }
+    rank = clamp01(normalized);
+  } else {
+    rank = clamp01(Number(raw?.rank ?? raw?.score ?? 0.6));
+  }
   const price = Number(raw?.price ?? raw?.amount ?? 0) || 0;
 
   // transaction_type: 1 = rent, 0 = buy (new mapping)
@@ -256,6 +275,7 @@ export function useDify() {
     setDifyAmenities,
     listings,
     difyAmenities,
+    messages,
   } = useAppStore();
 
   const callDify = useCallback(async (
@@ -267,6 +287,20 @@ export function useDify() {
       return null;
     }
 
+    // Build conversation-aware prompt (kept as plain string to avoid extra token objects)
+    const last = messages[messages.length - 1];
+    const historyWithLatest =
+      last && last.role === 'user' && last.content === userPrompt
+        ? messages
+        : [...messages, { role: 'user' as const, content: userPrompt }];
+
+    const historyString = historyWithLatest
+      .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+      .join('\n');
+    const combinedPrompt = historyString
+      ? `Conversation so far:\n${historyString}\n\nCurrent request: ${userPrompt}`
+      : userPrompt;
+
     setIsLoading(true);
     setError(null);
 
@@ -277,7 +311,7 @@ export function useDify() {
     const longitude = Number(location.lng);
     const radius = Number(radiusKm);
     const inputs: DifyRequest = {
-      user_prompt: userPrompt,
+      user_prompt: combinedPrompt,
       latitude,
       longitude,
       radius,
@@ -294,7 +328,7 @@ export function useDify() {
         DIFY_MODE === 'chat'
           ? {
               inputs,
-              query: userPrompt,
+              query: combinedPrompt,
               user: userIdentity,
               response_mode: 'blocking',
             }
@@ -369,6 +403,36 @@ export function useDify() {
 
       const normalizedOffers =
         filteredByType.length > 0 ? filteredByType : normalizedOffersAll;
+
+      // Short-circuit if the workflow signals "not passed" (ask for more info)
+      const passedFlagRaw = (outputs as any)?.passed ?? (outputs as any)?.llm_out?.passed;
+      const passedFlag = typeof passedFlagRaw === 'string'
+        ? passedFlagRaw.trim() !== '0'
+        : Boolean(passedFlagRaw ?? 1);
+
+      if (!passedFlag) {
+        const askMore =
+          outputs.result ||
+          outputs.assistant_text ||
+          outputs.text ||
+          outputs.answer ||
+          agentSummary ||
+          'Could you share a bit more so I can search effectively?';
+
+        const fallback: DifyResponse = {
+          assistant_text: askMore,
+          session_id: outputs.session_id || sessionId,
+          user_id: userId,
+          offers: [],
+          amenities: [],
+        };
+
+        addMessage({ role: 'assistant', content: askMore });
+        setDifyAmenities([]);
+        setListings([]);
+        setIsLoading(false);
+        return fallback;
+      }
 
       // Aggregate amenities from response or offers
       const aggregatedAmenities =
@@ -466,7 +530,7 @@ export function useDify() {
       setIsLoading(false);
       return null;
     }
-  }, [location, sessionId, radiusKm, listingType, addMessage, setListings, setDifyAmenities]);
+  }, [location, sessionId, radiusKm, listingType, addMessage, setListings, setDifyAmenities, messages]);
 
   // Resolve amenities for an offer
   const resolveOfferAmenities = useCallback((listing: Listing): DifyAmenity[] => {
