@@ -66,7 +66,7 @@ export default function Index() {
     // Add demo user prompt
     addMessage({
       role: 'user',
-      content: 'quiet area, parks nearby, good transit, budget under 1200',
+      content: 'quiet area, parks nearby, good transit, budget up to 1200',
     });
     
     // Fetch amenities - listings will be fetched by MainLayout's useEffect when demo mode triggers

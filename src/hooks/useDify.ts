@@ -157,12 +157,131 @@ const MOCK_AMENITIES: DifyAmenity[] = [
   { amenity_id: 15, lat: 48.8520, long: 2.3450, category: 'healtcare', description: 'Hôpital Hôtel-Dieu' },
 ];
 
+// Clamp helper
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+// Normalize any incoming offer shape to the DifyOffer contract used in the UI
+function normalizeOffer(raw: any, index: number): DifyOffer {
+  const lat =
+    raw?.lat ??
+    raw?.latitude ??
+    raw?.location?.lat ??
+    raw?.location_lat ??
+    0;
+
+  const lng =
+    raw?.lng ??
+    raw?.long ??
+    raw?.longitude ??
+    raw?.location?.lon ??
+    raw?.location?.lng ??
+    raw?.location_lng ??
+    0;
+
+  const propertyIdRaw = raw?.property_id ?? raw?.uuid ?? raw?.id ?? index + 1;
+  const property_id = Number.isFinite(Number(propertyIdRaw))
+    ? Number(propertyIdRaw)
+    : index + 1;
+
+  const rank = clamp01(Number(raw?.rank ?? raw?.score ?? 0.6));
+  const price = Number(raw?.price ?? raw?.amount ?? 0) || 0;
+
+  // transaction_type: 1 = rent, 0 = buy (new mapping)
+  const txNewRaw = raw?.transaction_type ?? raw?.transactiontype;
+  const transactionTypeNew =
+    txNewRaw === undefined || txNewRaw === null
+      ? undefined
+      : Number(txNewRaw);
+
+  // legacy transactionType: 0 = sale, 1 = rent
+  const txLegacyRaw = transactionTypeNew === undefined ? raw?.transactionType : undefined;
+  const transactionTypeLegacy =
+    txLegacyRaw === undefined || txLegacyRaw === null
+      ? undefined
+      : Number(txLegacyRaw);
+
+  // Prioritize explicit transaction_type signals over any rent_or_buy flag
+  let rent_or_buy: boolean;
+  if (transactionTypeNew === 1) {
+    rent_or_buy = true; // rent
+  } else if (transactionTypeNew === 0) {
+    rent_or_buy = false; // buy
+  } else if (transactionTypeLegacy === 1) {
+    rent_or_buy = true; // rent (legacy)
+  } else if (transactionTypeLegacy === 0) {
+    rent_or_buy = false; // buy (legacy)
+  } else if (typeof raw?.rent_or_buy === 'string') {
+    rent_or_buy = raw.rent_or_buy.toLowerCase() !== 'buy';
+  } else if (typeof raw?.rent_or_buy === 'boolean') {
+    rent_or_buy = raw.rent_or_buy;
+  } else {
+    rent_or_buy = true; // default to rent if unknown
+  }
+
+  const photos: string[] = raw?.photos ?? raw?.images ?? [];
+
+  const summary =
+    raw?.analysis?.summary ??
+    raw?.summary ??
+    (typeof raw?.description === 'string'
+      ? raw.description.slice(0, 240)
+      : undefined);
+
+  const closest_amenity_ids =
+    raw?.closest_amenity_ids ??
+    (Array.isArray(raw?.amenities)
+      ? raw.amenities
+          .map((a: any) => a?.amenity_id ?? a?.id)
+          .filter((id: any) => typeof id === 'number')
+      : []);
+
+  return {
+    property_id,
+    lat,
+    long: lng, // preserve Dify's `long` key; downstream normalizes to `lng`
+    rank,
+    photos,
+    price,
+    rent_or_buy,
+    adress:
+      raw?.adress ??
+      raw?.address ??
+      raw?.city ??
+      raw?.title ??
+      `Property ${property_id}`,
+    redirect_url: raw?.redirect_url ?? raw?.url,
+    nice_to_have: {
+      posted_date: raw?.posted_date ?? raw?.createdAt,
+      area_m2: raw?.area_m2 ?? raw?.surface,
+      rooms: raw?.rooms ?? raw?.bedrooms ?? raw?.room,
+      deposit: raw?.deposit,
+      furnished: raw?.furnished,
+      requirements: raw?.requirements,
+    },
+    analysis: {
+      summary,
+      pros: raw?.analysis?.pros ?? raw?.pros ?? [],
+      cons: raw?.analysis?.cons ?? raw?.cons ?? [],
+    },
+    closest_amenity_ids,
+  };
+}
+
 // Convert Dify offer to internal Listing format
-function difyOfferToListing(offer: DifyOffer, index: number): Listing {
+function difyOfferToListing(
+  offer: DifyOffer,
+  index: number,
+  listingTypeOverride?: ListingType
+): Listing {
   // Normalize lng from long/lng (Dify uses "long")
   const lng = offer.lng ?? offer.long ?? 0;
   const rank = offer.rank ?? 0;
   const score = Math.round(rank * 10); // 0-10 scale
+  let period: 'month' | 'total' = offer.rent_or_buy === true ? 'month' : 'total';
+  // If we're in buy mode but the offer claims rent, force purchase price display
+  if (listingTypeOverride === 'buy' && period === 'month') {
+    period = 'total';
+  }
   
   return {
     id: `dify-${offer.property_id || index}`,
@@ -170,7 +289,7 @@ function difyOfferToListing(offer: DifyOffer, index: number): Listing {
     price: {
       amount: offer.price || 0,
       currency: 'EUR',
-      period: offer.rent_or_buy === true ? 'month' : 'total',
+      period,
     },
     address: offer.adress || '',
     lat: offer.lat || 0,
@@ -218,6 +337,7 @@ export function useDify() {
     priceMin, 
     priceMax,
     countryCode,
+    listingType,
     addMessage,
     setListings,
     setDifyAmenities,
@@ -242,7 +362,7 @@ export function useDify() {
     // Generate appropriate assistant text
     let assistantText = '';
     if (!hasBudget && !userPrompt.toLowerCase().includes('budget')) {
-      assistantText = `I found some great options matching "${userPrompt}" in the area! To narrow down the best matches, what's your monthly budget? You can use the quick chips below or tell me directly.`;
+      assistantText = `I found some great options matching "${userPrompt}" in the area! To narrow down the best matches, what's your monthly budget?`;
     } else {
       const budgetText = hasBudget ? ` within your €${priceMax} budget` : '';
       assistantText = `Based on your preferences for "${userPrompt}"${budgetText}, I found ${filteredOffers.length} properties. They're ranked by how well they match your criteria - quiet areas, park access, and transit connections. The top match scores 92/100 and is in Prenzlauer Berg!`;
@@ -288,7 +408,9 @@ export function useDify() {
       
       // Convert offers to listings
       if (mockResponse.offers && mockResponse.offers.length > 0) {
-        const listingsData = mockResponse.offers.map((offer, i) => difyOfferToListing(offer, i));
+        const listingsData = mockResponse.offers.map((offer, i) =>
+          difyOfferToListing(offer, i, listingType)
+        );
         setListings(listingsData);
       }
 
@@ -297,24 +419,17 @@ export function useDify() {
     }
 
     // Real API call (for when backend is connected)
-    // Build inputs object expected by Dify workflow/chat
+    // Build minimal inputs object required by Dify backend
+    const transactionType: 0 | 1 = listingType === 'rent' ? 1 : 0; // 1 = rent, 0 = buy (current Dify mapping)
+    const latitude = Math.trunc(Number(location.lat));
+    const longitude = Math.trunc(Number(location.lng));
+    const radius = Math.trunc(Number(radiusKm));
     const inputs: DifyRequest = {
-      mode,
       user_prompt: userPrompt,
-      session_id: sessionId,
-      user_id: userId,
-      locale: navigator.language?.split('-')[0] || 'en',
-      countryCode: countryCode || 'DE',
-      price_min: priceMin,
-      price_max: priceMax,
-      // Some Dify workflows expect `radius`; keep `radiusKm` for internal use and send both
-      radius: radiusKm,
-      radiusKm,
-      latitude: location.lat,
-      longitude: location.lng,
-      location_lat: location.lat,
-      location_lng: location.lng,
-      location: { lat: location.lat, lng: location.lng },
+      latitude,
+      longitude,
+      radius,
+      transaction_type: transactionType,
     };
 
     try {
@@ -322,7 +437,7 @@ export function useDify() {
         throw new Error('Missing VITE_DIFY_API_KEY');
       }
 
-      const userIdentity = String(userId || sessionId || 'web-user');
+      const userIdentity = String(sessionId || 'web-user');
       const payload =
         DIFY_MODE === 'chat'
           ? {
@@ -358,15 +473,44 @@ export function useDify() {
       }
 
       const raw = await response.json();
+
+      // Bubble up workflow-level failures returned with 200 status
+      const rawStatus = raw?.status || raw?.data?.status;
+      const rawError = raw?.error || raw?.data?.error;
+      if (rawStatus === 'failed' || rawError) {
+        throw new Error(rawError || 'Dify workflow failed');
+      }
+
       const outputs =
         DIFY_MODE === 'chat'
           ? raw?.data || raw
           : raw?.data?.outputs || raw?.outputs || raw;
+
+      // Accept either `offers` or a generic `result` array from the workflow
+      const rawOffers = Array.isArray(outputs?.offers)
+        ? outputs.offers
+        : Array.isArray(outputs?.result)
+          ? outputs.result
+          : [];
+
+      const normalizedOffersAll = rawOffers.map((offer: any, i: number) =>
+        normalizeOffer(offer, i)
+      );
+
+      // Prefer matching listingType, but fall back to showing all if filter would empty results
+      const filteredByType = normalizedOffersAll.filter((offer: DifyOffer) => {
+        if (listingType === 'rent') return offer.rent_or_buy !== false; // keep rentals/unknown
+        return offer.rent_or_buy === false; // buy only
+      });
+
+      const normalizedOffers =
+        filteredByType.length > 0 ? filteredByType : normalizedOffersAll;
+
       const data: DifyResponse = {
         assistant_text: outputs.assistant_text || outputs.text || outputs.answer,
         session_id: outputs.session_id || sessionId,
         user_id: userId,
-        offers: outputs.offers || [],
+        offers: normalizedOffers,
         amenities: outputs.amenities || [],
       };
       
@@ -382,7 +526,9 @@ export function useDify() {
       
       // Convert offers to listings
       if (data.offers && data.offers.length > 0) {
-        const listingsData = data.offers.map((offer, i) => difyOfferToListing(offer, i));
+        const listingsData = data.offers.map((offer, i) =>
+          difyOfferToListing(offer, i, listingType)
+        );
         setListings(listingsData);
       }
 
@@ -403,7 +549,9 @@ export function useDify() {
       }
       
       if (mockResponse.offers.length > 0) {
-        const listingsData = mockResponse.offers.map((offer, i) => difyOfferToListing(offer, i));
+        const listingsData = mockResponse.offers.map((offer, i) =>
+          difyOfferToListing(offer, i, listingType)
+        );
         setListings(listingsData);
       }
       
@@ -411,7 +559,7 @@ export function useDify() {
       setIsLoading(false);
       return mockResponse;
     }
-  }, [location, sessionId, userId, radiusKm, priceMin, priceMax, countryCode, addMessage, setListings, setDifyAmenities, isDemoMode, getMockResponse]);
+  }, [location, sessionId, radiusKm, priceMin, priceMax, countryCode, listingType, addMessage, setListings, setDifyAmenities, isDemoMode, getMockResponse]);
 
   // Resolve amenities for an offer
   const resolveOfferAmenities = useCallback((listing: Listing): DifyAmenity[] => {

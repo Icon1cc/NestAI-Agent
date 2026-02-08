@@ -1,9 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Send, Sparkles, Loader2, MicOff, VolumeX, Home } from 'lucide-react';
+import { Mic, Send, Loader2, MicOff, VolumeX, Home } from 'lucide-react';
 import { useVoice } from '@/hooks/useVoice';
-import { useAppStore } from '@/store/appStore';
-import { BUDGET_CHIPS } from '@/types';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
@@ -12,12 +10,10 @@ interface ChatBarProps {
   onSearch: () => void;
   isLoading: boolean;
   hasLocation: boolean;
-  hasBudget?: boolean;
 }
 
-export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = false }: ChatBarProps) {
+export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarProps) {
   const [input, setInput] = useState('');
-  const { priceMax, setPriceRange, addMessage } = useAppStore();
   const t = useI18n();
   
   const { 
@@ -48,14 +44,6 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
     }
   };
 
-  const handleBudgetChipClick = (min: number, max: number) => {
-    setPriceRange(min, max);
-    // Send budget message
-    const budgetMessage = `My budget is ${min > 0 ? `€${min} to ` : 'under '}€${max}`;
-    addMessage({ role: 'user', content: budgetMessage });
-    onSend(budgetMessage);
-  };
-
   const handleMicClick = () => {
     if (isListening) {
       stopListening();
@@ -70,39 +58,12 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation, hasBudget = 
     }
   };
 
-  // Show budget chips if no budget set
-  const showBudgetChips = hasLocation && !hasBudget && priceMax === 0;
-
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className="w-full px-4 pb-4 pt-2 border-t border-border/40 bg-background/70 backdrop-blur-2xl"
     >
-      {/* Budget chips - shown when no budget is set */}
-      {showBudgetChips && (
-        <div className="mb-3">
-          <p className="text-xs text-muted-foreground mb-2">{t('set_budget')}</p>
-          <div className="flex gap-2 overflow-x-auto scrollbar-none">
-            {BUDGET_CHIPS.map((chip) => (
-              <button
-                key={chip.label}
-                onClick={() => handleBudgetChipClick(chip.min, chip.max)}
-                disabled={!hasLocation || isLoading}
-                className={cn(
-                  "flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
-                  "bg-accent/10 text-accent border border-accent/20",
-                  "hover:bg-accent/20 hover:border-accent/40",
-                  "disabled:opacity-50 disabled:pointer-events-none"
-                )}
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Input bar */}
       <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
         {/* Voice indicator */}

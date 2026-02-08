@@ -81,7 +81,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
   // Auto-trigger Dify for demo mode on first load
   useEffect(() => {
     if (isDemoMode && location && listings.length === 0 && !isDifyLoading) {
-      callDify('quiet area, parks nearby, good transit, budget under 1200');
+      callDify('quiet area, parks nearby, good transit, budget up to 1200');
     }
   }, [isDemoMode, location, listings.length, isDifyLoading, callDify]);
 
@@ -298,7 +298,6 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                     onSearch={handleSearch}
                     isLoading={isChatLoading || isDifyLoading}
                     hasLocation={!!location}
-                    hasBudget={priceMax > 0}
                   />
                 </motion.div>
               )}

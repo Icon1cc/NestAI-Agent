@@ -10,7 +10,6 @@ type TranslationKey =
   | 'no_offers_title'
   | 'no_offers_subtitle'
   | 'search_with_nestai'
-  | 'set_budget'
   | 'chat_placeholder'
   | 'search_homes'
   | 'loading_amenities'
@@ -110,11 +109,6 @@ const translations: Record<TranslationKey, Record<Language, string>> = {
     en: 'Search with NestAI',
     fr: 'Chercher avec NestAI',
     de: 'Mit NestAI suchen',
-  },
-  set_budget: {
-    en: 'Set your budget:',
-    fr: 'Fixez votre budget :',
-    de: 'Budget festlegen:',
   },
   chat_placeholder: {
     en: 'Ask anything',

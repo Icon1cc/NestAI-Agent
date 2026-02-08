@@ -161,13 +161,6 @@ export interface SearchFilters {
   moveInDate?: string;
 }
 
-// Budget quick chips
-export const BUDGET_CHIPS = [
-  { label: 'Under €800', min: 0, max: 800 },
-  { label: '€800-1200', min: 800, max: 1200 },
-  { label: '€1200-1600', min: 1200, max: 1600 },
-  { label: '€1600+', min: 1600, max: 999999 },
-] as const;
 
 // Dify integration
 export type DifyMode = 'chat' | 'compare';
@@ -178,23 +171,12 @@ export interface DifyMessage {
 }
 
 export interface DifyRequest {
-  mode: DifyMode;
   user_prompt: string;
-  session_id: string;
-  user_id: number;
-  locale: string;
-  countryCode: string;
-  price_min: number;
-  price_max: number;
-  // Some Dify workflows expect the field name "radius" instead of "radiusKm"
-  radius?: RadiusKm;
-  radiusKm: RadiusKm;
-  location: { lat: number; lng: number };
-  // Optional flattened coordinates for Dify apps that expect top-level lat/lng
-  latitude?: number;
-  longitude?: number;
-  location_lat?: number;
-  location_lng?: number;
+  latitude: number;
+  longitude: number;
+  radius: number;
+  // 1 = rent, 0 = buy (current Dify mapping)
+  transaction_type: 0 | 1;
 }
 
 // Updated compare request with full offer data
