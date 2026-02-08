@@ -25,7 +25,7 @@ npm run dev
 - Frontend calls `src/hooks/useDify.ts`.
 - It reads `VITE_DIFY_API_KEY` and `VITE_DIFY_ENDPOINT` from env.
 - Requests go directly to Dify with `Authorization: Bearer <key>`.
-- If the key/endpoint is missing or fails, the UI automatically falls back to built-in mock/demo data so the app stays usable.
+- If the key/endpoint is missing or fails, the UI will surface an error instead of loading mock data.
 
 ## Language Support
 - Languages available: English (EN), Français (FR), Deutsch (DE).

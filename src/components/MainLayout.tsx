@@ -33,9 +33,7 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     listingType,
     activeTab, 
     setActiveTab,
-    isDemoMode,
     messages,
-    priceMax,
     listings,
     selectedOfferId,
     setSelectedOfferId,
@@ -77,13 +75,6 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
       setPanelOpen(true);
     }
   }, [location, setPanelOpen]);
-
-  // Auto-trigger Dify for demo mode on first load
-  useEffect(() => {
-    if (isDemoMode && location && listings.length === 0 && !isDifyLoading) {
-      callDify('quiet area, parks nearby, good transit, budget up to 1200');
-    }
-  }, [isDemoMode, location, listings.length, isDifyLoading, callDify]);
 
   const handleSearch = useCallback(async () => {
     if (!location) return;
@@ -137,7 +128,8 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
     .slice(-1)[0]?.content;
 
   const showPanelControls = !!location;
-  const visibleMessages = messages;
+  // Only show the last few messages so the list doesn't push listings off-screen
+  const visibleMessages = messages.slice(-3);
 
   return (
     <div className="relative h-[calc(100vh-4rem)] pt-16">
@@ -246,44 +238,23 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
                         ? "border-primary text-primary"
                         : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
+                    >
+                      {t('amenities_tab')}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('chat')}
+                      className={cn(
+                        "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                      activeTab === 'chat'
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
                   >
-                    {t('amenities_tab')}
+                    Chat
                   </button>
                   </div>
 
-                  {/* Conversation preview */}
-                  {visibleMessages.length > 0 && (
-                    <div className="px-4 py-3 border-b border-border/60 bg-card/70 backdrop-blur">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-[0.08em]">
-                          Conversation
-                        </p>
-                        {messages.length > 8 && (
-                          <span className="text-[11px] text-muted-foreground">
-                            Scroll to see earlier messages
-                          </span>
-                        )}
-                      </div>
-                      <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                        {visibleMessages.map((msg, idx) => (
-                          <div
-                            key={idx}
-                            className={cn(
-                              "p-2.5 rounded-lg text-sm border",
-                              msg.role === 'user'
-                                ? "bg-primary/10 border-primary/20 text-foreground"
-                                : "bg-muted border-border text-foreground/90"
-                            )}
-                          >
-                            <p className="text-[11px] font-semibold text-muted-foreground mb-0.5">
-                              {msg.role === 'user' ? 'You' : 'NestAI'}
-                            </p>
-                            <p className="leading-snug break-words">{msg.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {/* Conversation preview is hidden; chat lives in its own tab */}
 
                   {/* Quick chips - only show when on listings tab */}
                   {activeTab === 'listings' && listings.length > 0 && (
@@ -308,32 +279,59 @@ export function MainLayout({ onChangeLocation }: MainLayoutProps) {
 
                   {/* Tab content */}
                   <div className="flex-1 overflow-y-auto min-h-0 bg-card/70 backdrop-blur">
-                    {activeTab === 'listings' ? (
+                    {activeTab === 'listings' && (
                       <ListingsPanel
                         listings={listings}
                         isLoading={isDifyLoading}
                         error={null}
                         onSearch={handleSearch}
-                        isDemoMode={isDemoMode}
                         assistantMessage={lastAssistantMessage}
                         onViewDetails={handleViewDetails}
                       />
-                    ) : (
+                    )}
+                    {activeTab === 'amenities' && (
                       <AmenitiesPanel
                         data={amenitiesData}
                         isLoading={isAmenitiesLoading}
                         error={amenitiesError}
                       />
                     )}
+                    {activeTab === 'chat' && (
+                      <div className="flex flex-col h-full">
+                        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                          {messages.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">Ask NestAI anything to get started.</p>
+                          ) : (
+                            messages.map((msg, idx) => (
+                              <div
+                                key={idx}
+                                className={cn(
+                                  "p-2.5 rounded-lg text-sm border",
+                                  msg.role === 'user'
+                                    ? "bg-primary/10 border-primary/20 text-foreground"
+                                    : "bg-muted border-border text-foreground/90"
+                                )}
+                              >
+                                <p className="text-[11px] font-semibold text-muted-foreground mb-0.5">
+                                  {msg.role === 'user' ? 'You' : 'NestAI'}
+                                </p>
+                                <p className="leading-snug break-words whitespace-pre-wrap">{msg.content}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        <div className="border-t border-border bg-card/80 backdrop-blur px-2 py-2">
+                          <ChatBar
+                            onSend={handleSendMessage}
+                            onSearch={handleSearch}
+                            isLoading={isChatLoading || isDifyLoading}
+                            hasLocation={!!location}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Chat bar */}
-                  <ChatBar
-                    onSend={handleSendMessage}
-                    onSearch={handleSearch}
-                    isLoading={isChatLoading || isDifyLoading}
-                    hasLocation={!!location}
-                  />
                 </motion.div>
               )}
             </AnimatePresence>

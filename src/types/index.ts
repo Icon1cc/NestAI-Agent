@@ -83,6 +83,7 @@ export interface Listing {
   cons?: string[];
   nice_to_have?: NiceToHave;
   closest_amenity_ids?: number[];
+  amenities?: DifyAmenity[];
 }
 
 // Dify offer schema (normalized from API)
@@ -101,6 +102,7 @@ export interface DifyOffer {
   nice_to_have?: NiceToHave;
   analysis: OfferAnalysis;
   closest_amenity_ids: number[];
+  amenities?: DifyAmenity[];
 }
 
 export interface ListingsResponse {
@@ -139,6 +141,10 @@ export interface DifyAmenity {
   long?: number; // Dify API uses 'long'
   category: AmenityCategory | 'healtcare'; // Handle Dify typo
   description: string;
+  name?: string;
+  address?: string;
+  distance?: number;
+  property_id?: number;
 }
 
 export interface AmenitiesData {
@@ -252,7 +258,7 @@ export interface AppState {
   isHistoryDrawerOpen: boolean;
   isCompareModalOpen: boolean;
   isSettingsOpen: boolean;
-  activeTab: 'amenities' | 'listings';
+  activeTab: 'amenities' | 'listings' | 'chat';
   
   // Data
   amenities: AmenitiesData | null;
@@ -278,9 +284,6 @@ export interface AppState {
   // Session
   sessionId: string;
   userId: number;
-  
-  // Demo mode
-  isDemoMode: boolean;
 }
 
 // Helper to normalize category from Dify (handles typos like "healtcare")

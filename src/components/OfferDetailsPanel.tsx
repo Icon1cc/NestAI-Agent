@@ -56,7 +56,9 @@ export function OfferDetailsPanel({ listing, onBack }: OfferDetailsPanelProps) {
       : 'nest-score-low';
 
   // Resolve amenities for this offer
-  const offerAmenities = resolveOfferAmenities(listing);
+  const offerAmenities = listing.amenities && listing.amenities.length > 0
+    ? listing.amenities
+    : resolveOfferAmenities(listing);
   
   // Group amenities by category
   const amenitiesByCategory = offerAmenities.reduce((acc, amenity) => {

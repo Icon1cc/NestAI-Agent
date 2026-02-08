@@ -20,6 +20,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const currentYear = new Date().getFullYear();
   const language = useAppStore((s) => s.language);
+  const isMapPickerOpen = useAppStore((s) => s.isMapPickerOpen);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -41,34 +42,38 @@ const App = () => {
           </Routes>
 
           {/* Global footer actions (inside Router so Links work) */}
-          <div className="fixed inset-x-0 bottom-4 z-40 flex items-center justify-center gap-3 px-4">
-            <div className="px-4 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm flex items-center gap-3">
-              <button
-                onClick={() => setContactOpen(true)}
-                className="font-medium text-foreground hover:text-primary transition-colors"
-              >
-                Contact
-              </button>
-              <span className="text-border">•</span>
-              <button
-                onClick={() => setAboutOpen(true)}
-                className="font-medium text-foreground hover:text-primary transition-colors"
-              >
-                About us
-              </button>
-              <span className="text-border">•</span>
-              <button
-                onClick={() => setTermsOpen(true)}
-                className="font-medium text-foreground hover:text-primary transition-colors"
-              >
-                Terms and conditions
-              </button>
-            </div>
-          </div>
+          {!isMapPickerOpen && (
+            <>
+              <div className="fixed inset-x-0 bottom-4 z-40 flex items-center justify-center gap-3 px-4">
+                <div className="px-4 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm flex items-center gap-3">
+                  <button
+                    onClick={() => setContactOpen(true)}
+                    className="font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    Contact
+                  </button>
+                  <span className="text-border">•</span>
+                  <button
+                    onClick={() => setAboutOpen(true)}
+                    className="font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    About us
+                  </button>
+                  <span className="text-border">•</span>
+                  <button
+                    onClick={() => setTermsOpen(true)}
+                    className="font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    Terms and conditions
+                  </button>
+                </div>
+              </div>
 
-          <div className="fixed left-4 bottom-4 z-40 px-3 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm pointer-events-none">
-            © {currentYear} NestAI Agent
-          </div>
+              <div className="fixed left-4 bottom-4 z-40 px-3 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm pointer-events-none">
+                © {currentYear} NestAI Agent
+              </div>
+            </>
+          )}
 
           <Dialog open={isContactOpen} onOpenChange={setContactOpen}>
             <DialogContent className="sm:max-w-md">

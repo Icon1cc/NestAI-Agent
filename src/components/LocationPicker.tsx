@@ -1,20 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Navigation, Sparkles, Loader2, AlertCircle, X } from 'lucide-react';
+import { Search, MapPin, Navigation, Loader2, AlertCircle, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useNominatimSearch } from '@/hooks/useNominatim';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useAppStore } from '@/store/appStore';
-import { cn } from '@/lib/utils';
 import type { NominatimResult } from '@/types';
 import { useI18n } from '@/lib/i18n';
 
 interface LocationPickerProps {
   onPickOnMap: () => void;
-  onDemoMode: () => void;
 }
 
-export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps) {
+export function LocationPicker({ onPickOnMap }: LocationPickerProps) {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const t = useI18n();
@@ -164,28 +162,6 @@ export function LocationPicker({ onPickOnMap, onDemoMode }: LocationPickerProps)
           >
             <MapPin className="w-4 h-4" />
             <span>{t('pick_on_map')}</span>
-          </button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
-            </div>
-          </div>
-
-          <button
-            onClick={onDemoMode}
-            className={cn(
-              "w-full h-12 rounded-xl font-medium transition-all duration-200",
-              "bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20",
-              "text-foreground hover:border-primary/40 hover:shadow-lg",
-              "flex items-center justify-center gap-2"
-            )}
-          >
-            <Sparkles className="w-4 h-4 text-accent" />
-            <span>{t('try_demo_mode')}</span>
           </button>
         </div>
 

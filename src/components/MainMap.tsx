@@ -216,6 +216,9 @@ export function MainMap({ listings, onRecenter, onChangeLocation, highlightedAme
   const activeHighlightIds = useMemo(() => {
     if (selectedOfferId) {
       const listing = listings.find(l => l.id === selectedOfferId);
+      if (listing?.amenities && listing.amenities.length > 0) {
+        return listing.amenities.map((a) => a.amenity_id);
+      }
       if (listing?.closest_amenity_ids) {
         return listing.closest_amenity_ids;
       }

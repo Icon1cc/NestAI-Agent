@@ -29,7 +29,6 @@ type TranslationKey =
   | 'search_placeholder'
   | 'use_my_location'
   | 'pick_on_map'
-  | 'try_demo_mode'
   | 'searching'
   | 'or'
   | 'quick_chip_quieter'
@@ -188,11 +187,6 @@ const translations: Record<TranslationKey, Record<Language, string>> = {
     en: 'Pick on map',
     fr: 'Choisir sur la carte',
     de: 'Auf der Karte wählen',
-  },
-  try_demo_mode: {
-    en: 'Try Demo Mode',
-    fr: 'Essayer le mode démo',
-    de: 'Demo-Modus ausprobieren',
   },
   searching: {
     en: 'Searching...',

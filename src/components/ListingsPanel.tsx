@@ -181,7 +181,6 @@ interface ListingsPanelProps {
   isLoading: boolean;
   error: string | null;
   onSearch: () => void;
-  isDemoMode: boolean;
   assistantMessage?: string;
   onViewDetails: (listingId: string) => void;
 }
@@ -191,7 +190,6 @@ export function ListingsPanel({
   isLoading, 
   error, 
   onSearch, 
-  isDemoMode, 
   assistantMessage,
   onViewDetails,
 }: ListingsPanelProps) {
@@ -263,7 +261,6 @@ export function ListingsPanel({
       <div className="flex items-center justify-between px-1">
         <h2 className="nest-section-title">
           {listings.length} {listingType === 'rent' ? t('rent') : t('buy')}
-          {isDemoMode && <span className="ml-2 text-accent">(Demo)</span>}
         </h2>
         {selectedOfferIds.length > 0 && (
           <p className="text-sm text-muted-foreground">

@@ -8,17 +8,6 @@ import { HistoryDrawer } from '@/components/HistoryDrawer';
 import { CompareModal } from '@/components/CompareModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { useAppStore } from '@/store/appStore';
-import { useAmenities } from '@/hooks/useAmenities';
-
-// Paris demo location as per spec (default is Paris)
-const PARIS_DEMO_LOCATION = {
-  label: 'Paris, France',
-  lat: 48.8566,
-  lng: 2.3522,
-  countryCode: 'FR',
-  city: 'Paris',
-  country: 'France',
-};
 
 export default function Index() {
   const {
@@ -33,17 +22,9 @@ export default function Index() {
     setCompareModalOpen,
     isSettingsOpen,
     setSettingsOpen,
-    setDemoMode,
     resetLocation,
-    radiusKm,
-    setRadiusKm,
-    setActiveTab,
-    setPriceRange,
-    addMessage,
     listings,
   } = useAppStore();
-
-  const { fetchAmenities } = useAmenities();
 
   // Apply dark mode on mount
   useEffect(() => {
@@ -55,25 +36,6 @@ export default function Index() {
   const handlePickOnMap = useCallback(() => {
     setMapPickerOpen(true);
   }, [setMapPickerOpen]);
-
-  const handleDemoMode = useCallback(async () => {
-    // Set demo mode with Paris location
-    setDemoMode(true);
-    setLocation(PARIS_DEMO_LOCATION);
-    setRadiusKm(3);
-    setPriceRange(0, 1200);
-    
-    // Add demo user prompt
-    addMessage({
-      role: 'user',
-      content: 'quiet area, parks nearby, good transit, budget up to 1200',
-    });
-    
-    // Fetch amenities - listings will be fetched by MainLayout's useEffect when demo mode triggers
-    await fetchAmenities(PARIS_DEMO_LOCATION, 3);
-    
-    setActiveTab('listings');
-  }, [setDemoMode, setLocation, setRadiusKm, setPriceRange, addMessage, fetchAmenities, setActiveTab]);
 
   const handleChangeLocation = useCallback(() => {
     resetLocation();
@@ -94,7 +56,6 @@ export default function Index() {
           >
             <LocationPicker
               onPickOnMap={handlePickOnMap}
-              onDemoMode={handleDemoMode}
             />
           </motion.div>
         ) : (

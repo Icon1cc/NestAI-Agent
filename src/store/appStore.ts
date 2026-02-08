@@ -49,8 +49,8 @@ interface AppStore {
   setCompareModalOpen: (open: boolean) => void;
   isSettingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
-  activeTab: 'amenities' | 'listings';
-  setActiveTab: (tab: 'amenities' | 'listings') => void;
+  activeTab: 'amenities' | 'listings' | 'chat';
+  setActiveTab: (tab: 'amenities' | 'listings' | 'chat') => void;
   language: 'en' | 'fr' | 'de';
   setLanguage: (lang: 'en' | 'fr' | 'de') => void;
   isPanelOpen: boolean;
@@ -83,10 +83,6 @@ interface AppStore {
   sessionId: string;
   userId: number;
   resetSession: () => void;
-  
-  // Demo mode
-  isDemoMode: boolean;
-  setDemoMode: (demo: boolean) => void;
   
   // Reset
   resetLocation: () => void;
@@ -199,10 +195,6 @@ export const useAppStore = create<AppStore>()(
         memorySummary: '',
       }),
       
-      // Demo mode
-      isDemoMode: false,
-      setDemoMode: (isDemoMode) => set({ isDemoMode }),
-      
       // Reset
       resetLocation: () => set({ 
         location: null, 
@@ -210,7 +202,6 @@ export const useAppStore = create<AppStore>()(
         listings: [], 
         selectedOfferIds: [],
         selectedOfferId: null,
-        isDemoMode: false,
         messages: [],
         priceMin: 0,
         priceMax: 0,
