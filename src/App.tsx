@@ -89,28 +89,36 @@ const App = () => {
                   href="mailto:rishtiwari98@gmail.com"
                 >
                   <span className="font-semibold">Rishabh Tiwari</span>
-                  <span className="text-muted-foreground">– rishtiwari98@gmail.com</span>
+                  <span className="text-muted-foreground">
+                    – rishtiwari98@gmail.com
+                  </span>
                 </a>
                 <a
                   className="nest-chip inline-flex items-center gap-2"
                   href="mailto:alexandre.boving@gmail.com"
                 >
                   <span className="font-semibold">Alexandre Boving</span>
-                  <span className="text-muted-foreground">– alexandre.boving@gmail.com</span>
+                  <span className="text-muted-foreground">
+                    – alexandre.boving@gmail.com
+                  </span>
                 </a>
                 <a
                   className="nest-chip inline-flex items-center gap-2"
                   href="mailto:hello@quentinrobert.com"
                 >
-                  <span className="font-semibold">Quentin Sachkov</span>
-                  <span className="text-muted-foreground">– hello@quentinrobert.com</span>
+                  <span className="font-semibold">Quentin Robert</span>
+                  <span className="text-muted-foreground">
+                    – hello@quentinrobert.com
+                  </span>
                 </a>
                 <a
                   className="nest-chip inline-flex items-center gap-2"
                   href="mailto:vladimirsachkov2003@gmail.com"
                 >
                   <span className="font-semibold">Vladimir Sachkov</span>
-                  <span className="text-muted-foreground">– vladimirsachkov2003@gmail.com</span>
+                  <span className="text-muted-foreground">
+                    – vladimirsachkov2003@gmail.com
+                  </span>
                 </a>
               </div>
             </DialogContent>
@@ -126,19 +134,22 @@ const App = () => {
               </DialogHeader>
               <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
                 <p>
-                  NestAI helps anyone find the right home faster: we pair live listings
-                  with an AI copilot that understands your needs, weighs trade‑offs, and
-                  keeps the conversation going so you don’t lose context.
+                  NestAI helps anyone find the right home faster: we pair live
+                  listings with an AI copilot that understands your needs,
+                  weighs trade‑offs, and keeps the conversation going so you
+                  don’t lose context.
                 </p>
                 <p>
-                  Under the hood, we combine real-time property feeds, neighborhood data
-                  (transit, parks, schools, safety), and your personal constraints to
-                  surface matches, not just results. You can ask follow-up questions,
-                  compare options, and explore on a map without starting over.
+                  Under the hood, we combine real-time property feeds,
+                  neighborhood data (transit, parks, schools, safety), and your
+                  personal constraints to surface matches, not just results. You
+                  can ask follow-up questions, compare options, and explore on a
+                  map without starting over.
                 </p>
                 <p>
-                  Our team blends product, data, and real-estate experience to deliver a
-                  calm, transparent search experience for renters and buyers alike.
+                  Our team blends product, data, and real-estate experience to
+                  deliver a calm, transparent search experience for renters and
+                  buyers alike.
                 </p>
               </div>
             </DialogContent>
