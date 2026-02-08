@@ -48,11 +48,12 @@ npm run preview    # preview the build
 ---
 
 ## 3) How the app works (data flow)
+
 ```mermaid
-flowchart TD
+graph TD
   UI[User UI (Map + Tabs)] -->|search/chat| DIFY[useDify hook]
-  DIFY -->|POST latitude/longitude/radius/transaction_type| API[Dify API]
-  API -->|offers + amenities| DIFY
+  DIFY -->|POST lat/lng/radius/transaction_type| API[Dify API]
+  API -->|offers & amenities| DIFY
   DIFY -->|normalize + distance filter| STORE[Zustand store]
   STORE --> MAP[Leaflet map markers]
   STORE --> OFFERS[Offers tab]
