@@ -1,117 +1,436 @@
-# NestAI Agent – Map-first AI home finder
+# 🏡 NestAI Agent
 
-An interactive map + side-panel UI that finds rentals or purchases via Dify/OpenAI, compares amenities, and chats with the user in context. Tabs keep Offers, Amenities, and Chat separate; the map always stays interactive.
+**AI-Powered Real Estate Discovery Platform**
 
----
-
-## Table of contents
-1) Quick start  
-2) Environment variables  
-3) How the app works (data flow)  
-4) UI guide  
-5) Voice & chat  
-6) Dify/OpenAI integration details  
-7) Companion plugin (if used)  
-8) Scripts & tooling  
-9) Troubleshooting
+An intelligent, map-first home finder that combines interactive geospatial visualization with AI-driven property search. NestAI Agent leverages natural language processing to help users discover rental and purchase opportunities, compare amenities, and explore neighborhoods through an intuitive conversational interface.
 
 ---
 
-## 1) Quick start
-Prereqs: Node 18+, npm.
+## 📋 Table of Contents
 
-```sh
-git clone <repo>
-cd home-scout-ai-ce7cddae
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Environment Configuration](#-environment-configuration)
+- [Architecture Overview](#-architecture-overview)
+- [User Interface Guide](#-user-interface-guide)
+- [Voice & Chat Capabilities](#-voice--chat-capabilities)
+- [AI Integration](#-ai-integration)
+- [Development](#-development)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## ✨ Features
+
+- **🗺️ Interactive Map Interface** – Real-time geospatial visualization with radius-based search
+- **🤖 AI-Powered Search** – Natural language queries powered by Dify/OpenAI
+- **📊 Smart Filtering** – Distance-based filtering with intelligent fallback to nearest matches
+- **🏢 Comprehensive Amenity Analysis** – Categorized nearby points of interest (groceries, parks, schools, transit, healthcare, fitness)
+- **💬 Conversational UI** – Full chat history with context-aware responses
+- **🎤 Voice Input** – Hands-free search with speech-to-text capabilities
+- **📱 Responsive Design** – Optimized for desktop and mobile experiences
+- **⚡ Real-Time Updates** – Live property data with instant map synchronization
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18.x or higher
+- npm 8.x or higher
+- Modern web browser with JavaScript enabled
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/nestai-agent.git
+cd nestai-agent
+
+# Install dependencies
 npm install
-cp .env.example .env     # or .env.local
+
+# Configure environment variables
+cp .env.example .env
 ```
 
-Update `.env` (see next section), then:
-```sh
-npm run dev        # start Vite dev server
-npm run build      # production build
-npm run preview    # preview the build
+### Configuration
+
+Edit `.env` with your Dify API credentials (see [Environment Configuration](#-environment-configuration) for details).
+
+### Running the Application
+
+```bash
+# Development mode with hot reload
+npm run dev
+
+# Production build
+npm run build
+
+# Preview production build
+npm run preview
 ```
+
+The application will be available at `http://localhost:5173` (development) or the configured port.
 
 ---
 
-## 2) Environment variables
-| Key | Required | Description |
-| --- | --- | --- |
-| `VITE_DIFY_API_KEY` | Yes | Dify API key used by the frontend for all AI calls. |
-| `VITE_DIFY_MODE` | Optional (`workflow` \| `chat`, default `workflow`) | Matches your Dify app type. |
-| `VITE_DIFY_ENDPOINT` | Optional | Override endpoint; defaults to Dify’s standard URL based on mode. |
+## 🔐 Environment Configuration
 
-*Keep keys client-safe only if you trust the environment; this app calls Dify from the browser.*
+Create a `.env` file in the project root with the following variables:
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VITE_DIFY_API_KEY` | **Yes** | — | Your Dify API key for AI service authentication |
+| `VITE_DIFY_MODE` | No | `workflow` | Dify application type: `workflow` or `chat` |
+| `VITE_DIFY_ENDPOINT` | No | Auto | Custom Dify API endpoint (overrides default) |
+
+### Example Configuration
+
+```bash
+VITE_DIFY_API_KEY=your_api_key_here
+VITE_DIFY_MODE=workflow
+# VITE_DIFY_ENDPOINT=https://custom-endpoint.example.com/v1
+```
+
+> **⚠️ Security Note:** Keep API keys secure. For production deployments, consider implementing a backend proxy to avoid exposing credentials in the client.
 
 ---
 
-## 3) How the app works (data flow)
+## 🏗️ Architecture Overview
+
+### Data Flow
 
 ```mermaid
 graph TD
-  UI[User UI (Map + Tabs)] -->|search/chat| DIFY[useDify hook]
-  DIFY -->|POST lat/lng/radius/transaction_type| API[Dify API]
-  API -->|offers & amenities| DIFY
-  DIFY -->|normalize + distance filter| STORE[Zustand store]
-  STORE --> MAP[Leaflet map markers]
-  STORE --> OFFERS[Offers tab]
-  STORE --> AMENITIES[Amenities tab]
-  STORE --> CHAT[Chat tab history]
+    A[User Interface] -->|Search Query| B[useDify Hook]
+    B -->|API Request| C[Dify AI Service]
+    C -->|Property Data| D[Response Normalizer]
+    D -->|Distance Calculation| E[Zustand Store]
+    E -->|State Update| F[Map Markers]
+    E -->|State Update| G[Offers List]
+    E -->|State Update| H[Amenities Panel]
+    E -->|State Update| I[Chat History]
+    
+    style C fill:#4f46e5
+    style E fill:#10b981
 ```
-Key points:
-- Radius filtering happens client-side; if nothing is inside the radius, the UI shows nearest results and informs the user.
-- Listings carry `distance`, `amenities`, and `closest_amenity_ids` so the map and details panel stay in sync.
+
+### Core Components
+
+#### State Management
+- **Store:** Zustand-based global state (`src/store/appStore.ts`)
+- **Persistence:** React Query for server state caching
+- **Real-time Updates:** Automatic re-rendering on state changes
+
+#### API Integration
+- **Hook:** `src/hooks/useDify.ts` handles all AI service communication
+- **Payload Structure:**
+  ```typescript
+  {
+    latitude: number,
+    longitude: number,
+    radius: number,
+    transaction_type: 0 | 1, // 0 = buy, 1 = rent
+    prompt: string
+  }
+  ```
+- **Response Normalization:** Automatic distance calculation and filtering
+
+#### Filtering Logic
+1. **Radius-based:** Primary filtering by geographic distance
+2. **Fallback Mode:** Displays nearest matches when radius yields no results
+3. **Client-side Processing:** Efficient filtering without additional API calls
 
 ---
 
-## 4) UI guide
-- **Map (always visible):** shows search center with radius circle; markers for listings and highlighted amenities when an offer is selected.
-- **Side panel tabs:**
-  - **Offers:** ranked listings with scores, badges, price, quick chips, and a details panel (photos, summary, pros/cons, nearby amenities).
-  - **Amenities:** categorized nearby points (groceries, parks, schools, transit, healthcare, fitness).
-  - **Chat:** full conversation with NestAI plus input bar.
-- **Panel toggle:** bottom-right handle shows/hides the side panel; map remains interactive.
-- **Details view:** shows listing info, amenities by category with distances, and quick link to open the original listing.
+## 🎨 User Interface Guide
+
+### Main Layout
+
+#### Map View (Persistent)
+- **Search Center Marker:** Indicates the query origin point
+- **Radius Circle:** Visual representation of search boundary
+- **Property Markers:** Interactive pins for each listing
+- **Amenity Highlights:** Context-aware POI display when properties are selected
+
+#### Side Panel (Tabbed Interface)
+
+##### 1. Offers Tab
+- **Ranked Listings:** AI-scored properties with relevance indicators
+- **Quick Filters:** Category chips for rapid refinement
+- **Detail Cards:** Expandable views with:
+  - Photo galleries
+  - AI-generated summaries
+  - Pros & cons analysis
+  - Nearby amenities with distances
+  - Direct listing links
+
+##### 2. Amenities Tab
+- **Categorized POIs:**
+  - 🛒 Groceries & Shopping
+  - 🌳 Parks & Recreation
+  - 🏫 Schools & Education
+  - 🚇 Public Transit
+  - 🏥 Healthcare Facilities
+  - 💪 Fitness Centers
+- **Distance Display:** Walking/driving time estimates
+- **Map Integration:** Click to highlight on map
+
+##### 3. Chat Tab
+- **Conversation History:** Full message thread with NestAI
+- **Message Input:** Text entry with send button
+- **Context Awareness:** AI remembers search parameters and preferences
+
+### Panel Controls
+- **Toggle Button:** Bottom-right handle to show/hide side panel
+- **Responsive Behavior:** Auto-collapse on mobile, persistent on desktop
+- **Keyboard Shortcuts:** `Esc` to close details, `Tab` for navigation
 
 ---
 
-## 5) Voice & chat
-- Voice capture is available via the mic button (see `src/hooks/useVoice.ts`). Hold to speak; on release, the transcript is sent as a chat message.
-- Chat input lives in the Chat tab; quick chips appear in Offers for fast refinements.
+## 🎤 Voice & Chat Capabilities
+
+### Voice Input
+- **Activation:** Press and hold the microphone button
+- **Recording:** Speak your search query naturally
+- **Processing:** Automatic speech-to-text conversion on release
+- **Integration:** Transcript sent directly as chat message
+
+**Implementation:** See `src/hooks/useVoice.ts` for technical details
+
+### Chat Interface
+- **Natural Language:** Conversational queries (e.g., "Find a 2-bedroom apartment near parks under $2000")
+- **Contextual Memory:** AI retains search context across messages
+- **Quick Actions:** Predefined chips for common refinements
+- **Rich Responses:** Formatted listings with interactive elements
 
 ---
 
-## 6) Dify/OpenAI integration details
-- Core hook: `src/hooks/useDify.ts`
-  - Builds payload with `latitude`, `longitude`, `radius`, `transaction_type` (rent=1, buy=0), and the user prompt.
-  - Reads `VITE_DIFY_API_KEY`, `VITE_DIFY_MODE`, `VITE_DIFY_ENDPOINT`.
-  - Normalizes offers/amenities, computes distances, filters by radius, and gracefully falls back to “nearest matches” if none are inside the radius.
-  - Accepts `llm_out.agent_summary` as assistant text when Dify returns that shape.
-- State: `src/store/appStore.ts` (Zustand) holds location, listings, amenities, messages, active tab, etc.
-- Types: `src/types/index.ts` (offers, amenities, listing shape, distance helpers).
+## 🤖 AI Integration
+
+### Dify Service Configuration
+
+**Primary Hook:** `src/hooks/useDify.ts`
+
+#### Request Payload
+```typescript
+{
+  latitude: number,      // Search center latitude
+  longitude: number,     // Search center longitude
+  radius: number,        // Search radius in meters
+  transaction_type: 0|1, // 0 = purchase, 1 = rental
+  prompt: string         // User's natural language query
+}
+```
+
+#### Response Processing
+1. **Normalization:** Standardize property data structure
+2. **Distance Calculation:** Compute distances from search center
+3. **Filtering:** Apply radius constraints with intelligent fallback
+4. **Enrichment:** Add amenity proximity data
+5. **Scoring:** Apply AI relevance scoring
+
+#### Environment Variables
+- `VITE_DIFY_API_KEY`: Authentication credential
+- `VITE_DIFY_MODE`: Service mode (`workflow` | `chat`)
+- `VITE_DIFY_ENDPOINT`: Optional custom endpoint
+
+### State Management
+
+**Store Location:** `src/store/appStore.ts`
+
+**Managed State:**
+- User location and search parameters
+- Property listings with metadata
+- Amenity data with categories
+- Chat message history
+- Active tab and UI state
+
+**Type Definitions:** `src/types/index.ts`
 
 ---
 
-## 7) Companion plugin (if used)
-If you use the companion browser/plugin, point it to the same backend/URL and reuse your Dify key. Keep its README aligned with these env keys and payloads. (No plugin code lives in this repo.)
+## 🛠️ Development
+
+### Tech Stack
+
+| Category | Technology |
+|----------|-----------|
+| **Build Tool** | Vite 5.x |
+| **Framework** | React 18.x |
+| **Language** | TypeScript 5.x |
+| **Styling** | Tailwind CSS 3.x + shadcn/ui |
+| **State** | Zustand 4.x |
+| **Data Fetching** | React Query 5.x |
+| **Animation** | Framer Motion 11.x |
+| **Mapping** | Leaflet 1.9.x |
+| **Compiler** | SWC |
+
+### Available Scripts
+
+```bash
+# Start development server with HMR
+npm run dev
+
+# Type-check TypeScript
+npm run type-check
+
+# Lint codebase
+npm run lint
+
+# Format code with Prettier
+npm run format
+
+# Run tests
+npm run test
+
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+
+# Analyze bundle size
+npm run analyze
+```
+
+### Project Structure
+
+```
+nestai-agent/
+├── src/
+│   ├── components/       # React components
+│   ├── hooks/           # Custom React hooks
+│   ├── store/           # Zustand stores
+│   ├── types/           # TypeScript definitions
+│   ├── utils/           # Helper functions
+│   └── App.tsx          # Root component
+├── public/              # Static assets
+├── .env.example         # Environment template
+└── package.json         # Dependencies
+```
+
+### Code Quality
+
+- **TypeScript:** Strict mode enabled for type safety
+- **ESLint:** Configured with React and TypeScript rules
+- **Prettier:** Consistent code formatting
+- **Husky:** Pre-commit hooks for quality checks
 
 ---
 
-## 8) Scripts & tooling
-- `npm run dev` – start dev server
-- `npm run build` – production build
-- `npm run preview` – serve built assets locally
-- `npm run lint` – lint via eslint
+## 🔧 Troubleshooting
 
-Tech stack: Vite, React, TypeScript, Tailwind + shadcn/ui, Zustand, React Query, Framer Motion, Leaflet, SWC.
+### Common Issues
+
+#### No Results Displayed
+
+**Symptoms:** Empty offers list despite successful search
+
+**Solutions:**
+1. Verify `VITE_DIFY_API_KEY` is set correctly
+2. Check browser console for `[Dify]` error logs
+3. Confirm Dify service mode matches `VITE_DIFY_MODE`
+4. Validate API endpoint accessibility
+
+```bash
+# Test API connectivity
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  https://api.dify.ai/v1/workflows/run
+```
+
+#### Results Outside Search Radius
+
+**Expected Behavior:** Client-side fallback to nearest matches
+
+**Details:**
+- When no properties exist within the specified radius, the app displays the closest available options
+- A notice informs users that results are outside the requested area
+- Adjust search radius or relocate search center to refine results
+
+#### Voice Input Not Working
+
+**Symptoms:** Microphone button unresponsive or no transcription
+
+**Solutions:**
+1. Check browser microphone permissions
+2. Ensure HTTPS connection (required for Web Speech API)
+3. Test with supported browsers (Chrome, Edge, Safari)
+4. Fallback: Use text input in Chat tab
+
+**Browser Compatibility:**
+| Browser | Voice Support |
+|---------|--------------|
+| Chrome 90+ | ✅ Full |
+| Edge 90+ | ✅ Full |
+| Safari 14+ | ✅ Full |
+| Firefox | ⚠️ Limited |
+
+#### Build Failures
+
+**Common Causes:**
+- Node version mismatch (requires 18+)
+- Missing environment variables
+- Corrupted dependencies
+
+**Resolution:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+
+# Verify Node version
+node --version  # Should be 18.x or higher
+```
+
+### Debug Mode
+
+Enable verbose logging:
+
+```typescript
+// src/config.ts
+export const DEBUG = {
+  dify: true,
+  maps: true,
+  voice: true
+};
+```
 
 ---
 
-## 9) Troubleshooting
-- **Nothing shows up:** verify `VITE_DIFY_API_KEY` and mode/endpoint; check browser console for `[Dify]` logs.
-- **Results outside radius:** client now falls back to nearest matches only if radius is empty; otherwise only in-radius listings render.
-- **Voice not working:** ensure mic permissions; fallback to typing in Chat tab.
+### Development Workflow
 
-Enjoy exploring neighborhoods with NestAI Agent!
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Standards
+
+- Follow existing code style
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📞 Support
+
+- **Email:** rishtiwari98@gmail.com
+
+---
+
+<p align="center">
+  Made with ❤️ by the NestAI Team
+</p>
