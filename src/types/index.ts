@@ -186,8 +186,15 @@ export interface DifyRequest {
   countryCode: string;
   price_min: number;
   price_max: number;
+  // Some Dify workflows expect the field name "radius" instead of "radiusKm"
+  radius?: RadiusKm;
   radiusKm: RadiusKm;
   location: { lat: number; lng: number };
+  // Optional flattened coordinates for Dify apps that expect top-level lat/lng
+  latitude?: number;
+  longitude?: number;
+  location_lat?: number;
+  location_lng?: number;
 }
 
 // Updated compare request with full offer data

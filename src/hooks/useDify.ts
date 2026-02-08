@@ -192,8 +192,19 @@ function difyOfferToListing(offer: DifyOffer, index: number): Listing {
   };
 }
 
-// Placeholder API endpoint - would be replaced with actual backend
-const DIFY_ENDPOINT = '/api/dify/run';
+const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
+const DIFY_MODE = (import.meta.env.VITE_DIFY_MODE || 'workflow').toLowerCase(); // 'workflow' | 'chat'
+const defaultEndpoint =
+  DIFY_MODE === 'chat'
+    ? 'https://api.dify.ai/v1/chat-messages'
+    : 'https://api.dify.ai/v1/workflows/run';
+const rawEndpointEnv = import.meta.env.VITE_DIFY_ENDPOINT;
+
+// If env endpoint is provided and absolute, use it verbatim; else fall back to sensible default
+const DIFY_ENDPOINT =
+  rawEndpointEnv && rawEndpointEnv.startsWith('http')
+    ? rawEndpointEnv
+    : defaultEndpoint;
 
 export function useDify() {
   const [isLoading, setIsLoading] = useState(false);
@@ -286,7 +297,8 @@ export function useDify() {
     }
 
     // Real API call (for when backend is connected)
-    const request: DifyRequest = {
+    // Build inputs object expected by Dify workflow/chat
+    const inputs: DifyRequest = {
       mode,
       user_prompt: userPrompt,
       session_id: sessionId,
@@ -295,24 +307,68 @@ export function useDify() {
       countryCode: countryCode || 'DE',
       price_min: priceMin,
       price_max: priceMax,
+      // Some Dify workflows expect `radius`; keep `radiusKm` for internal use and send both
+      radius: radiusKm,
       radiusKm,
+      latitude: location.lat,
+      longitude: location.lng,
+      location_lat: location.lat,
+      location_lng: location.lng,
       location: { lat: location.lat, lng: location.lng },
     };
 
     try {
+      if (!DIFY_API_KEY) {
+        throw new Error('Missing VITE_DIFY_API_KEY');
+      }
+
+      const userIdentity = String(userId || sessionId || 'web-user');
+      const payload =
+        DIFY_MODE === 'chat'
+          ? {
+              inputs,
+              query: userPrompt,
+              user: userIdentity,
+              response_mode: 'blocking',
+            }
+          : {
+              inputs,
+              user: userIdentity,
+              response_mode: 'blocking',
+            };
+
       const response = await fetch(DIFY_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DIFY_API_KEY}`,
         },
-        body: JSON.stringify(request),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        let detail = '';
+        try {
+          const errJson = await response.json();
+          detail = errJson?.message || JSON.stringify(errJson);
+        } catch {
+          detail = await response.text();
+        }
+        throw new Error(`API error: ${response.status}${detail ? ` - ${detail}` : ''}`);
       }
 
-      const data: DifyResponse = await response.json();
+      const raw = await response.json();
+      const outputs =
+        DIFY_MODE === 'chat'
+          ? raw?.data || raw
+          : raw?.data?.outputs || raw?.outputs || raw;
+      const data: DifyResponse = {
+        assistant_text: outputs.assistant_text || outputs.text || outputs.answer,
+        session_id: outputs.session_id || sessionId,
+        user_id: userId,
+        offers: outputs.offers || [],
+        amenities: outputs.amenities || [],
+      };
       
       // Add assistant message
       if (data.assistant_text) {
@@ -429,16 +485,28 @@ export function useDify() {
     };
 
     try {
+      if (!DIFY_API_KEY) {
+        throw new Error('Missing VITE_DIFY_API_KEY');
+      }
+
       const response = await fetch(DIFY_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DIFY_API_KEY}`,
         },
         body: JSON.stringify(request),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        let detail = '';
+        try {
+          const errJson = await response.json();
+          detail = errJson?.message || JSON.stringify(errJson);
+        } catch {
+          detail = await response.text();
+        }
+        throw new Error(`API error: ${response.status}${detail ? ` - ${detail}` : ''}`);
       }
 
       const data: DifyCompareResponse = await response.json();

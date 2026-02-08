@@ -1,73 +1,48 @@
-# Welcome to your Lovable project
+# Home Scout AI — Setup & Usage
 
-## Project info
+## Prerequisites
+- Node 18+ and npm
+- A Dify API key (for live AI results)
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+## Getting Started
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+npm install
+cp .env.example .env.local   # or .env
+```
+Edit `.env.local` and set:
+```
+VITE_DIFY_API_KEY=your-dify-api-key
+# Optional if you use a custom endpoint:
+# VITE_DIFY_ENDPOINT=https://api.dify.ai/v1/workflows/run
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Run the app:
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Dify Integration (how it works)
+- Frontend calls `src/hooks/useDify.ts`.
+- It reads `VITE_DIFY_API_KEY` and `VITE_DIFY_ENDPOINT` from env.
+- Requests go directly to Dify with `Authorization: Bearer <key>`.
+- If the key/endpoint is missing or fails, the UI automatically falls back to built-in mock/demo data so the app stays usable.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Language Support
+- Languages available: English (EN), Français (FR), Deutsch (DE).
+- Change language in Settings; it’s applied when you click “Done”.
+- `document.documentElement.lang` is set for accessibility/SEO.
 
-**Use GitHub Codespaces**
+## Panel & UI Notes
+- Right-hand panel can be shown/hidden via the bottom-right toggle on the panel area.
+- Map fills the screen when the panel is hidden.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Tech Stack
+- Vite + React + TypeScript
+- Tailwind + shadcn/ui
+- Zustand state, React Query, Framer Motion, Leaflet
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Quick Scripts
+- `npm run dev` – start local dev server
+- `npm run build` – production build
+- `npm run preview` – preview production build
+- `npm run lint` – linting

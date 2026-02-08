@@ -117,9 +117,9 @@ const translations: Record<TranslationKey, Record<Language, string>> = {
     de: 'Budget festlegen:',
   },
   chat_placeholder: {
-    en: "Ask about the area or describe what you're looking for...",
-    fr: 'Parlez du quartier ou décrivez votre recherche...',
-    de: 'Frag nach der Gegend oder beschreibe, was du suchst...',
+    en: 'Ask anything',
+    fr: 'Posez une question',
+    de: 'Frag mich was',
   },
   search_homes: {
     en: 'Search homes',
