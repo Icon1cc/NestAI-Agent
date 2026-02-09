@@ -1,0 +1,1371 @@
+app:
+  description: First Dify working application
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: Tech Europe
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.8@aae2be0913b8c6f0b80cff58e08d7a8b4c214569b41778413fcaea204561ff16
+    version: null
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: vladimirsachkov/openstreetmap:0.0.4@9a10888c401d7cfe57d10f22e838aff9ebc51715c460770ffd87405bb9fdcfdf
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: ''
+    id: 80a80250-6ff6-48d8-a16f-7d467312f09f
+    name: streamestate
+    selector:
+    - env
+    - streamestate
+    value: 205f83bebc7f9bd2787aef4f879ad2fe
+    value_type: string
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1770500314968-source-1770499631762-target
+      selected: false
+      source: '1770500314968'
+      sourceHandle: source
+      target: '1770499631762'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: end
+      id: 1770498067748-source-1770501248781-target
+      selected: false
+      source: '1770498067748'
+      sourceHandle: source
+      target: '1770501248781'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1770498067748-source-1770500314968-target
+      selected: false
+      source: '1770498067748'
+      sourceHandle: source
+      target: '1770500314968'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: iteration
+      id: 1770500314968-source-1770510109715-target
+      selected: false
+      source: '1770500314968'
+      sourceHandle: source
+      target: '1770510109715'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: iteration-start
+        targetType: code
+      id: 1770510109715start-source-1770511086636-target
+      selected: false
+      source: 1770510109715start
+      sourceHandle: source
+      target: '1770511086636'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: code
+        targetType: code
+      id: 1770511086636-source-1770512553764-target
+      selected: false
+      source: '1770511086636'
+      sourceHandle: source
+      target: '1770512553764'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInLoop: false
+        sourceType: iteration
+        targetType: end
+      id: 1770510109715-source-1770514619313-target
+      selected: false
+      source: '1770510109715'
+      sourceHandle: source
+      target: '1770514619313'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: code
+        targetType: tool
+      id: 1770511086636-source-1770520513794-target
+      selected: false
+      source: '1770511086636'
+      sourceHandle: source
+      target: '1770520513794'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: tool
+        targetType: code
+      id: 1770520513794-source-1770512553764-target
+      selected: false
+      source: '1770520513794'
+      sourceHandle: source
+      target: '1770512553764'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: code
+        targetType: template-transform
+      id: 1770512553764-source-1770536323989-target
+      source: '1770512553764'
+      sourceHandle: source
+      target: '1770536323989'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: template-transform
+        targetType: llm
+      id: 1770536323989--1770536416216-target
+      source: '1770536323989'
+      sourceHandle: source
+      target: '1770536416216'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: llm
+        targetType: code
+      id: 1770536416216-source-1770536537954-target
+      source: '1770536416216'
+      sourceHandle: source
+      target: '1770536537954'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        sourceType: code
+        targetType: code
+      id: 1770512553764-source-1770536537954-target
+      source: '1770512553764'
+      sourceHandle: source
+      target: '1770536537954'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: template-transform
+      id: 1770505719740-source-1770547305854-target
+      source: '1770505719740'
+      sourceHandle: source
+      target: '1770547305854'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: template-transform
+        targetType: llm
+      id: 1770547305854-source-1770547344065-target
+      source: '1770547305854'
+      sourceHandle: source
+      target: '1770547344065'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+      id: 1770547437472-true-1770498067748-target
+      source: '1770547437472'
+      sourceHandle: 'true'
+      target: '1770498067748'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: end
+      id: 1770547437472-false-1770547469917-target
+      source: '1770547437472'
+      sourceHandle: 'false'
+      target: '1770547469917'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1770547344065-source-1770548276619-target
+      selected: false
+      source: '1770547344065'
+      sourceHandle: source
+      target: '1770548276619'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1770548276619-source-1770547437472-target
+      source: '1770548276619'
+      sourceHandle: source
+      target: '1770547437472'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        authorization:
+          config:
+            api_key: '{{#env.streamestate#}}'
+            type: basic
+          type: no-auth
+        body:
+          data: []
+          type: none
+        headers: 'Content-Type:application/json
+
+          X-API-KEY:{{#env.streamestate#}}'
+        method: get
+        params: 'lat:{{#1770548276619.latitude#}}
+
+          lon:{{#1770548276619.longitude#}}
+
+          radius:{{#1770548276619.radius#}}
+
+          transactionType:{{#1770548276619.transaction_type#}}
+
+          propertyTypes[]:[0, 1]
+
+          itemsPerPage:5
+
+          withCoherentPrice:true
+
+          page:1'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP Request
+        type: http-request
+        url: https://api.stream.estate/documents/properties
+        variables: []
+      height: 137
+      id: '1770498067748'
+      position:
+        x: -490.19800755351787
+        y: 712.5806457193606
+      positionAbsolute:
+        x: -490.19800755351787
+        y: 712.5806457193606
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1770500314968'
+          - result
+          value_type: array[object]
+          variable: result
+        selected: false
+        title: Output
+        type: end
+      height: 88
+      id: '1770499631762'
+      position:
+        x: 470.5804804564559
+        y: 655.5165232290174
+      positionAbsolute:
+        x: 470.5804804564559
+        y: 655.5165232290174
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(api_response) -> dict:\n    \"\"\"Format Stream\
+          \ Estate API response into simplified property list\"\"\"\n    \n    # Parse\
+          \ JSON if response is a string\n    if isinstance(api_response, str):\n\
+          \        api_response = json.loads(api_response)\n    \n    # Extract properties\
+          \ from API response\n    properties = api_response.get('hydra:member', [])\n\
+          \    \n    # Format each property\n    formatted_properties = []\n    for\
+          \ prop in properties:\n        city = prop.get('city', {})\n        location\
+          \ = city.get('location', {})\n        advert = prop.get('adverts', [{}])[0]\
+          \ if prop.get('adverts') else {}\n        \n        formatted_properties.append({\n\
+          \            \"title\": prop.get('title'),\n            \"price\": prop.get('price'),\n\
+          \            \"surface\": prop.get('surface'),\n            \"bedrooms\"\
+          : prop.get('bedroom'),\n            \"city\": city.get('name'),\n      \
+          \      \"latitude\": location.get('lat'),\n            \"longitude\": location.get('lon'),\n\
+          \            \"description\": advert.get('description'),\n            \"\
+          images\": advert.get('pictures', []),\n            \"url\": advert.get('url',\
+          \ '')\n        })\n    \n    return {\"result\": formatted_properties}"
+        code_language: python3
+        outputs:
+          result:
+            children: null
+            type: array[object]
+        selected: false
+        title: Code
+        type: code
+        variables:
+        - value_selector:
+          - '1770498067748'
+          - body
+          value_type: string
+          variable: api_response
+      height: 52
+      id: '1770500314968'
+      position:
+        x: -150.57748737116594
+        y: 905.0909818467057
+      positionAbsolute:
+        x: -150.57748737116594
+        y: 905.0909818467057
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1770498067748'
+          - body
+          value_type: string
+          variable: body
+        selected: false
+        title: Output 2
+        type: end
+      height: 88
+      id: '1770501248781'
+      position:
+        x: 21.473983058197177
+        y: 570.3552322449326
+      positionAbsolute:
+        x: 21.473983058197177
+        y: 570.3552322449326
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        selected: false
+        title: User Input
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: latitude
+          options: []
+          placeholder: ''
+          required: true
+          type: number
+          variable: latitude
+        - default: ''
+          hint: ''
+          label: longitude
+          options: []
+          placeholder: ''
+          required: true
+          type: number
+          variable: longitude
+        - default: ''
+          hint: ''
+          label: radius
+          options: []
+          placeholder: ''
+          required: true
+          type: number
+          variable: radius
+        - default: ''
+          hint: ''
+          label: user prompt
+          max_length: 2048
+          options: []
+          placeholder: ''
+          required: true
+          type: paragraph
+          variable: user_prompt
+        - hint: ''
+          label: transaction type
+          options: []
+          placeholder: ''
+          required: true
+          type: number
+          variable: transaction_type
+      height: 213
+      id: '1770505719740'
+      position:
+        x: -2043.4216925731334
+        y: 496.05550262449435
+      positionAbsolute:
+        x: -2043.4216925731334
+        y: 496.05550262449435
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        error_handle_mode: terminated
+        flatten_output: true
+        height: 256.7084768070447
+        is_parallel: true
+        iterator_input_type: array[object]
+        iterator_selector:
+        - '1770500314968'
+        - result
+        output_selector:
+        - '1770536537954'
+        - result
+        output_type: array[object]
+        parallel_nums: 5
+        selected: false
+        start_node_id: 1770510109715start
+        title: Iteration
+        type: iteration
+        width: 1629.3341480569604
+      height: 257
+      id: '1770510109715'
+      position:
+        x: 167.08905370855882
+        y: 944.2322790403982
+      positionAbsolute:
+        x: 167.08905370855882
+        y: 944.2322790403982
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 1629
+      zIndex: 1
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      draggable: false
+      height: 48
+      id: 1770510109715start
+      parentId: '1770510109715'
+      position:
+        x: 24
+        y: 68
+      positionAbsolute:
+        x: 191.08905370855882
+        y: 1012.2322790403982
+      selectable: false
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      zIndex: 1002
+    - data:
+        code: "\ndef main(_property):\n    \n    return {\n        \"latitude\": _property[\"\
+          latitude\"],\n        \"longitude\": _property[\"longitude\"],\n       \
+          \ \"_property\": _property\n    }\n"
+        code_language: python3
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        outputs:
+          _property:
+            children: null
+            type: object
+          latitude:
+            children: null
+            type: number
+          longitude:
+            children: null
+            type: number
+        selected: false
+        title: Code 2
+        type: code
+        variables:
+        - value_selector:
+          - '1770510109715'
+          - item
+          value_type: object
+          variable: _property
+      height: 52
+      id: '1770511086636'
+      parentId: '1770510109715'
+      position:
+        x: 66.48339396241579
+        y: 151.98903976186716
+      positionAbsolute:
+        x: 233.5724476709746
+        y: 1096.2213188022654
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        code: "import math\n\ndef equirectangular_distance(lat1, lon1, lat2, lon2,\
+          \ radius=6371):\n    \"\"\"\n    Calculate the approximate distance between\
+          \ two points on Earth using \n    the Equirectangular Approximation (fast\
+          \ but only accurate for small distances).\n    \n    Args:\n        lat1\
+          \ (float): Latitude of first point in decimal degrees\n        lon1 (float):\
+          \ Longitude of first point in decimal degrees\n        lat2 (float): Latitude\
+          \ of second point in decimal degrees\n        lon2 (float): Longitude of\
+          \ second point in decimal degrees\n        radius (float): Earth's radius\
+          \ in km (default: 6371 km)\n                       Use 3959 for miles\n\
+          \    \n    Returns:\n        float: Approximate distance in the same units\
+          \ as radius (km or miles)\n    \n    Note:\n        This method is suitable\
+          \ for small distances (< 100 km typically).\n        For larger distances\
+          \ or higher accuracy, use the Haversine formula.\n    \"\"\"\n    # Convert\
+          \ degrees to radians\n    lat1_rad = math.radians(lat1)\n    lat2_rad =\
+          \ math.radians(lat2)\n    lon1_rad = math.radians(lon1)\n    lon2_rad =\
+          \ math.radians(lon2)\n    \n    # Calculate differences\n    delta_lon =\
+          \ lon2_rad - lon1_rad\n    delta_lat = lat2_rad - lat1_rad\n    \n    #\
+          \ Equirectangular approximation\n    # Average latitude for the cosine correction\n\
+          \    avg_lat = (lat1_rad + lat2_rad) / 2\n    \n    # Calculate x and y\
+          \ distances\n    x = delta_lon * math.cos(avg_lat)\n    y = delta_lat\n\
+          \    \n    # Calculate Euclidean distance\n    distance = radius * math.sqrt(x**2\
+          \ + y**2)\n    \n    return distance\n\n\ndef main(data, _property, latitude,\
+          \ longitude):\n    \"\"\"\n    Calculate distances from a reference point\
+          \ to all amenities in data,\n    add distance to each amenity, sort by distance,\
+          \ and attach to property.\n    \n    Args:\n        data (list): List of\
+          \ amenity objects with 'latitude' and 'longitude' keys\n        _property\
+          \ (dict): Property object to attach amenities to\n        latitude (float):\
+          \ Reference latitude\n        longitude (float): Reference longitude\n \
+          \   \n    Returns:\n        dict: Updated property object with sorted amenities\n\
+          \    \"\"\"\n    # Calculate distance for each amenity\n    amenities_with_distance\
+          \ = []\n    \n    for amenity in data:\n        # Calculate distance from\
+          \ reference point to this amenity\n        if not amenity.get('lat') or\
+          \ not amenity.get('lon'):\n            continue\n\n        distance = equirectangular_distance(\n\
+          \            latitude, \n            longitude,\n            amenity['lat'],\n\
+          \            amenity['lon']\n        )\n        \n        # Create a copy\
+          \ of the amenity with distance added\n        amenity_with_distance = {**amenity,\
+          \ 'distance': distance}\n        amenities_with_distance.append(amenity_with_distance)\n\
+          \    \n    # Sort amenities by distance (closest first)\n    sorted_amenities\
+          \ = sorted(amenities_with_distance, key=lambda x: x['distance'])\n    \n\
+          \    # Add sorted amenities to the property object\n    _property['amenities']\
+          \ = sorted_amenities\n    \n    return {\n        \"result\": _property\n\
+          \    }"
+        code_language: python3
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        outputs:
+          result:
+            children: null
+            type: object
+        selected: false
+        title: Code 3
+        type: code
+        variables:
+        - value_selector:
+          - '1770520513794'
+          - data
+          value_type: array[object]
+          variable: data
+        - value_selector:
+          - '1770510109715'
+          - item
+          value_type: object
+          variable: _property
+        - value_selector:
+          - '1770511086636'
+          - latitude
+          value_type: number
+          variable: latitude
+        - value_selector:
+          - '1770511086636'
+          - longitude
+          value_type: number
+          variable: longitude
+      height: 52
+      id: '1770512553764'
+      parentId: '1770510109715'
+      position:
+        x: 588.7367153517042
+        y: 65
+      positionAbsolute:
+        x: 755.825769060263
+        y: 1009.2322790403982
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        outputs:
+        - value_selector:
+          - '1770510109715'
+          - output
+          value_type: array[object]
+          variable: result
+        - value_selector:
+          - '1770548276619'
+          - passed
+          value_type: number
+          variable: passed
+        selected: false
+        title: Output 4
+        type: end
+      height: 114
+      id: '1770514619313'
+      position:
+        x: 2040.3080730392367
+        y: 1091.8825739732974
+      positionAbsolute:
+        x: 2040.3080730392367
+        y: 1091.8825739732974
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        isInIteration: true
+        isInLoop: false
+        is_team_authorization: true
+        iteration_id: '1770510109715'
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The latitude of the location.
+            ja_JP: The latitude of the location.
+            pt_BR: The latitude of the location.
+            zh_Hans: The latitude of the location.
+          label:
+            en_US: Latitude
+            ja_JP: Latitude
+            pt_BR: Latitude
+            zh_Hans: Latitude
+          llm_description: The latitude of the location.
+          max: null
+          min: null
+          name: latitude
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The longitude of the location.
+            ja_JP: The longitude of the location.
+            pt_BR: The longitude of the location.
+            zh_Hans: The longitude of the location.
+          label:
+            en_US: Longitude
+            ja_JP: Longitude
+            pt_BR: Longitude
+            zh_Hans: Longitude
+          llm_description: The longitude of the location.
+          max: null
+          min: null
+          name: longitude
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The search radius in kilometers.
+            ja_JP: The search radius in kilometers.
+            pt_BR: The search radius in kilometers.
+            zh_Hans: The search radius in kilometers.
+          label:
+            en_US: Radius (km)
+            ja_JP: Radius (km)
+            pt_BR: Radius (km)
+            zh_Hans: Radius (km)
+          llm_description: The search radius in kilometers.
+          max: null
+          min: null
+          name: radius
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The category of amenities to search for.
+            ja_JP: The category of amenities to search for.
+            pt_BR: The category of amenities to search for.
+            zh_Hans: The category of amenities to search for.
+          label:
+            en_US: Categories
+            ja_JP: Categories
+            pt_BR: Categories
+            zh_Hans: Categories
+          llm_description: The category of amenities to search for.
+          max: null
+          min: null
+          name: categories
+          options:
+          - icon: ''
+            label:
+              en_US: Groceries
+              ja_JP: Groceries
+              pt_BR: Groceries
+              zh_Hans: Groceries
+            value: groceries
+          - icon: ''
+            label:
+              en_US: Parks
+              ja_JP: Parks
+              pt_BR: Parks
+              zh_Hans: Parks
+            value: parks
+          - icon: ''
+            label:
+              en_US: Schools
+              ja_JP: Schools
+              pt_BR: Schools
+              zh_Hans: Schools
+            value: schools
+          - icon: ''
+            label:
+              en_US: Transit
+              ja_JP: Transit
+              pt_BR: Transit
+              zh_Hans: Transit
+            value: transit
+          - icon: ''
+            label:
+              en_US: Healthcare
+              ja_JP: Healthcare
+              pt_BR: Healthcare
+              zh_Hans: Healthcare
+            value: healthcare
+          - icon: ''
+            label:
+              en_US: Fitness
+              ja_JP: Fitness
+              pt_BR: Fitness
+              zh_Hans: Fitness
+            value: fitness
+          - icon: ''
+            label:
+              en_US: All
+              ja_JP: All
+              pt_BR: All
+              zh_Hans: All
+            value: all
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: select
+        params:
+          categories: ''
+          latitude: ''
+          longitude: ''
+          radius: ''
+        plugin_id: vladimirsachkov/openstreetmap
+        plugin_unique_identifier: vladimirsachkov/openstreetmap:0.0.4@9a10888c401d7cfe57d10f22e838aff9ebc51715c460770ffd87405bb9fdcfdf
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=76e5af78-a511-427a-8d87-99395318a4b1&filename=5db7358e97ee9fada77a6bb88f3c3fdfbd69b2792dbaa7dbebb0ba57c925da55.svg
+        provider_id: vladimirsachkov/openstreetmap/openstreetmap
+        provider_name: vladimirsachkov/openstreetmap/openstreetmap
+        provider_type: builtin
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: OSM Search
+        tool_configurations: {}
+        tool_description: Search for amenities (groceries, parks, schools, transit,
+          healthcare, fitness) within a specified radius of a latitude and longitude.
+        tool_label: OSM Search
+        tool_name: osm_search
+        tool_node_version: '2'
+        tool_parameters:
+          categories:
+            type: constant
+            value: all
+          latitude:
+            type: variable
+            value:
+            - '1770511086636'
+            - latitude
+          longitude:
+            type: variable
+            value:
+            - '1770511086636'
+            - longitude
+          radius:
+            type: constant
+            value: 3
+        type: tool
+      height: 81
+      id: '1770520513794'
+      parentId: '1770510109715'
+      position:
+        x: 358.5819889522455
+        y: 156
+      positionAbsolute:
+        x: 525.6710426608043
+        y: 1100.2322790403982
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        selected: false
+        template: "# PROPERTY OFFER DETAILS\nTitle: {{ offer_data.title }}\nPrice:\
+          \ €{{ offer_data.price }}\nLocation: {{ offer_data.city }} ({{ offer_data.latitude\
+          \ }}, {{ offer_data.longitude }})\nSurface: {{ offer_data.surface }}m²\n\
+          Bedrooms: {{ offer_data.bedrooms }}\nURL: {{ offer_data.url }}\n\n# DESCRIPTION\n\
+          {{ offer_data.description }}\n\n# NEARBY AMENITIES (Sorted by distance)\n\
+          {% for item in offer_data.amenities | sort(attribute='distance') -%}\n-\
+          \ {{ item.name }} (Type: {{ item.type }}) | Distance: {{ item.distance |\
+          \ round(2) }} km | Address: {{ item.address }}\n  {% if item.description\
+          \ != \"No additional description available\" %}Note: {{ item.description\
+          \ }}{% endif %}\n{% endfor %}\n\n# INSTRUCTIONS for LLM\nYou are a professional\
+          \ rental agent. Analyze the property above against the User's Chat History.\n\
+          Provide a structured JSON response with the following fields:\n1. \"match_score\"\
+          : (1-10) How well this property fits the user's needs.\n2. \"pros\": A list\
+          \ of precise, data-driven reasons why this is a good fit.\n3. \"cons\":\
+          \ A list of potential drawbacks based on the data provided.\n4. \"agent_summary\"\
+          : A 2-sentence pitch to the user."
+        title: Template
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1770512553764'
+          - result
+          value_type: object
+          variable: offer_data
+      height: 52
+      id: '1770536323989'
+      parentId: '1770510109715'
+      position:
+        x: 720.4622644390928
+        y: 167.2317980954674
+      positionAbsolute:
+        x: 887.5513181476516
+        y: 1111.4640771358656
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-5-chat-latest
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 6c1c5e54-a36d-4419-b213-c586c70afcee
+          role: system
+          text: '{{#1770536323989.output#}}'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              agent_summary:
+                description: A concise two-sentence rental agent pitch tailored to
+                  the user
+                type: string
+              cons:
+                description: Potential drawbacks or mismatches between the property
+                  and the user's needs
+                items:
+                  type: string
+                type: array
+              match_score:
+                description: How well the property fits the user's needs on a scale
+                  from 1 (poor fit) to 10 (excellent fit)
+                maximum: 10
+                minimum: 1
+                type: integer
+              pros:
+                description: Data-driven reasons why the property matches the user's
+                  preferences and requirements
+                items:
+                  type: string
+                type: array
+            required:
+            - match_score
+            - pros
+            - cons
+            - agent_summary
+            type: object
+        structured_output_enabled: true
+        title: LLM 2
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1770536416216'
+      parentId: '1770510109715'
+      position:
+        x: 1017.8037128718424
+        y: 149
+      positionAbsolute:
+        x: 1184.8927665804013
+        y: 1093.2322790403982
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        code: "def main(code_out, llm_out):\n    for key, val in llm_out.items():\n\
+          \        code_out[key] = val\n    \n    return {\n        \"result\": code_out\n\
+          \    }"
+        code_language: python3
+        isInIteration: true
+        isInLoop: false
+        iteration_id: '1770510109715'
+        outputs:
+          result:
+            children: null
+            type: object
+        selected: false
+        title: Code 5
+        type: code
+        variables:
+        - value_selector:
+          - '1770512553764'
+          - result
+          value_type: object
+          variable: code_out
+        - value_selector:
+          - '1770536416216'
+          - structured_output
+          value_type: object
+          variable: llm_out
+      height: 52
+      id: '1770536537954'
+      parentId: '1770510109715'
+      position:
+        x: 1332.4247246085945
+        y: 113.68063910354681
+      positionAbsolute:
+        x: 1499.5137783171533
+        y: 1057.912918143945
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        selected: false
+        template: "# PROPERTY OFFER DETAILS\nlatitude: {{ latitude }}\nlongitude:\
+          \ {{ longitude }}\nradius: {{ radius }}\nuser_prompt: {{ user_prompt }}\n\
+          bedroom_min: {{ bedroom_min }}\nbedroom_max: {{ bedroom_max }}\ntransaction_type:\
+          \ {{ transaction_type }} where 0 is buying. Otherwise, it is renting.\n\n\
+          # USER QUERY\n{{ user_prompt }}\n\n# INSTRUCTIONS for LLM\nYou are a professional\
+          \ rental agent. Analyze the user query and evaluate if it has sufficient\
+          \ information in order to let the query proceed the flow or write a warmful\
+          \ comment in order to return to the user for better clarification on what\
+          \ is missing about the range prices he wants. If the user provides implicit\
+          \ price willings try to match it accordingly: \n\n# Purchase: (class, min,\
+          \ max)\npurchase_ranges = [\n    (\"Budget\", 80000, 150000),\n    (\"Middle-class\"\
+          , 150000, 300000),\n    (\"Upper-middle\", 300000, 600000),\n    (\"Luxury\"\
+          , 600000, 10000000)\n]\n\n# Rental: (class, min, max)\nrental_ranges = [\n\
+          \    (\"Budget\", 400, 700),\n    (\"Middle-class\", 700, 1200),\n    (\"\
+          Upper-middle\", 1200, 2000),\n    (\"Luxury\", 2000, 20000)\n]\n\n\nProvide\
+          \ a structured JSON response with the following fields:\n1. \"latitude\"\
+          : {{ latitude }}\n2. \"longitude\": {{ longitude }}\n3. \"radius\": {{radius}}\n\
+          4. \"transaction_type\": {{ transaction_type }}\n5. \"bedroom_min\": {{\
+          \ bedroom_min }}\n6. \"bedroom_max\": {{ bedroom_max }}\n7. \"passed\":\
+          \ An integer value between 0 and 1 stating if the user\n8. \"comment\":\
+          \ The model response in order to send back to the user for more information.\
+          \ Present in both cases\n\nInsert always 1 for passed if a user mentions\
+          \ \"find\" in his query. "
+        title: Template 2
+        type: template-transform
+        variables:
+        - value_selector:
+          - '1770505719740'
+          - latitude
+          value_type: number
+          variable: latitude
+        - value_selector:
+          - '1770505719740'
+          - longitude
+          value_type: number
+          variable: longitude
+        - value_selector:
+          - '1770505719740'
+          - radius
+          value_type: number
+          variable: radius
+        - value_selector:
+          - '1770505719740'
+          - user_prompt
+          value_type: string
+          variable: user_prompt
+        - value_selector:
+          - '1770505719740'
+          - transaction_type
+          value_type: number
+          variable: transaction_type
+      height: 52
+      id: '1770547305854'
+      position:
+        x: -1714.8463489097903
+        y: 464.1234023111113
+      positionAbsolute:
+        x: -1714.8463489097903
+        y: 464.1234023111113
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-5-chat-latest
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 14fee57e-19ae-42c2-ae7d-d50c968c4eb4
+          role: system
+          text: '{{#1770547305854.output#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: false
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              bedroom_max:
+                description: Maximum number of bedrooms required
+                type: integer
+              bedroom_min:
+                description: Minimum number of bedrooms required
+                type: integer
+              comment:
+                description: The model response to send back to the user for more
+                  information or feedback
+                type: string
+              latitude:
+                description: Latitude coordinate of the search location
+                type: integer
+              longitude:
+                description: Longitude coordinate of the search location
+                type: integer
+              passed:
+                description: 'Validation status: 0 for failed validation, 1 for passed
+                  validation'
+                maximum: 1
+                minimum: 0
+                type: integer
+              radius:
+                description: Search radius from the specified coordinates
+                type: integer
+              transaction_type:
+                description: Type of property transaction (e.g., 0 for rental, 1 for
+                  sale)
+                type: integer
+            required:
+            - latitude
+            - longitude
+            - radius
+            - transaction_type
+            - bedroom_min
+            - bedroom_max
+            - passed
+            - comment
+            type: object
+        structured_output_enabled: true
+        title: LLM 2
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1770547344065'
+      position:
+        x: -1410.7822254892703
+        y: 634.2555212336691
+      positionAbsolute:
+        x: -1410.7822254892703
+        y: 634.2555212336691
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: '='
+            id: cfa4f215-4d78-4010-b5d7-40daa80c35fc
+            value: '1'
+            varType: number
+            variable_selector:
+            - '1770548276619'
+            - passed
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: IF/ELSE
+        type: if-else
+      height: 124
+      id: '1770547437472'
+      position:
+        x: -875.4827167012662
+        y: 900.27609189552
+      positionAbsolute:
+        x: -875.4827167012662
+        y: 900.27609189552
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1770548276619'
+          - result
+          value_type: string
+          variable: result
+        - value_selector:
+          - '1770548276619'
+          - passed
+          value_type: number
+          variable: passed
+        selected: false
+        title: Output 4
+        type: end
+      height: 114
+      id: '1770547469917'
+      position:
+        x: -479.4940821743127
+        y: 1138.2593138900918
+      positionAbsolute:
+        x: -479.4940821743127
+        y: 1138.2593138900918
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "def main(structured_output):\n    # Define default values\n    defaults\
+          \ = {\n        \"latitude\": 50.8503,  # Brussels center as fallback\n \
+          \       \"longitude\": 4.3517,\n        \"radius\": 5000,  # 5km default\
+          \ radius\n        \"bedroom_min\": 0,  # Very low\n        \"bedroom_max\"\
+          : 99,  # Very high\n        \"transaction_type\": 0  # Default to rental\n\
+          \    }\n    \n    # Get values with defaults for missing keys\n    result\
+          \ = {\n        \"latitude\": structured_output.get(\"latitude\") or defaults[\"\
+          latitude\"],\n        \"longitude\": structured_output.get(\"longitude\"\
+          ) or defaults[\"longitude\"],\n        \"radius\": structured_output.get(\"\
+          radius\") or defaults[\"radius\"],\n        \"bedroom_min\": structured_output.get(\"\
+          bedroom_min\") if structured_output.get(\"bedroom_min\") is not None else\
+          \ defaults[\"bedroom_min\"],\n        \"bedroom_max\": structured_output.get(\"\
+          bedroom_max\") if structured_output.get(\"bedroom_max\") is not None else\
+          \ defaults[\"bedroom_max\"],\n        \"transaction_type\": structured_output.get(\"\
+          transaction_type\") if structured_output.get(\"transaction_type\") is not\
+          \ None else defaults[\"transaction_type\"],\n        \"passed\": structured_output.get(\"\
+          passed\"),  # No default\n        \"result\": structured_output.get(\"comment\"\
+          )  # No default\n    }\n    \n    return result\n\n"
+        code_language: python3
+        outputs:
+          bedroom_max:
+            children: null
+            type: number
+          bedroom_min:
+            children: null
+            type: number
+          latitude:
+            children: null
+            type: number
+          longitude:
+            children: null
+            type: number
+          passed:
+            children: null
+            type: number
+          radius:
+            children: null
+            type: number
+          result:
+            children: null
+            type: string
+          transaction_type:
+            children: null
+            type: number
+        selected: false
+        title: Code 5
+        type: code
+        variables:
+        - value_selector:
+          - '1770547344065'
+          - structured_output
+          value_type: object
+          variable: structured_output
+      height: 52
+      id: '1770548276619'
+      position:
+        x: -1156.1660368796606
+        y: 794.1803158918722
+      positionAbsolute:
+        x: -1156.1660368796606
+        y: 794.1803158918722
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 551.1035900100437
+      y: 19.459452920150284
+      zoom: 0.25
+  rag_pipeline_variables: []
