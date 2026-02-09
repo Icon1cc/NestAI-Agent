@@ -246,19 +246,23 @@ function difyOfferToListing(
   };
 }
 
-const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
+// Client call target:
+// - Production: call our serverless proxy at /api/dify (keeps key server-side)
+// - Local dev: if VITE_DIFY_API_KEY is set, allow direct calls to Dify for convenience
+const DEV_DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_MODE = (import.meta.env.VITE_DIFY_MODE || 'workflow').toLowerCase(); // 'workflow' | 'chat'
-const defaultEndpoint =
+const devRawEndpoint = import.meta.env.VITE_DIFY_ENDPOINT;
+const devDefaultEndpoint =
   DIFY_MODE === 'chat'
     ? 'https://api.dify.ai/v1/chat-messages'
     : 'https://api.dify.ai/v1/workflows/run';
-const rawEndpointEnv = import.meta.env.VITE_DIFY_ENDPOINT;
+const devDirectEndpoint =
+  devRawEndpoint && devRawEndpoint.startsWith('http')
+    ? devRawEndpoint
+    : devDefaultEndpoint;
 
-// If env endpoint is provided and absolute, use it verbatim; else fall back to sensible default
-const DIFY_ENDPOINT =
-  rawEndpointEnv && rawEndpointEnv.startsWith('http')
-    ? rawEndpointEnv
-    : defaultEndpoint;
+const USE_DIRECT_DIFY = import.meta.env.DEV && Boolean(DEV_DIFY_API_KEY);
+const DIFY_ENDPOINT = USE_DIRECT_DIFY ? devDirectEndpoint : '/api/dify';
 
 export function useDify() {
   const [isLoading, setIsLoading] = useState(false);
@@ -321,8 +325,8 @@ export function useDify() {
     };
 
     try {
-      if (!DIFY_API_KEY) {
-        throw new Error('Missing VITE_DIFY_API_KEY');
+      if (USE_DIRECT_DIFY && !DEV_DIFY_API_KEY) {
+        throw new Error('Missing VITE_DIFY_API_KEY for direct dev calls');
       }
 
       const userIdentity = String(sessionId || 'web-user');
@@ -341,12 +345,16 @@ export function useDify() {
               response_mode: 'blocking',
             };
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (USE_DIRECT_DIFY) {
+        headers['Authorization'] = `Bearer ${DEV_DIFY_API_KEY}`;
+      }
+
       const response = await fetch(DIFY_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${DIFY_API_KEY}`,
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -606,16 +614,20 @@ export function useDify() {
     };
 
     try {
-      if (!DIFY_API_KEY) {
-        throw new Error('Missing VITE_DIFY_API_KEY');
+      if (USE_DIRECT_DIFY && !DEV_DIFY_API_KEY) {
+        throw new Error('Missing VITE_DIFY_API_KEY for direct dev calls');
+      }
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (USE_DIRECT_DIFY) {
+        headers['Authorization'] = `Bearer ${DEV_DIFY_API_KEY}`;
       }
 
       const response = await fetch(DIFY_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${DIFY_API_KEY}`,
-        },
+        headers,
         body: JSON.stringify(request),
       });
 
