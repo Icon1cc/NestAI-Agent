@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useReverseGeocode } from './useNominatim';
 import type { Location } from '@/types';
+import { UI } from '@/config/constants';
+import { logger } from '@/lib/logger';
 
 interface GeolocationError {
   code: number;
@@ -50,7 +52,7 @@ export function useGeolocation() {
             try {
               const reverseWithTimeout = Promise.race([
                 reverseGeocode(latitude, longitude),
-                new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
+                new Promise<null>((resolve) => setTimeout(() => resolve(null), UI.REVERSE_GEOCODE_TIMEOUT_MS)),
               ]);
 
               const location = await reverseWithTimeout;
@@ -64,7 +66,7 @@ export function useGeolocation() {
                 }
               );
             } catch (geoError) {
-              console.error('Reverse geocode error:', geoError);
+              logger.error('Reverse geocode error:', geoError);
               setIsLoading(false);
               resolve({
                 label: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
@@ -74,7 +76,7 @@ export function useGeolocation() {
             }
           },
           (err) => {
-            console.error('Geolocation error:', err);
+            logger.error('Geolocation error:', err);
             let message = 'Unable to get your location';
 
             switch (err.code) {
@@ -99,13 +101,13 @@ export function useGeolocation() {
           },
           {
             enableHighAccuracy: true,
-            timeout: 10000,
+            timeout: UI.GEOLOCATION_TIMEOUT_MS,
             maximumAge: 60000,
           }
         );
       });
     } catch (e) {
-      console.error('Unexpected geolocation error:', e);
+      logger.error('Unexpected geolocation error:', e);
       setError({
         code: 0,
         message: 'An unexpected error occurred. Please use "Pick on map" instead.',

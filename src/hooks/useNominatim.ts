@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback } from 'react';
 import type { NominatimResult, Location } from '@/types';
+import { API, UI } from '@/config/constants';
+import { logger } from '@/lib/logger';
 
-const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
+const NOMINATIM_BASE = API.NOMINATIM_BASE;
 
 export function useNominatimSearch() {
   const [results, setResults] = useState<NominatimResult[]>([]);
@@ -77,7 +79,7 @@ export function useNominatimSearch() {
       } finally {
         setIsLoading(false);
       }
-    }, 350);
+    }, UI.DEBOUNCE_SEARCH_MS);
   }, []);
 
   const clear = useCallback(() => {
@@ -163,7 +165,7 @@ export function useReverseGeocode() {
       if (err instanceof Error && err.name === 'AbortError') {
         return null;
       }
-      console.error('Reverse geocode error:', err);
+      logger.error('Reverse geocode error:', err);
       return null;
     } finally {
       setIsLoading(false);

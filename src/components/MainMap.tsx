@@ -6,7 +6,7 @@ import { Crosshair, MapPin } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { useReverseGeocode } from '@/hooks/useNominatim';
 import { normalizeCategory } from '@/types';
-import type { Listing, DifyAmenity } from '@/types';
+import type { Listing } from '@/types';
 import 'leaflet/dist/leaflet.css';
 import { useI18n } from '@/lib/i18n';
 

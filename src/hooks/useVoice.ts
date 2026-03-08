@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 // Type declarations for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -99,7 +100,7 @@ export function useVoice() {
     };
 
     recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
+      logger.error('Speech recognition error:', event.error);
       
       if (event.error === 'not-allowed') {
         setState(prev => ({ 
@@ -126,7 +127,7 @@ export function useVoice() {
         try {
           recognition.start();
         } catch (err) {
-          console.error('Failed to restart speech recognition:', err);
+          logger.error('Failed to restart speech recognition:', err);
           setState(prev => ({ ...prev, isListening: false }));
           isListeningRef.current = false;
         }
@@ -143,7 +144,7 @@ export function useVoice() {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
-      } catch (e) {
+      } catch {
         // Ignore abort errors
       }
     }
@@ -167,10 +168,10 @@ export function useVoice() {
       try {
         if (recognitionRef.current && isListeningRef.current) {
           recognitionRef.current.start();
-          console.log('Speech recognition started successfully');
+          logger.log('Speech recognition started successfully');
         }
       } catch (err) {
-        console.error('Failed to start speech recognition:', err);
+        logger.error('Failed to start speech recognition:', err);
         setState(prev => ({ ...prev, isListening: false, error: 'Failed to start microphone. Please try again.' }));
         isListeningRef.current = false;
       }

@@ -7,6 +7,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useAppStore } from '@/store/appStore';
 import type { NominatimResult } from '@/types';
 import { useI18n } from '@/lib/i18n';
+import { logger } from '@/lib/logger';
 
 interface LocationPickerProps {
   onPickOnMap: () => void;
@@ -41,7 +42,7 @@ export function LocationPicker({ onPickOnMap }: LocationPickerProps) {
         setLocation(location);
       }
     } catch (err) {
-      console.error('Location error:', err);
+      logger.error('Location error:', err);
       // Error is already set by the hook
     }
   };
@@ -51,18 +52,18 @@ export function LocationPicker({ onPickOnMap }: LocationPickerProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-lg mx-auto px-4 relative"
+      className="w-full max-w-lg mx-auto px-3 sm:px-4 relative"
     >
-      <div className="absolute -left-16 -top-24 w-48 h-48 bg-primary/20 blur-[70px] rounded-full pointer-events-none" />
-      <div className="absolute -right-10 -bottom-16 w-44 h-44 bg-accent/18 blur-[70px] rounded-full pointer-events-none" />
-      <div className="nest-card-elevated p-8 space-y-6">
+      <div className="absolute -left-16 -top-24 w-48 h-48 bg-primary/20 blur-[70px] rounded-full pointer-events-none hidden sm:block" />
+      <div className="absolute -right-10 -bottom-16 w-44 h-44 bg-accent/18 blur-[70px] rounded-full pointer-events-none hidden sm:block" />
+      <div className="nest-card-elevated p-5 sm:p-8 space-y-5 sm:space-y-6">
         {/* Header */}
-        <div className="text-center space-y-3">
-          <div className="flex justify-center mb-4">
+        <div className="text-center space-y-2 sm:space-y-3">
+          <div className="flex justify-center mb-3 sm:mb-4">
             <Logo size="lg" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{t('location_title')}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{t('location_title')}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             {t('location_subtitle')}
           </p>
         </div>
@@ -70,7 +71,7 @@ export function LocationPicker({ onPickOnMap }: LocationPickerProps) {
         {/* Search input */}
         <div className="relative">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
             <input
               type="text"
               value={query}
@@ -80,7 +81,7 @@ export function LocationPicker({ onPickOnMap }: LocationPickerProps) {
               }}
               onFocus={() => setShowResults(true)}
               placeholder={t('search_placeholder')}
-              className="nest-input-lg w-full pl-12 pr-10"
+              className="nest-input-lg w-full pl-10 sm:pl-12 pr-10 text-sm sm:text-base h-12 sm:h-14"
             />
             {query && (
               <button
@@ -194,7 +195,7 @@ export function LocationPicker({ onPickOnMap }: LocationPickerProps) {
       </div>
 
       {/* Bottom hint */}
-      <p className="text-center text-sm text-muted-foreground mt-6">
+      <p className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-6 px-2">
         Explore neighborhoods, compare amenities, and find properties to rent or buy
       </p>
     </motion.div>

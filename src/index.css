@@ -358,10 +358,16 @@
     @apply fixed inset-0 bg-foreground/20 backdrop-blur-sm;
   }
 
-  /* Drawer */
+  /* Drawer - responsive */
   .nest-drawer {
-    @apply fixed top-0 left-0 h-full w-80 bg-card border-r border-border;
+    @apply fixed top-0 left-0 h-full w-[85vw] max-w-80 bg-card border-r border-border;
     box-shadow: var(--shadow-xl);
+  }
+
+  @media (min-width: 640px) {
+    .nest-drawer {
+      @apply w-80;
+    }
   }
 
   /* Score indicator */
@@ -455,5 +461,35 @@
 
   .leaflet-control-zoom a:hover {
     @apply bg-muted !important;
+  }
+
+  /* Mobile-specific Leaflet controls */
+  @media (max-width: 640px) {
+    .leaflet-control-zoom {
+      @apply scale-90 origin-top-left;
+    }
+
+    .leaflet-control-attribution {
+      @apply text-[10px];
+    }
+  }
+
+  /* Hide scrollbar utility */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area insets for mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
   }
 }

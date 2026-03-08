@@ -13,7 +13,7 @@ interface AmenityCardProps {
   color: string;
 }
 
-function AmenityCard({ category, items, icon, label, color }: AmenityCardProps) {
+function AmenityCard({ items, icon, label, color }: AmenityCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const nearestThree = items.slice(0, 3);
   const hasMore = items.length > 3;

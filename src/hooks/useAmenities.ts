@@ -1,15 +1,11 @@
 import { useState, useCallback, useRef } from 'react';
 import { openDB, type IDBPDatabase } from 'idb';
 import type { AmenitiesData, Amenity, Location, RadiusKm, AmenityCategory } from '@/types';
+import { calculateDistance } from '@/lib/geo';
+import { DB, CACHE, API, OVERPASS_TIMEOUT_SECONDS } from '@/config/constants';
+import { logger } from '@/lib/logger';
 
-const DB_NAME = 'nestai-cache';
-const STORE_NAME = 'amenities';
-const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-];
+const STORE_NAME = DB.STORES.AMENITIES;
 
 interface CacheEntry {
   key: string;
@@ -18,7 +14,7 @@ interface CacheEntry {
 }
 
 async function getDB(): Promise<IDBPDatabase> {
-  return openDB(DB_NAME, 2, {
+  return openDB(DB.CACHE_NAME, 2, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'key' });
@@ -31,24 +27,9 @@ function getCacheKey(lat: number, lng: number, radiusKm: RadiusKm): string {
   return `${lat.toFixed(4)}:${lng.toFixed(4)}:${radiusKm}:amenities:v2`;
 }
 
-function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371; // Earth's radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-// Build combined Overpass query for all 6 categories
 function buildOverpassQuery(lat: number, lng: number, radiusM: number): string {
   return `
-[out:json][timeout:12];
+[out:json][timeout:${OVERPASS_TIMEOUT_SECONDS}];
 (
   // Groceries
   node["shop"="supermarket"](around:${radiusM},${lat},${lng});
@@ -178,13 +159,13 @@ export function useAmenities() {
       const db = await getDB();
       const cached = await db.get(STORE_NAME, cacheKey) as CacheEntry | undefined;
       
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION_MS) {
+      if (cached && Date.now() - cached.timestamp < CACHE.AMENITIES_DURATION_MS) {
         setData(cached.data);
         setIsLoading(false);
         return cached.data;
       }
     } catch (err) {
-      console.warn('Cache read error:', err);
+      logger.warn('Cache read error:', err);
     }
 
     abortControllerRef.current = new AbortController();
@@ -193,7 +174,7 @@ export function useAmenities() {
 
     let lastError: Error | null = null;
 
-    for (const endpoint of OVERPASS_ENDPOINTS) {
+    for (const endpoint of API.OVERPASS_ENDPOINTS) {
       try {
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -241,7 +222,7 @@ export function useAmenities() {
             timestamp: Date.now(),
           });
         } catch (err) {
-          console.warn('Cache write error:', err);
+          logger.warn('Cache write error:', err);
         }
 
         setData(amenities);
@@ -253,7 +234,7 @@ export function useAmenities() {
           return null;
         }
         lastError = err as Error;
-        console.warn(`Overpass endpoint ${endpoint} failed:`, err);
+        logger.warn(`Overpass endpoint ${endpoint} failed:`, err);
       }
     }
 

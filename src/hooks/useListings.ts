@@ -1,10 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
 import { openDB, type IDBPDatabase } from 'idb';
 import type { Listing, Location, RadiusKm, ListingType, SearchFilters } from '@/types';
+import { DB, CACHE } from '@/config/constants';
+import { logger } from '@/lib/logger';
 
-const DB_NAME = 'nestai-cache';
-const STORE_NAME = 'listings';
-const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+const STORE_NAME = DB.STORES.LISTINGS;
 
 interface CacheEntry {
   key: string;
@@ -13,7 +13,7 @@ interface CacheEntry {
 }
 
 async function getDB(): Promise<IDBPDatabase> {
-  return openDB(DB_NAME, 2, {
+  return openDB(DB.CACHE_NAME, 2, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'key' });
@@ -31,20 +31,6 @@ function getCacheKey(
 ): string {
   const filtersHash = JSON.stringify(filters);
   return `${lat.toFixed(4)}:${lng.toFixed(4)}:${radiusKm}:${listingType}:${filtersHash}`;
-}
-
-function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
 }
 
 export function useListings() {
@@ -73,18 +59,18 @@ export function useListings() {
       const db = await getDB();
       const cached = await db.get(STORE_NAME, cacheKey) as CacheEntry | undefined;
       
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION_MS) {
+      if (cached && Date.now() - cached.timestamp < CACHE.LISTINGS_DURATION_MS) {
         setListings(cached.data);
         setIsLoading(false);
         return cached.data;
       }
     } catch (err) {
-      console.warn('Cache read error:', err);
+      logger.warn('Cache read error:', err);
     }
 
     abortControllerRef.current = new AbortController();
 
-    // TODO: Replace with real backend call.
+    // Listings are fetched via useDify hook - this hook is for caching purposes only
     setListings([]);
     setIsLoading(false);
     return [];

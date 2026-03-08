@@ -1,12 +1,14 @@
 import { useCallback, useEffect } from 'react';
 import { openDB, type IDBPDatabase } from 'idb';
 import { useAppStore } from '@/store/appStore';
-import type { Session, DifyMessage, Listing, AmenitiesData, Location, RadiusKm } from '@/types';
+import type { Session } from '@/types';
+import { logger } from '@/lib/logger';
+import { DB, UI } from '@/config/constants';
 
-const DB_NAME = 'nestai-sessions';
-const SESSIONS_STORE = 'sessions';
-const MESSAGES_STORE = 'messages';
-const STATE_STORE = 'state';
+const DB_NAME = DB.SESSIONS_NAME;
+const SESSIONS_STORE = DB.STORES.SESSIONS;
+const MESSAGES_STORE = DB.STORES.MESSAGES;
+const STATE_STORE = DB.STORES.STATE;
 
 async function getDB(): Promise<IDBPDatabase> {
   return openDB(DB_NAME, 1, {
@@ -29,7 +31,6 @@ async function getDB(): Promise<IDBPDatabase> {
 export function useSession() {
   const {
     sessionId,
-    userId,
     messages,
     location,
     radiusKm,
@@ -51,7 +52,7 @@ export function useSession() {
         id: sessionId,
         createdAt: new Date().toISOString(),
         location: location || undefined,
-        messages: messages.slice(-6), // Keep last 6 messages
+        messages: messages.slice(-UI.MAX_MESSAGES_KEPT),
         memorySummary: '',
         listings,
         selectedOfferIds: [],
@@ -65,7 +66,7 @@ export function useSession() {
 
       await db.put(SESSIONS_STORE, session);
     } catch (err) {
-      console.warn('Failed to save session:', err);
+      logger.warn('Failed to save session:', err);
     }
   }, [sessionId, location, messages, listings, countryCode, priceMin, priceMax, radiusKm, amenities]);
 
@@ -75,7 +76,7 @@ export function useSession() {
       const db = await getDB();
       return await db.get(SESSIONS_STORE, id);
     } catch (err) {
-      console.warn('Failed to load session:', err);
+      logger.warn('Failed to load session:', err);
       return null;
     }
   }, []);
@@ -87,7 +88,7 @@ export function useSession() {
       const sessions = await db.getAllFromIndex(SESSIONS_STORE, 'createdAt');
       return sessions.reverse(); // Most recent first
     } catch (err) {
-      console.warn('Failed to get sessions:', err);
+      logger.warn('Failed to get sessions:', err);
       return [];
     }
   }, []);
@@ -98,7 +99,7 @@ export function useSession() {
       const db = await getDB();
       await db.delete(SESSIONS_STORE, id);
     } catch (err) {
-      console.warn('Failed to delete session:', err);
+      logger.warn('Failed to delete session:', err);
     }
   }, []);
 
@@ -118,7 +119,7 @@ export function useSession() {
         updatedAt: Date.now(),
       });
     } catch (err) {
-      console.warn('Failed to save last state:', err);
+      logger.warn('Failed to save last state:', err);
     }
   }, [location, radiusKm, priceMin, priceMax, countryCode, amenities, listings]);
 
@@ -133,7 +134,7 @@ export function useSession() {
       }
       return state;
     } catch (err) {
-      console.warn('Failed to load last state:', err);
+      logger.warn('Failed to load last state:', err);
       return null;
     }
   }, [setAmenities, setListings]);
@@ -145,7 +146,7 @@ export function useSession() {
         saveSession();
         saveLastState();
       }
-    }, 2000); // Debounce 2 seconds
+    }, UI.DEBOUNCE_SAVE_MS);
 
     return () => clearTimeout(timeout);
   }, [sessionId, messages, listings, saveSession, saveLastState]);

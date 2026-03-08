@@ -15,19 +15,18 @@ interface ChatBarProps {
 export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarProps) {
   const [input, setInput] = useState('');
   const t = useI18n();
-  
-  const { 
-    isListening, 
-    isSpeaking, 
-    transcript, 
+
+  const {
+    isListening,
+    isSpeaking,
+    transcript,
     isSupported,
-    startListening, 
+    startListening,
     stopListening,
     stopSpeaking,
     clearTranscript,
   } = useVoice();
 
-  // Update input when transcript changes
   useEffect(() => {
     if (transcript) {
       setInput(transcript);
@@ -47,7 +46,6 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
   const handleMicClick = () => {
     if (isListening) {
       stopListening();
-      // If we have a transcript, submit it
       if (transcript.trim()) {
         onSend(transcript.trim());
         clearTranscript();
@@ -59,31 +57,26 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
   };
 
   return (
-    <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="w-full px-4 pb-4 pt-2 border-t border-border/40 bg-background/70 backdrop-blur-2xl"
-    >
-      {/* Input bar */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-wrap items-center gap-2 relative sm:flex-nowrap"
-      >
-        {/* Voice indicator */}
-        <AnimatePresence>
-          {isListening && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm whitespace-nowrap shadow-lg"
-            >
+    <div className="w-full">
+      {/* Voice indicator */}
+      <AnimatePresence>
+        {isListening && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="mb-2 flex justify-center"
+          >
+            <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap shadow-lg">
               🎙️ Listening... release to send
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Mic button - push to talk */}
+      {/* Input bar */}
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        {/* Mic button */}
         {isSupported && (
           <button
             type="button"
@@ -94,15 +87,19 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
             onTouchEnd={handleMicClick}
             disabled={!hasLocation}
             className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0",
-              isListening 
-                ? "bg-destructive text-destructive-foreground scale-110" 
-                : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80",
-              "disabled:opacity-50"
+              'w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0',
+              isListening
+                ? 'bg-destructive text-destructive-foreground scale-110'
+                : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80',
+              'disabled:opacity-50'
             )}
             title="Hold to speak"
           >
-            {isListening ? <MicOff className="w-5 h-5 animate-pulse" /> : <Mic className="w-5 h-5" />}
+            {isListening ? (
+              <MicOff className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+            ) : (
+              <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
           </button>
         )}
 
@@ -112,11 +109,11 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={hasLocation ? t('chat_placeholder') : t('chat_placeholder')}
+            placeholder={t('chat_placeholder')}
             disabled={!hasLocation || isLoading}
-            className="nest-input w-full pr-12"
+            className="nest-input w-full h-10 sm:h-12 text-sm sm:text-base pr-10"
           />
-          
+
           {/* Stop speaking button */}
           <AnimatePresence>
             {isSpeaking && (
@@ -128,44 +125,50 @@ export function ChatBar({ onSend, onSearch, isLoading, hasLocation }: ChatBarPro
                 onClick={stopSpeaking}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-primary"
               >
-                <VolumeX className="w-5 h-5" />
+                <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.button>
             )}
           </AnimatePresence>
         </div>
 
         {/* Send button */}
-        <div className="flex w-full sm:w-auto sm:flex-none gap-2">
-          <button
-            type="submit"
-            disabled={!hasLocation || isLoading || !input.trim()}
-            className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0",
-              "bg-primary text-primary-foreground",
-              "hover:bg-primary/90",
-              "disabled:opacity-50 disabled:pointer-events-none"
-            )}
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </button>
+        <button
+          type="submit"
+          disabled={!hasLocation || isLoading || !input.trim()}
+          className={cn(
+            'w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0',
+            'bg-primary text-primary-foreground',
+            'hover:bg-primary/90',
+            'disabled:opacity-50 disabled:pointer-events-none'
+          )}
+        >
+          {isLoading ? (
+            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+          ) : (
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+          )}
+        </button>
 
-          {/* Search button */}
-          <button
-            type="button"
-            onClick={onSearch}
-            disabled={!hasLocation || isLoading}
-            className="nest-btn-hero flex-1 sm:flex-initial flex items-center justify-center gap-2"
-          >
-            <Home className="w-4 h-4" />
-            <span className="hidden lg:inline">{t('search_homes')}</span>
-            <span className="lg:hidden">{t('search_homes')}</span>
-          </button>
-        </div>
+        {/* Search button */}
+        <button
+          type="button"
+          onClick={onSearch}
+          disabled={!hasLocation || isLoading}
+          className={cn(
+            'h-10 sm:h-11 px-3 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 flex-shrink-0',
+            'font-medium text-xs sm:text-sm transition-all',
+            'text-accent-foreground',
+            'disabled:opacity-50 disabled:pointer-events-none'
+          )}
+          style={{
+            background: 'var(--gradient-accent)',
+            boxShadow: 'var(--shadow-md), 0 0 20px -5px hsl(var(--accent) / 0.4)',
+          }}
+        >
+          <Home className="w-4 h-4" />
+          <span className="hidden xs:inline">{t('search_homes')}</span>
+        </button>
       </form>
-    </motion.div>
+    </div>
   );
 }

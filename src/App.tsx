@@ -21,6 +21,7 @@ const App = () => {
   const currentYear = new Date().getFullYear();
   const language = useAppStore((s) => s.language);
   const isMapPickerOpen = useAppStore((s) => s.isMapPickerOpen);
+  const location = useAppStore((s) => s.location);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -28,6 +29,9 @@ const App = () => {
   const [isContactOpen, setContactOpen] = useState(false);
   const [isAboutOpen, setAboutOpen] = useState(false);
   const [isTermsOpen, setTermsOpen] = useState(false);
+
+  // Hide footer when in main app view (has location) to avoid overlap with panel
+  const showFooter = !isMapPickerOpen && !location;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -37,46 +41,47 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
 
-          {/* Global footer actions (inside Router so Links work) */}
-          {!isMapPickerOpen && (
-            <>
-              <div className="fixed inset-x-0 bottom-4 z-40 flex items-center justify-center gap-3 px-4">
-                <div className="px-4 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm flex items-center gap-3">
+          {/* Global footer - only show on landing page */}
+          {showFooter && (
+            <footer className="fixed inset-x-0 bottom-0 z-40 p-4 pointer-events-none">
+              <div className="max-w-lg mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+                {/* Copyright */}
+                <div className="order-2 sm:order-1 px-3 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm pointer-events-auto">
+                  © {currentYear} NestAI Agent
+                </div>
+
+                {/* Links */}
+                <div className="order-1 sm:order-2 px-4 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm flex items-center gap-2 sm:gap-3 pointer-events-auto">
                   <button
                     onClick={() => setContactOpen(true)}
                     className="font-medium text-foreground hover:text-primary transition-colors"
                   >
                     Contact
                   </button>
-                  <span className="text-border">•</span>
+                  <span className="text-border hidden sm:inline">•</span>
                   <button
                     onClick={() => setAboutOpen(true)}
                     className="font-medium text-foreground hover:text-primary transition-colors"
                   >
-                    About us
+                    About
                   </button>
-                  <span className="text-border">•</span>
+                  <span className="text-border hidden sm:inline">•</span>
                   <button
                     onClick={() => setTermsOpen(true)}
                     className="font-medium text-foreground hover:text-primary transition-colors"
                   >
-                    Terms and conditions
+                    Terms
                   </button>
                 </div>
               </div>
-
-              <div className="fixed left-4 bottom-4 z-40 px-3 py-1.5 rounded-full bg-background/80 border border-border/60 text-xs text-muted-foreground backdrop-blur-sm shadow-sm pointer-events-none">
-                © {currentYear} NestAI Agent
-              </div>
-            </>
+            </footer>
           )}
 
           <Dialog open={isContactOpen} onOpenChange={setContactOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-auto">
               <DialogHeader>
                 <DialogTitle>Contact</DialogTitle>
                 <DialogDescription>
@@ -85,39 +90,39 @@ const App = () => {
               </DialogHeader>
               <div className="space-y-2 text-sm">
                 <a
-                  className="nest-chip-primary inline-flex items-center gap-2"
+                  className="nest-chip-primary inline-flex items-center gap-2 flex-wrap"
                   href="mailto:rishtiwari98@gmail.com"
                 >
                   <span className="font-semibold">Rishabh Tiwari</span>
-                  <span className="text-muted-foreground">
-                    – rishtiwari98@gmail.com
+                  <span className="text-muted-foreground text-xs">
+                    rishtiwari98@gmail.com
                   </span>
                 </a>
                 <a
-                  className="nest-chip inline-flex items-center gap-2"
+                  className="nest-chip inline-flex items-center gap-2 flex-wrap"
                   href="mailto:alexandre.boving@gmail.com"
                 >
                   <span className="font-semibold">Alexandre Boving</span>
-                  <span className="text-muted-foreground">
-                    – alexandre.boving@gmail.com
+                  <span className="text-muted-foreground text-xs">
+                    alexandre.boving@gmail.com
                   </span>
                 </a>
                 <a
-                  className="nest-chip inline-flex items-center gap-2"
+                  className="nest-chip inline-flex items-center gap-2 flex-wrap"
                   href="mailto:hello@quentinrobert.com"
                 >
                   <span className="font-semibold">Quentin Robert</span>
-                  <span className="text-muted-foreground">
-                    – hello@quentinrobert.com
+                  <span className="text-muted-foreground text-xs">
+                    hello@quentinrobert.com
                   </span>
                 </a>
                 <a
-                  className="nest-chip inline-flex items-center gap-2"
+                  className="nest-chip inline-flex items-center gap-2 flex-wrap"
                   href="mailto:vladimirsachkov2003@gmail.com"
                 >
                   <span className="font-semibold">Vladimir Sachkov</span>
-                  <span className="text-muted-foreground">
-                    – vladimirsachkov2003@gmail.com
+                  <span className="text-muted-foreground text-xs">
+                    vladimirsachkov2003@gmail.com
                   </span>
                 </a>
               </div>
@@ -125,7 +130,7 @@ const App = () => {
           </Dialog>
 
           <Dialog open={isAboutOpen} onOpenChange={setAboutOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-auto">
               <DialogHeader>
                 <DialogTitle>About us</DialogTitle>
                 <DialogDescription>
@@ -137,14 +142,12 @@ const App = () => {
                   NestAI helps anyone find the right home faster: we pair live
                   listings with an AI copilot that understands your needs,
                   weighs trade‑offs, and keeps the conversation going so you
-                  don’t lose context.
+                  don't lose context.
                 </p>
                 <p>
                   Under the hood, we combine real-time property feeds,
                   neighborhood data (transit, parks, schools, safety), and your
-                  personal constraints to surface matches, not just results. You
-                  can ask follow-up questions, compare options, and explore on a
-                  map without starting over.
+                  personal constraints to surface matches, not just results.
                 </p>
                 <p>
                   Our team blends product, data, and real-estate experience to
@@ -156,7 +159,7 @@ const App = () => {
           </Dialog>
 
           <Dialog open={isTermsOpen} onOpenChange={setTermsOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-auto">
               <DialogHeader>
                 <DialogTitle>Terms and conditions</DialogTitle>
                 <DialogDescription>

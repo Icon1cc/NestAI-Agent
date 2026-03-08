@@ -13,18 +13,15 @@ interface HistoryDrawerProps {
 
 export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
   const { messages, clearMessages, setLocation, setListings, setAmenities } = useAppStore();
-  const { getAllSessions, deleteSession, loadSession } = useSession();
-  
+  const { getAllSessions, deleteSession } = useSession();
+
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Load sessions when drawer opens
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true);
       getAllSessions().then(data => {
         setSessions(data);
-        setIsLoading(false);
       });
     }
   }, [isOpen, getAllSessions]);
@@ -81,14 +78,14 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
           {/* Drawer */}
           <motion.div
             key="history-drawer"
-            initial={{ x: -320 }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: -320 }}
+            exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="nest-drawer z-[95]"
+            className="nest-drawer z-[95] flex flex-col"
           >
             {/* Header */}
-            <div className="h-16 px-4 flex items-center justify-between border-b border-border">
+            <div className="h-14 sm:h-16 px-3 sm:px-4 flex items-center justify-between border-b border-border shrink-0">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-primary" />
                 <h2 className="font-semibold">History</h2>
@@ -99,7 +96,7 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 min-h-0">
               {/* Current conversation */}
               {messages.length > 0 && (
                 <div className="mb-6">
@@ -192,7 +189,7 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
 
             {/* Footer */}
             {messages.length > 0 && (
-              <div className="p-4 border-t border-border">
+              <div className="p-3 sm:p-4 border-t border-border shrink-0">
                 <button
                   onClick={clearMessages}
                   className="nest-btn-secondary w-full flex items-center justify-center gap-2 text-sm text-destructive"

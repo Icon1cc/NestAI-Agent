@@ -12,7 +12,6 @@ import { useAppStore } from '@/store/appStore';
 export default function Index() {
   const {
     location,
-    setLocation,
     isDarkMode,
     isMapPickerOpen,
     setMapPickerOpen,

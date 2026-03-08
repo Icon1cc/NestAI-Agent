@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Home, Bed, Maximize2, MapPin, ExternalLink, Check, Loader2, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import type { Listing } from '@/types';
