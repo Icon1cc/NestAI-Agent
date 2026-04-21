@@ -10,6 +10,13 @@ export default defineConfig(() => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/api/overpass": {
+        target: "https://overpass.kumi.systems",
+        changeOrigin: true,
+        rewrite: () => "/api/interpreter",
+      },
+    },
   },
   plugins: [react()],
   resolve: {

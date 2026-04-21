@@ -12,8 +12,9 @@ export const CACHE = {
 export const API = {
   NOMINATIM_BASE: 'https://nominatim.openstreetmap.org',
   OVERPASS_ENDPOINTS: [
-    'https://overpass-api.de/api/interpreter',
+    '/api/overpass',
     'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass-api.de/api/interpreter',
   ],
   DIFY_WORKFLOW_ENDPOINT: 'https://api.dify.ai/v1/workflows/run',
   DIFY_CHAT_ENDPOINT: 'https://api.dify.ai/v1/chat-messages',
