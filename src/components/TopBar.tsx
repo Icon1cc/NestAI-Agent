@@ -109,7 +109,7 @@ export function TopBar() {
           </button>
 
           <Logo size="md" showText className="hidden sm:flex" />
-          <Logo size="sm" className="sm:hidden" />
+          <Logo size="sm" showText={false} className="sm:hidden" />
 
           {/* Location chip - visible on tablet+ */}
           {location && (

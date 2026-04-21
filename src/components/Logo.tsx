@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/store/appStore';
+import { cn } from '@/lib/utils';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
+  className?: string;
 }
 
-export function Logo({ size = 'md', showText = true }: LogoProps) {
+export function Logo({ size = 'md', showText = true, className }: LogoProps) {
   const { resetLocation } = useAppStore();
   
   const sizes = {
@@ -22,9 +24,9 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
   };
 
   return (
-    <button 
+    <button
       onClick={handleClick}
-      className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+      className={cn('flex items-center gap-2 hover:opacity-80 transition-opacity', className)}
       aria-label="Go to home"
     >
       <motion.div
